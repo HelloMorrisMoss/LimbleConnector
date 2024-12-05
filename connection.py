@@ -7,18 +7,17 @@ from untracked_config.timezones import local_tz
 
 
 class LimbleEndpoint:  # rename something like endpoint?
-    def __init__(self, parent, rt_add, convert_datetimes=True):
-        print(f'init with {parent=}, {rt_add=}')
+    def __init__(self, parent, rt_add):
+        # print(f'init with {parent=}, {rt_add=}')
         self.parent = parent
         self.rt_add = rt_add
 
-        self.convert_datetimes = convert_datetimes
         self.epoch_columns = ['createdDate', 'startDate', 'due', 'dateCompleted ', 'lastEdited', 'startedOn',
                               'lastEdited', 'dateAdded']
 
-    def response_params(self, *args, **kwargs):
-        params = kwargs.pop('rq_params', None)
+    def request_params(self, *args, **kwargs):
         print(f'response partial: {args=} - {kwargs=}')
+        params = kwargs.pop('rq_params', None)
         response = requests.get(*args, **kwargs, url=self.rt_add, proxies=internal_proxies,
                                 headers=self.parent.authentication_header, params=params)
         return response
@@ -26,9 +25,14 @@ class LimbleEndpoint:  # rename something like endpoint?
     def df_params(self, *args, **kwargs):
         print(f'df partial: {args=} - {kwargs=}')
 
-        result_df = pd.DataFrame.from_records(self.response_params(*args, **kwargs).json())
+        if (convert_datetimes:=kwargs.get('convert_datetimes')) is None:
+            convert_datetimes = self.parent.convert_datetimes
+        else:
+            del kwargs['convert_datetimes']
+
 
         if self.convert_datetimes:
+        if convert_datetimes:
             self.convert_datetime_columns(result_df)
 
         return result_df
@@ -47,16 +51,19 @@ class LimbleEndpoint:  # rename something like endpoint?
 
     @property
     def response(self):
-        return self.response_params()
+        return self.request_params()
 
 
 class LimbleConnection():
 
-    def __init__(self):
+    def __init__(self, convert_datetimes=False):
         self.authentication_header = {'Authorization': f'Basic {b64_credentials}'}
         self.api_base_address = 'https://api.limblecmms.com:443'
         self.api_version = 'v2'  # todo: handle other versions?
         self.apiv_addrs = f'{self.api_base_address}/{self.api_version}'
+
+        self.convert_datetimes = convert_datetimes
+
         # design decision, add the slash when it is needed not before
         self.__endpoints__ = {'assets': 'assets',
                               'assets.fields': 'assets/fields',
@@ -127,5 +134,5 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    lc = LimbleConnection()
+    lc = LimbleConnection(convert_datetimes=True)
     pass  # for debug breakpoint in IDE
