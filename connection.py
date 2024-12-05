@@ -6,7 +6,7 @@ from untracked_config.proxy import internal_proxies
 from untracked_config.timezones import local_tz
 
 
-class LimbleEndpoint:  # rename something like endpoint?
+class LimbleEndpoint:
     def __init__(self, parent, rt_add):
         # print(f'init with {parent=}, {rt_add=}')
         self.parent = parent
@@ -18,9 +18,37 @@ class LimbleEndpoint:  # rename something like endpoint?
     def request_params(self, *args, **kwargs):
         print(f'response partial: {args=} - {kwargs=}')
         params = kwargs.pop('rq_params', None)
-        response = requests.get(*args, **kwargs, url=self.rt_add, proxies=internal_proxies,
-                                headers=self.parent.authentication_header, params=params)
-        return response
+
+        # the Limble API will by default only send 100 results at a time (or the limit parameter)
+        # if provided parameter use that, otherwise the parent setting
+        if (auto_page_all := kwargs.get('auto_page_all')) is None:
+            print(f'using parent auto page all: {self.parent.auto_page_all=}')
+            auto_page_all = self.parent.auto_page_all
+        else:
+            del kwargs['auto_page_all']
+
+        if auto_page_all:
+            result_data = []
+            results_returned = True
+            page_number = 0
+
+            if params is None:
+                params = {}
+
+            while results_returned:
+                page_number += 1
+                params['page'] = page_number
+                print(f'{params=}')
+                page_data = requests.get(*args, **kwargs, url=self.rt_add, proxies=internal_proxies,
+                                headers=self.parent.authentication_header, params=params).json()
+                if not page_data:
+                    results_returned = False
+                else:
+                    result_data += page_data
+        else:
+            result_data = requests.get(*args, **kwargs, url=self.rt_add, proxies=internal_proxies,
+                                    headers=self.parent.authentication_header, params=params).json()
+        return result_data
 
     def df_params(self, *args, **kwargs):
         print(f'df partial: {args=} - {kwargs=}')
@@ -30,8 +58,8 @@ class LimbleEndpoint:  # rename something like endpoint?
         else:
             del kwargs['convert_datetimes']
 
+        result_df = pd.DataFrame.from_records(self.request_params(*args, **kwargs))
 
-        if self.convert_datetimes:
         if convert_datetimes:
             self.convert_datetime_columns(result_df)
 
@@ -56,12 +84,13 @@ class LimbleEndpoint:  # rename something like endpoint?
 
 class LimbleConnection():
 
-    def __init__(self, convert_datetimes=False):
+    def __init__(self, convert_datetimes=False, auto_page_all=True):
         self.authentication_header = {'Authorization': f'Basic {b64_credentials}'}
         self.api_base_address = 'https://api.limblecmms.com:443'
         self.api_version = 'v2'  # todo: handle other versions?
         self.apiv_addrs = f'{self.api_base_address}/{self.api_version}'
 
+        self.auto_page_all = auto_page_all
         self.convert_datetimes = convert_datetimes
 
         # design decision, add the slash when it is needed not before
@@ -88,14 +117,12 @@ class LimbleConnection():
                               #  tasks/:taskID/instructions/:instructionID/options
                               #  tasks/labor
                               #  tasks/labor/categories
-
-
                               }
+
         to_add_properties_list = [(epn, epaddr) for (epn, epaddr) in self.__endpoints__.items()]
         while to_add_properties_list:
             epn, epaddr = to_add_properties_list.pop(0)
             if '.' in epn:
-                pass
                 self.set_sub_property(epaddr, epn, to_add_properties_list)
             else:
                 propertish = self.__create_endpoint(epn, epaddr)
@@ -134,5 +161,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    lc = LimbleConnection(convert_datetimes=True)
+    lc = LimbleConnection(convert_datetimes=True, auto_page_all=True)
+    assets = lc.assets.df
     pass  # for debug breakpoint in IDE
