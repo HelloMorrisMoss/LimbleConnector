@@ -8,7 +8,6 @@ from untracked_config.timezones import local_tz
 
 class LimbleEndpoint:
     def __init__(self, parent, rt_add):
-        # print(f'init with {parent=}, {rt_add=}')
         self.parent = parent
         self.rt_add = rt_add
 
@@ -16,13 +15,11 @@ class LimbleEndpoint:
                               'lastEdited', 'dateAdded']
 
     def request_params(self, *args, **kwargs):
-        print(f'response partial: {args=} - {kwargs=}')
         params = kwargs.pop('rq_params', None)
 
         # the Limble API will by default only send 100 results at a time (or the limit parameter)
         # if provided parameter use that, otherwise the parent setting
         if (auto_page_all := kwargs.get('auto_page_all')) is None:
-            print(f'using parent auto page all: {self.parent.auto_page_all=}')
             auto_page_all = self.parent.auto_page_all
         else:
             del kwargs['auto_page_all']
@@ -38,7 +35,6 @@ class LimbleEndpoint:
             while results_returned:
                 page_number += 1
                 params['page'] = page_number
-                print(f'{params=}')
                 page_data = requests.get(*args, **kwargs, url=self.rt_add, proxies=internal_proxies,
                                 headers=self.parent.authentication_header, params=params).json()
                 if not page_data:
@@ -51,8 +47,6 @@ class LimbleEndpoint:
         return result_data
 
     def df_params(self, *args, **kwargs):
-        print(f'df partial: {args=} - {kwargs=}')
-
         if (convert_datetimes:=kwargs.get('convert_datetimes')) is None:
             convert_datetimes = self.parent.convert_datetimes
         else:
@@ -67,11 +61,9 @@ class LimbleEndpoint:
 
     def convert_datetime_columns(self, df: pd.DataFrame):
         cols_to_convert = [col for col in df.columns if col in self.epoch_columns]
-        # todo: pandas does not like replacing a column in this way
-        #  "FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of
-        #  pandas. Value '<DatetimeArray>"
         for col in cols_to_convert:
-            df.loc[:, col] = pd.to_datetime(df.loc[:, col], unit='s', origin='unix', utc=True).dt.tz_convert(local_tz)
+            ci = df.columns.get_loc(col)
+            df.isetitem(ci, pd.to_datetime(df.loc[:, col], unit='s', origin='unix', utc=True).dt.tz_convert(local_tz))
 
     @property
     def df(self):
@@ -139,7 +131,6 @@ class LimbleConnection():
             propertish = self.__create_endpoint(epn_path[-1], epaddr)
             setattr(parent, epn_path[-1], propertish)
         except AttributeError as aerr:
-            print(f'No parent for {epn}')
             incomplete_list.append((epn, epaddr))
 
     def __create_endpoint(self, epn, epaddr):
