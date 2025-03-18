@@ -66,6 +66,9 @@ class LimbleEndpoint:
         else:
             del kwargs['auto_page_all']
 
+        if any(self.rt_addr.endswith(end) for end in ('users',)):
+            auto_page_all = None  # these do not support the page parameter
+
         if auto_page_all:
             result_data = []
             results_returned = True
