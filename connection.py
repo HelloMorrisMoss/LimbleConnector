@@ -40,9 +40,11 @@ class LimbleEndpoint:
         Args:
             *args: Positional arguments passed to the `requests.get` function.
             **kwargs: Keyword arguments, including:
-                - rq_params (dict, optional): Additional query parameters for the request.
-                - auto_page_all (bool, optional): Overrides the parent's setting for
-                  automatic pagination.
+                - rq_params (dict, optional): Additional query parameters for the request, see Limble API docs.
+                - auto_page_all (bool, optional): Overrides the parent's setting for automatic pagination.
+                - path_param (str, optional): for accessing endpoints that have a path parameter
+                    ex: users/123/teams where 123 is userID
+                    !: optional in that not all end points need one, the ones that do _require_ it.
 
         Examples:
             Example getting only page 2 of the assets list:
@@ -66,8 +68,15 @@ class LimbleEndpoint:
         else:
             del kwargs['auto_page_all']
 
-        if any(self.rt_addr.endswith(end) for end in ('users',)):
+        if any(self.rt_addr.endswith(end) for end in ('users', 'teams')):
             auto_page_all = None  # these do not support the page parameter
+
+        # for accessing endpoints that have a path parameter; ex: users/123/teams where 123 is userID
+        if (path_param := kwargs.get('path_param')) is not None:
+            this_address = self.rt_addr.format(path_param=path_param)
+            del kwargs['path_param']
+        else:
+            this_address = self.rt_addr
 
         if auto_page_all:
             result_data = []
@@ -81,7 +90,7 @@ class LimbleEndpoint:
                 page_number += 1
                 params['page'] = page_number
                 page_data = requests.get(
-                    *args, **kwargs, url=self.rt_addr, proxies=internal_proxies,
+                    *args, **kwargs, url=this_address, proxies=internal_proxies,
                     headers=self.parent.authentication_header, params=params
                 ).json()
                 if not page_data:
@@ -90,7 +99,7 @@ class LimbleEndpoint:
                     result_data += page_data
         else:
             result_data = requests.get(
-                *args, **kwargs, url=self.rt_addr, proxies=internal_proxies,
+                *args, **kwargs, url=this_address, proxies=internal_proxies,
                 headers=self.parent.authentication_header, params=params
             ).json()
         return result_data
@@ -196,7 +205,10 @@ class LimbleConnection:
                               'tasks.labor': 'tasks/labor',
                               'tasks.labor.categories': 'tasks/labor/categories',
 
+                              'teams': 'teams',
+
                               'users': 'users',
+                              'users.teams': 'users/{path_param}/teams',
 
                               # todo: create
                               #  assets/:assetID/logs
