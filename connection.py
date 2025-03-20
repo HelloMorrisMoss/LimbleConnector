@@ -42,7 +42,10 @@ class LimbleEndpoint:
             'startedOn', 'lastEdited', 'dateAdded'
         ]
 
-    def get_team_members(self, team_name, location_name=None, location_id=None):
+        if self.name == 'users':
+            self.get_team_members = self._get_team_members
+
+    def _get_team_members(self, team_name, location_name=None, location_id=None):
         if location_id is None:
             if location_name is None:  # provided no parameters, try to use default
                 location_id = self.connection.location_id
@@ -93,7 +96,7 @@ class LimbleEndpoint:
         params = kwargs.pop('rq_params', None)
 
         # why: the Limble API will by default only send 100 results at a time (or the limit parameter)
-        # if provided parameter use that, otherwise the parent setting
+        # if provided parameter use that, otherwise the setting for the connection
         if (auto_page_all := kwargs.get('auto_page_all')) is None:
             auto_page_all = self.connection.auto_page_all
         else:
@@ -315,7 +318,7 @@ class LimbleConnection:
             while parent_path_list:
                 parent_name = parent_path_list.pop(0)
                 parent = getattr(parent, parent_name)
-            propertish = self.__create_endpoint(epn_path[-1], epaddr)
+            propertish = self.__create_endpoint(epn, epaddr)
             setattr(parent, epn_path[-1], propertish)
         except AttributeError as aerr:
             incomplete_list.append((epn, epaddr))
