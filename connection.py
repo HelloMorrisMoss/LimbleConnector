@@ -1,4 +1,6 @@
 import re
+
+from cachetools import TTLCache, cached
 import pandas as pd
 import requests
 
@@ -8,7 +10,7 @@ from untracked_config.timezones import local_tz
 
 
 div_pattern = re.compile(r'(\<(\/)?div\>)')
-
+api_cache_lifetime_seconds = 2
 
 class LimbleEndpoint:
     """Represents an API endpoint for the Limble CMMS system.
@@ -62,6 +64,7 @@ class LimbleEndpoint:
         users_df = self.connection.users.df
         return users_df.loc[users_df['teams'].apply(lambda x: any([tid['teamID'] == team_id for tid in x]))]
 
+    @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))
     def request_params(self, *args, **kwargs):
         """Makes a GET request to the API endpoint allowing the use of parameters and retrieves data.
 
@@ -132,6 +135,7 @@ class LimbleEndpoint:
             ).json()
         return result_data
 
+    @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))
     def df_params(self, *args, **kwargs) -> pd.DataFrame:
         """Fetches data from the API endpoint allowing the use of parameters and returns it as a pandas DataFrame.
 
