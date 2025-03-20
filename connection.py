@@ -19,14 +19,16 @@ class LimbleEndpoint:
             that can be converted to datetime objects.
     """
 
-    def __init__(self, parent, rt_addr):
+    def __init__(self, connection, endpoint_name, rt_addr):
         """Initializes a LimbleEndpoint instance.
 
         Args:
-            parent (LimbleConnection): The parent connection instance.
+            connection (LimbleConnection): The parent connection instance.
             rt_addr (str): The full route address for this endpoint.
         """
-        self.parent = parent
+        self.name = endpoint_name  # TODO: added for custom handling of specifics; ex: users.teams.add
+        self.connection = connection
+        # self.connection = connection
         self.rt_addr = rt_addr
 
         self.epoch_columns = [
@@ -64,7 +66,7 @@ class LimbleEndpoint:
         # why: the Limble API will by default only send 100 results at a time (or the limit parameter)
         # if provided parameter use that, otherwise the parent setting
         if (auto_page_all := kwargs.get('auto_page_all')) is None:
-            auto_page_all = self.parent.auto_page_all
+            auto_page_all = self.connection.auto_page_all
         else:
             del kwargs['auto_page_all']
 
@@ -91,7 +93,7 @@ class LimbleEndpoint:
                 params['page'] = page_number
                 page_data = requests.get(
                     *args, **kwargs, url=this_address, proxies=internal_proxies,
-                    headers=self.parent.authentication_header, params=params
+                    headers=self.connection.authentication_header, params=params
                 ).json()
                 if not page_data:
                     results_returned = False
@@ -100,7 +102,7 @@ class LimbleEndpoint:
         else:
             result_data = requests.get(
                 *args, **kwargs, url=this_address, proxies=internal_proxies,
-                headers=self.parent.authentication_header, params=params
+                headers=self.connection.authentication_header, params=params
             ).json()
         return result_data
 
@@ -118,7 +120,7 @@ class LimbleEndpoint:
             pd.DataFrame: A DataFrame containing the API response data as a pandas DataFrame.
         """
         if (convert_datetimes := kwargs.get('convert_datetimes')) is None:
-            convert_datetimes = self.parent.convert_datetimes
+            convert_datetimes = self.connection.convert_datetimes
         else:
             del kwargs['convert_datetimes']
 
