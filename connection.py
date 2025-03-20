@@ -1,9 +1,13 @@
+import re
 import pandas as pd
 import requests
 
 from untracked_config.api_auth import b64_credentials
 from untracked_config.proxy import internal_proxies
 from untracked_config.timezones import local_tz
+
+
+div_pattern = re.compile(r'(\<(\/)?div\>)')
 
 
 class LimbleEndpoint:
@@ -35,6 +39,28 @@ class LimbleEndpoint:
             'createdDate', 'startDate', 'due', 'dateCompleted', 'lastEdited',
             'startedOn', 'lastEdited', 'dateAdded'
         ]
+
+    def get_team_members(self, team_name, location_name=None, location_id=None):
+        if location_id is None:
+            if location_name is None:  # provided no parameters, try to use default
+                location_id = self.connection.location_id
+            else:
+                locations_df = self.connection.locations.df
+                location_id = locations_df.loc[
+                    locations_df.loc[locations_df['name'] == location_name].index[0], 'locationID']
+
+        else:
+            locations_df = self.connection.locations.df
+            location_id = locations_df.loc[locations_df.loc[locations_df['name'] == location_name].index[0], 'locationID']
+
+        teams_df = self.connection.teams.df
+        teams_df.loc[:, 'name_clean'] = teams_df.loc[:, 'name'].apply(lambda x: div_pattern.sub("", x))
+        loc_teams = teams_df.loc[teams_df['locationID'] == location_id]
+        this_team =  loc_teams[loc_teams['name_clean'] == team_name].to_dict(orient='records')[0]
+
+        team_id = this_team['teamID']
+        users_df = self.connection.users.df
+        return users_df.loc[users_df['teams'].apply(lambda x: any([tid['teamID'] == team_id for tid in x]))]
 
     def request_params(self, *args, **kwargs):
         """Makes a GET request to the API endpoint allowing the use of parameters and retrieves data.
@@ -174,7 +200,8 @@ class LimbleConnection:
         __endpoints__ (dict): Dictionary of API endpoints and their paths.
     """
 
-    def __init__(self, convert_datetimes=False, auto_page_all=True):
+    def __init__(self, convert_datetimes=False, auto_page_all=True, location:str=None, location_id:int=None,
+                 *args, **kwargs):
         """Initializes a LimbleConnection instance.
 
         Args:
@@ -189,6 +216,8 @@ class LimbleConnection:
 
         self.auto_page_all = auto_page_all
         self.convert_datetimes = convert_datetimes
+        self._location = location
+        self._location_id = location_id
 
         # design decision: add the slash when it is needed not before (so no trailing or leading slashes here)
         # design decision: keep the name and path seperate to allow flexibility; ex: synonyms
@@ -229,6 +258,44 @@ class LimbleConnection:
                 propertish = self.__create_endpoint(epn, epaddr)
                 setattr(self.__class__, epn, propertish)
 
+    @property
+    def location(self):
+        if self._location is None:
+            if self._location_id is not None:
+                all_locations = self.locations.df
+                self._location = all_locations.set_index('locationID').loc[self._location_id, 'name']
+            else:
+                self._default_when_single_location()
+        return self._location
+
+    @location.setter
+    def location(self, location):
+        self._location = location
+
+    def _default_when_single_location(self):
+        all_locations = self.locations.df
+        if len(all_locations) == 1:
+            self._location = all_locations.loc[0, 'name']
+            self._location_id = all_locations.loc[0, 'locationID']
+        else:
+            raise AttributeError('Multiple locations are available. Please set the .location property of the '
+                                 'connection or specify in the endpoint method call.')
+
+    @property
+    def location_id(self):
+        if self._location_id is None:
+            if self._location is not None:
+                all_locations = self.locations.df
+                self._location_id = all_locations.set_index('name').loc[self._location, 'locationID']
+            else:
+                self._default_when_single_location()
+        return self._location_id
+
+    @location_id.setter
+    def location_id(self, location_id):
+        self._location_id = location_id
+
+
     def set_sub_property(self, epaddr, epn, incomplete_list):
         """Adds sub-properties for nested API endpoints.
 
@@ -260,7 +327,7 @@ class LimbleConnection:
             LimbleEndpoint: An object representing the API endpoint.
         """
         rt_add = self.get_route_address(epaddr)
-        propertish = LimbleEndpoint(self, rt_add)
+        propertish = LimbleEndpoint(self, epn, rt_add)
         return propertish
 
     def get_route_address(self, endpoint):
