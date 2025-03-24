@@ -1,3 +1,5 @@
+from __future__ import annotations
+import json
 import re
 from typing import Optional
 
@@ -42,6 +44,14 @@ class LimbleEndpoint:
             'createdDate', 'startDate', 'due', 'dateCompleted', 'lastEdited',
             'startedOn', 'lastEdited', 'dateAdded'
         ]
+        
+        # placeholders - these unfortunately show in every LimbleEndpoint in IDE type resolution/autocomplete
+        self.categories: Optional[LimbleEndpoint] = None
+        self.fields: Optional[LimbleEndpoint] = None
+        self.history: Optional[LimbleEndpoint] = None
+        self.labor: Optional[LimbleEndpoint] = None
+        self.suggested: Optional[LimbleEndpoint] = None
+        self.teams: Optional[LimbleEndpoint] = None
 
         if self.name == 'users':
             self.get_user_id_from_username = self._get_user_id_from_username
@@ -406,6 +416,13 @@ class LimbleConnection:
         self._location = location
         self._location_id = location_id
 
+        # placeholders
+        self.assets: Optional[LimbleEndpoint] = None
+        self.locations: Optional[LimbleEndpoint] = None
+        self.parts: Optional[LimbleEndpoint] = None
+        self.tasks: Optional[LimbleEndpoint] = None
+        self.users: Optional[LimbleEndpoint] = None
+
         # design decision: add the slash when it is needed not before (so no trailing or leading slashes here)
         # design decision: keep the name and path seperate to allow flexibility; ex: synonyms
         self.__endpoints__ = {'assets': 'assets',
@@ -448,6 +465,10 @@ class LimbleConnection:
 
     @property
     def location(self):
+        """The default location for this connection instance.
+
+        :return: str
+        """
         if self._location is None:
             if self._location_id is not None:
                 all_locations = self.locations.df
@@ -462,6 +483,11 @@ class LimbleConnection:
         self._location = location
 
     def _default_when_single_location(self):
+        """If there is only a single location, set that as the default location.
+
+        Otherwise, error requiring setting it."""
+        # todo: this has a hazard that someone using the connection could have code that works until a second location
+        #  is added...
         all_locations = self.locations.df
         if len(all_locations) == 1:
             self._location = all_locations.loc[0, 'name']
@@ -471,7 +497,11 @@ class LimbleConnection:
                                  'connection or specify in the endpoint method call.')
 
     @property
-    def location_id(self):
+    def location_id(self) -> int:
+        """The locationID for the default location for this connection instance.
+
+        :return: int
+        """
         if self._location_id is None:
             if self._location is not None:
                 all_locations = self.locations.df
