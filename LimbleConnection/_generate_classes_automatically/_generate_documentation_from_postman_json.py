@@ -205,7 +205,7 @@ path_dict = collection.get_requests_map()
 
 result, mtadata = generate_placeholder_classes(path_dict, '    ')
 
-with open(r"C:\Users\lmcglaughlin_local\PycharmProjects\LimbleConnector\LimbleConnection\placeholder_classes.py",
+with open(r"/LimbleConnection/placeholder_classes.py",
           "w") as f:
     f.write(result)
 
