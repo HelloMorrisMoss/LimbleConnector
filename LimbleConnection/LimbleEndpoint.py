@@ -263,8 +263,8 @@ class LimbleEndpoint:
         Examples:
             Example getting only page 2 of the assets list:
 
-            >>>lc = LimbleConnection()
-            >>>lc.assets.request_params(rq_params={'page': 2})
+            >lc = LimbleConnection()
+            >lc.assets.request_params(rq_params={'page': 2})
             [{'assetID': 101, 'name': 'Coating Line', 'startedOn': 1727890475, 'lastEdited': 1732230980,
             'parentAssetID': 0, 'locationID': 8675309, 'geoLocation': None, 'hoursPerWeek': 0,
             'meta': {'fields': '/v2/assets/fields/?assets=98', 'tasks': '/v2/tasks/?assets=98'},

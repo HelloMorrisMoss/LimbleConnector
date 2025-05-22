@@ -1,0 +1,13 @@
+{% macro definition_list(rows, headers, label_width=20, max_line_width=100, indent_size=8) -%}
+{% set definition_indent_width = label_width + 1 -%}
+{% set wrap_width = max_line_width - definition_indent_width -%}
+{% filter indent(width=indent_size) %}
+{{ "%-*s%s"|format(label_width, headers[0], headers[1]) }}
+{% for row in rows -%}
+{% set label = row[0] ~ ':' -%}
+{% set definition = row[1] -%}
+{% set wrapped = definition | wordwrap(width=wrap_width) | replace('\n', '\n' ~ ' ' * definition_indent_width) -%}
+{{ "%-*s%s"|format(label_width, label, wrapped) }}
+{% endfor -%}
+{% endfilter -%}
+{% endmacro -%}
