@@ -5,7 +5,7 @@ import tzlocal
 import pandas as pd
 import pytz
 
-from LimbleConnection import LimbleEndpoint
+from LimbleConnection.LimbleEndpoint import LimbleEndpoint
 from LimbleConnection._documentation_placeholders import Users
 
 api_cache_lifetime_seconds = 5

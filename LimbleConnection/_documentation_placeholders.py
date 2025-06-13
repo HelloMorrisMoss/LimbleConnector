@@ -152,5 +152,5 @@ def clean_docs(intext):
     print(params)
 
 
-
-pass
+if __name__ == '__main__':
+    pass

@@ -1,3 +1,10 @@
+# project specific
+*.xlsx
+LimbleConnection/untracked_config/api_auth.py
+LimbleConnection/untracked_config/proxy.py
+LimbleConnection/untracked_config/timezones.py
+AWS server ports
+
 ### This gitignore was first generated using PyCharm's .ignore plugin
 
 ### PyCharm+iml template
