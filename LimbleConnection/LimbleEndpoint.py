@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 import requests
@@ -248,7 +248,7 @@ class LimbleEndpoint:
         return users_df.loc[users_df['teams'].apply(lambda x: any([tid['teamID'] == team_id for tid in x]))]
 
     # @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))  # currently causing an issue with rq_params
-    def request_params(self, *args, **kwargs):
+    def get_request_params(self, *args, **kwargs):
         """Makes a GET request to the API endpoint allowing the use of parameters and retrieves data.
 
         Args:
@@ -273,7 +273,7 @@ class LimbleEndpoint:
         Returns:
             list: A list of results returned by the API.
         """
-        params = kwargs.pop('rq_params', None)
+        params: Union[dict, None] = kwargs.pop('rq_params', None)
 
         # why: the Limble API will by default only send 100 results at a time (or the limit parameter)
         # if provided parameter use that, otherwise the setting for the connection
@@ -282,15 +282,11 @@ class LimbleEndpoint:
         else:
             del kwargs['auto_page_all']
 
-        if any(self.rt_addr.endswith(end) for end in ('users', 'teams')):
+        if any(self.rt_addr.endswith(end) for end in ('users', 'teams', 'priorities')):
             auto_page_all = None  # these do not support the page parameter
 
         # for accessing endpoints that have a path parameter; ex: users/123/teams where 123 is userID
-        if (path_param := kwargs.get('path_param')) is not None:
-            this_address = self.rt_addr.format(path_param=path_param)
-            del kwargs['path_param']
-        else:
-            this_address = self.rt_addr
+        this_address = self._insert_path_param(kwargs)
 
         if auto_page_all:
             result_data = []
@@ -313,6 +309,19 @@ class LimbleEndpoint:
             result_data = self._get_request(params, this_address).json()
         return result_data
 
+    def _insert_path_param(self, kwargs):
+        """Substitute the path parameter into the address if there is one; ex: users/123/teams where 123 is userID
+        Args:
+             kwargs: dictionary, that may contain a path_param key.
+        :return: str, the path including the path parameter if provided, otherwise the original address.
+        """
+        if (path_param := kwargs.get('path_param')) is not None:
+            this_address = self.rt_addr.format(path_param=path_param)
+            del kwargs['path_param']
+        else:
+            this_address = self.rt_addr
+        return this_address
+
     # @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))
     def _get_request(self, params:dict, this_address:str):
         response = requests.get(url=this_address, proxies=self.connection.proxy,
@@ -320,6 +329,30 @@ class LimbleEndpoint:
         if not response.ok:
             response.raise_for_status()
         return response
+
+    def _patch_request(self, params:dict, this_address:str):
+        response = requests.patch(url=this_address, proxies=self.connection.proxy,
+                                  # unlike get, uses patch data instead of params, json.dumps, and type header
+                                  headers=self.connection.authentication_header | {'Content-Type': 'application/json'},
+                                  data=json.dumps(params))
+        if not response.ok:
+            response.raise_for_status()
+        return response
+    
+    def update(self, params:dict):
+        """Update this resource, replacing the existing data with the provided data."""
+        this_address = self._insert_path_param(params)
+        return self._patch_request(params, this_address)
+
+    def _post_request(self, params:dict):
+        response = requests.post(url=self.rt_addr, proxies=self.connection.proxy,
+                           headers=self.connection.authentication_header, params=params)
+        if not response.ok:
+            response.raise_for_status()
+        return response
+
+    def create(self, params:dict):
+        self._post_request(params)
 
     # @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))
     def df_params(self, *args, **kwargs) -> pd.DataFrame:
@@ -340,7 +373,7 @@ class LimbleEndpoint:
         else:
             del kwargs['convert_datetimes']
 
-        result_df = pd.DataFrame.from_records(self.request_params(*args, **kwargs))
+        result_df = pd.DataFrame.from_records(self.get_request_params(*args, **kwargs))
 
         # todo: perhaps the name_clean column should be an option for __init__ to do this wherever <div> may show up
         #  ...or a way to clean those up
@@ -376,4 +409,4 @@ class LimbleEndpoint:
     @property
     def response(self) -> list[dict]:
         """list: A property that fetches and returns the endpoint data as a list."""
-        return self.request_params()
+        return self.get_request_params()
