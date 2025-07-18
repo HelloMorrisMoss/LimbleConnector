@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Union
 
+import requests
 import tzlocal
 import pandas as pd
 import pytz
@@ -35,6 +36,9 @@ class LimbleConnection:
             convert_datetimes (bool, optional): If True, converts datetime fields in API responses to Python
                 datetime objects. Defaults to False.
             auto_page_all (bool, optional): If True, automatically paginates all API responses. Defaults to True.
+            location (str, optional): The default location for API requests. Defaults to None.
+            location_id (int, optional): The locationID for the default location. Defaults to None.
+            page_limit (int, optional): The maximum number of results to return per page. Defaults to 100.
         """
         self.authentication_header = {'Authorization': f'Basic {b64_credentials}'} if (b64_credentials:=kwargs.get('b64_credentials')) else None
         self.proxy = kwargs.get('proxy', None)
@@ -45,9 +49,10 @@ class LimbleConnection:
         self.apiv_addrs = f'{self.api_base_address}/{self.api_version}'
 
         self.auto_page_all = auto_page_all
+        self.page_limit = 100 if kwargs.get('page_limit') is None else kwargs.get('page_limit')
         self.convert_datetimes = convert_datetimes
         self._location = location
-        self._location_id = location_id
+        self._location_id = location_id  # todo: handle default location being multiple locations
 
         # placeholders
         self.assets: Optional[LimbleEndpoint] = None
@@ -57,6 +62,7 @@ class LimbleConnection:
         # self.users: Optional[LimbleEndpoint] = None
         # self.users = property(self.users, self)
         self.users = Users
+        self.statuses: Optional[LimbleEndpoint] = None
 
         # design decision: add the slash when it is needed not before (so no trailing or leading slashes here)
         # design decision: keep the name and path seperate to allow flexibility; ex: synonyms
@@ -80,6 +86,7 @@ class LimbleConnection:
                               'users': 'users',
                               'users.teams': 'users/{path_param}/teams',
                               'priorities': 'priorities',
+                              'statuses': 'statuses',
 
                               # todo: create
                               #  assets/:assetID/logs
@@ -99,6 +106,79 @@ class LimbleConnection:
             else:
                 propertish, epn = self.__create_endpoint(epn, epaddr)
                 setattr(self, epn, propertish)
+
+    def get_from_path(self, path_route:str, **kwargs) -> Union[requests.Response, pd.DataFrame]:
+        """Send a GET request to a route provided as a string. Intended for development purposes.
+
+        ex:
+            lc.get_from_path('tasks/{path_param}/instructions', path_param=1234, limit=2)
+            Would return the requests.Response object for the GET request to:
+            https://api.limblecmms.com:443/v2/tasks/1234/instructions?limit=2
+
+            Convenience features such as path parameter formatting, auto paging if enabled and the route supports
+            paging, etc. will be applied.
+
+        ex using raw=True:
+            lc.get_from_path(
+            path_route='https://api.limblecmms.com:443/v2/users/8675309/teams',
+             raw=True, teams=(436,437), locations=(163,74), limit=100)
+            Would return the requests.Response object for the GET request to:
+            https://api.limblecmms.com:443/v2/users/8675309/teams?teams=436,437&locations=163,74&limit=100
+
+        Args:
+            path_route: str, the route to send the ge request to. ex: /statuses or tasks/1234/
+            **kwargs: Keyword arguments, including:
+                - auto_page_all (bool, optional): Overrides the parent's setting for automatic pagination.
+                - path_param (str, optional): for accessing endpoints that have a path parameter
+                - raw (bool, optional): If True, neither the route string and results will not be processed by
+                    convenience features. Only authentication and proxy will be applied. All other kwargs will be passed
+                    to the request as query parameters.
+                - as_df (bool, optional): If True, returns the results as a pandas DataFrame, just as df_from_path.
+                - rq_params (dict, optional): Additional query parameters for the request, see Limble API docs.
+                - any other keyword arguments will be passed to the GET request as query parameters.
+        return: Union[requests.Response, pd.DataFrame]
+            """
+        raw = kwargs.pop('raw', False)
+
+        if raw:
+            print(f'Processing path as-is, convenience features will not be available,'
+                  f' except for authentication and proxy. {path_route=}')
+            value = LimbleEndpoint(self, '_', rt_addr='_')._get_request(kwargs, path_route)
+        else:
+            ep_keys = {kwargs.pop(key, None) for key in ('auto_page_all', 'path_param', 'rq_params')}
+            as_df = kwargs.pop('as_df', False)
+            ep_keys['rq_params'] = ep_keys['rq_params'] | kwargs if isinstance(ep_keys['rq_params'], dict) else kwargs
+
+            this_address = self.apiv_addrs + f'{"/" if path_route[0] != "/" else ""}{path_route}'
+            route_name = path_route.replace('/', '.')
+
+            if not route_name in self.__endpoints__.keys():
+                print(f'Custom route {route_name} is not implemented in LimbleConnector yet, some convenience features may'
+                      f' not be available.')
+
+            if as_df:
+                value = LimbleEndpoint(self, route_name, rt_addr=this_address).df_params(
+                    **ep_keys)
+            else:
+                value = LimbleEndpoint(self, route_name, rt_addr=this_address).get_request_params(
+                **ep_keys)
+        return value
+
+    def df_from_path(self, path_route:str, **kwargs) -> pd.DataFrame:
+        """Get the data as a pandas DataFrame from an endpoint provided as a path string.
+
+        Intended for development purposes.
+
+        Args:
+            path_route: str, the route to send the ge request to. ex: /statuses or tasks/invoices
+            kwargs (optional, any):
+                - auto_page_all (bool, optional): Overrides the connection's setting for automatic pagination.
+                - path_param (str, optional): for accessing endpoints that have a path parameter. The route string must
+                    have a '{path_param}' placeholder. ex: 'users/{path_param}' where the path parameter would be the
+                    userID.
+        :return: pandas.DataFrame
+        """
+        return self.get_from_path(path_route, as_df=True, **kwargs)
 
     @property
     def location(self):

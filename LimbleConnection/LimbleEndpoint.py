@@ -273,7 +273,7 @@ class LimbleEndpoint:
         Returns:
             list: A list of results returned by the API.
         """
-        params: Union[dict, None] = kwargs.pop('rq_params', None)
+        params: Union[dict, None] = kwargs.pop('rq_params', {})
 
         # why: the Limble API will by default only send 100 results at a time (or the limit parameter)
         # if provided parameter use that, otherwise the setting for the connection
@@ -282,8 +282,18 @@ class LimbleEndpoint:
         else:
             del kwargs['auto_page_all']
 
-        if any(self.rt_addr.endswith(end) for end in ('users', 'teams', 'priorities')):
+        # endpoint specific considerations
+        no_paging_endpoints = ('users', 'teams', 'priorities', 'labor', 'categories', 'statuses')
+        if any(self.rt_addr.endswith(end) for end in no_paging_endpoints):
             auto_page_all = None  # these do not support the page parameter
+
+        # for endpoints where locations matter, if not provided one and location default is set for the instance, use it
+        location_selective = 'tasks', 'users/{path_param}/teams', 'suggested', 'labor', 'gl', 'bills', 'po'
+        location_keys = ('location', 'locationID')
+        if any(ls in self.rt_addr for ls in location_selective) and all(params.get(lk) is None for lk in location_keys):
+            if self.connection.location is not None:
+                params['locations'] = f'{self.connection.location_id}'
+
 
         # for accessing endpoints that have a path parameter; ex: users/123/teams where 123 is userID
         this_address = self._insert_path_param(kwargs)
@@ -293,8 +303,9 @@ class LimbleEndpoint:
             results_returned = True
             page_number = 0
 
-            if params is None:
-                params = {}
+            if page_limit := kwargs.get('page_limit') is None:
+                page_limit = self.connection.page_limit
+            params['limit'] = page_limit  # default 100 in both connection and the API
 
             while results_returned:
                 page_number += 1
@@ -307,6 +318,10 @@ class LimbleEndpoint:
                     result_data += page_data
         else:
             result_data = self._get_request(params, this_address).json()
+            # filter using the default location post hoc for the top level /teams endpoint, as the API won't do it
+            if self.connection.location is not None:
+                if self.rt_addr.endswith('teams') and not 'users' in self.rt_addr:
+                    result_data = [result for result in result_data if result['locationID'] == self.connection.location_id]
         return result_data
 
     def _insert_path_param(self, kwargs):
@@ -317,6 +332,8 @@ class LimbleEndpoint:
         """
         if (path_param := kwargs.get('path_param')) is not None:
             this_address = self.rt_addr.format(path_param=path_param)
+            if this_address == self.rt_addr:  # most routes with path params it just goes on the end
+                this_address = f'{self.rt_addr}/{path_param}'
             del kwargs['path_param']
         else:
             this_address = self.rt_addr
@@ -331,6 +348,7 @@ class LimbleEndpoint:
         return response
 
     def _patch_request(self, params:dict, this_address:str):
+        print(f'_patch_request: {this_address=} with {params=}')
         response = requests.patch(url=this_address, proxies=self.connection.proxy,
                                   # unlike get, uses patch data instead of params, json.dumps, and type header
                                   headers=self.connection.authentication_header | {'Content-Type': 'application/json'},
@@ -339,9 +357,17 @@ class LimbleEndpoint:
             response.raise_for_status()
         return response
     
-    def update(self, params:dict):
-        """Update this resource, replacing the existing data with the provided data."""
-        this_address = self._insert_path_param(params)
+    def update(self, params:dict, lid: Union[int, str]=None) -> requests.Response:
+        """Update this resource, replacing the existing data with the provided data.
+
+        Args:
+            lid: the id of the resource to update. If provided will override any path_param in the params dictionary.
+            params: dictionary of parameters to send to the API, including the data to update.
+
+        :return: request.Response
+        """
+        this_address = self._insert_path_param(params if lid is None else params|{'path_param': lid})
+        print(f'update: {this_address=} with {params=}')
         return self._patch_request(params, this_address)
 
     def _post_request(self, params:dict):
