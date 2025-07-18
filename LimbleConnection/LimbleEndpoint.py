@@ -290,7 +290,7 @@ class LimbleEndpoint:
         # for endpoints where locations matter, if not provided one and location default is set for the instance, use it
         location_selective = 'tasks', 'users/{path_param}/teams', 'suggested', 'labor', 'gl', 'bills', 'po'
         location_keys = ('location', 'locationID')
-        if any(ls in self.rt_addr for ls in location_selective) and all(params.get(lk) is None for lk in location_keys):
+        if any(self.rt_addr.endswith(ls) for ls in location_selective) and all(params.get(lk) is None for lk in location_keys):
             if self.connection.location is not None:
                 params['locations'] = f'{self.connection.location_id}'
 
@@ -344,6 +344,7 @@ class LimbleEndpoint:
         response = requests.get(url=this_address, proxies=self.connection.proxy,
                            headers=self.connection.authentication_header, params=params)
         if not response.ok:
+            print(f'Error in response: {json.loads(response.text)}')
             response.raise_for_status()
         return response
 
@@ -354,6 +355,7 @@ class LimbleEndpoint:
                                   headers=self.connection.authentication_header | {'Content-Type': 'application/json'},
                                   data=json.dumps(params))
         if not response.ok:
+            print(f'Error in response: {json.loads(response.text)}')
             response.raise_for_status()
         return response
     

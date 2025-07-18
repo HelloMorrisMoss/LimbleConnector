@@ -145,7 +145,7 @@ class LimbleConnection:
                   f' except for authentication and proxy. {path_route=}')
             value = LimbleEndpoint(self, '_', rt_addr='_')._get_request(kwargs, path_route)
         else:
-            ep_keys = {kwargs.pop(key, None) for key in ('auto_page_all', 'path_param', 'rq_params')}
+            ep_keys = {key: kwargs.pop(key, None) for key in ('auto_page_all', 'path_param', 'rq_params')}
             as_df = kwargs.pop('as_df', False)
             ep_keys['rq_params'] = ep_keys['rq_params'] | kwargs if isinstance(ep_keys['rq_params'], dict) else kwargs
 
