@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from typing import Optional, Union
 
 import pandas as pd
@@ -58,6 +59,12 @@ class LimbleEndpoint:
             self.add_team = self._add_team
             self.remove_team = self._remove_team_from_user
 
+        # Limble's endpoint rate limit headers
+        self._rate_limit_headers = ('X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-First-Call',
+                                    'X-RateLimit-TTL', 'X-RateLimit-Minute-Limit', 'X-RateLimit-Minute-Remaining',
+                                    'X-RateLimit-Minute-First-Call', 'X-RateLimit-Minute-TTL')
+        self._ratelimit_ts_headers = 'X-RateLimit-First-Call', 'X-RateLimit-Minute-First-Call'
+
     def _add_team(self, username: str = None, team: str = None, location: str = None, user_id: int = None,
                   team_id: int = None, location_id: int = None):
         """Add a team (membership) to user.
@@ -96,6 +103,9 @@ class LimbleEndpoint:
             else:
                 raise ConnectionError(add_response.status_code)
         return add_response
+
+    def _convert_timestamp_to_datetime(self, timestamp: int) -> datetime:
+        return pd.to_datetime(timestamp, unit='s', origin='unix', utc=True).tz_convert(self.connection.timezone)
 
     def _ensure_parameters_for_user_add_or_remove_team(self, team=None, username=None, location=None, team_id=None, user_id=None,
                                                        location_id=None):
@@ -347,6 +357,39 @@ class LimbleEndpoint:
             print(f'Error in response: {json.loads(response.text)}')
             response.raise_for_status()
         return response
+
+    def _delete_request(self, this_address:str):
+        print(f'_delete_request: {this_address=}')
+        response = requests.delete(url=this_address, proxies=self.connection.proxy,
+                                  # unlike get, uses patch data instead of params, json.dumps, and type header
+                                  headers=self.connection.authentication_header | {'Content-Type': 'application/json'})
+        if not response.ok:
+            print(f'Error in response: {json.loads(response.text)}')
+            if response.status_code == 429:
+                header_strings = []
+                for hdr in self._rate_limit_headers:
+                    value = response.headers.get(hdr)
+                    if hdr in self._ratelimit_ts_headers:
+                        value = convert_timestamp_to_datetime(int(value), self.connection.timezone) if value else None
+                        header_strings.append(f'{hdr}: {value}')
+                    else:
+                        header_strings.append(f'{hdr}: {value}')
+                print(f'Rate limited: ' + ', '.join(header_strings))
+            response.raise_for_status()
+        return response
+
+    def delete(self, lid: Union[int, str]=None) -> requests.Response:
+        """Update this resource, replacing the existing data with the provided data.
+
+        Args:
+            lid: the id of the resource to update. If provided will override any path_param in the params dictionary.
+            params: dictionary of parameters to send to the API, including the data to update.
+
+        :return: request.Response
+        """
+        this_address = self._insert_path_param({'path_param': lid})
+        print(f'delete: {this_address=} with {lid=}')
+        return self._delete_request(this_address)
 
     def _patch_request(self, params:dict, this_address:str):
         print(f'_patch_request: {this_address=} with {params=}')
