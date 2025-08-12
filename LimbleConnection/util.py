@@ -60,8 +60,10 @@ class RateLimit:
         self.ttl = int(ttl) if ttl is not None else 0 # ms
         self.ttls = math.ceil(self.ttl/1000)
 
-    # def __str__(self):
-    #     return pformat({k: getattr(self, k) for k in self.__slots__}, )
+    @property
+    def next_live_time(self):
+        return datetime.timedelta(seconds=self.ttls) + self.first_call
+
 
 
 class RateLimitHandler:
@@ -91,9 +93,15 @@ class RateLimitHandler:
         """The time till live in milliseconds that the next request is ready, minute or hour. """
         return max(self.hour.ttl, self.minute.ttl)
 
-    def sleep_till_ready(self):
+    @property
+    def next_live_time(self):
+        return max(self.hour.next_live_time, self.minute.next_live_time)
+
+    def sleep_till_ready(self, verbose=False):
         """Sleep this thread until the time that the next of this type of request is ready."""
-        time.sleep(self.ttl)
+        if verbose:
+            print(f'Sleeping for {self.ttl} seconds until next request is ready at {self.next_live_time}.')
+        time.sleep(self.ttls)
 
 
 
