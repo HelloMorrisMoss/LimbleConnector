@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 
 # from LimbleConnection import LimbleConnection
-from LimbleConnection.util import div_pattern
+from LimbleConnection.util import div_pattern, convert_timestamp_to_datetime
 
 
 class LimbleEndpoint:
