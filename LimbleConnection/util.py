@@ -17,6 +17,9 @@ import time
 from pprint import pprint, pformat
 
 import pandas as pd
+from pandas import DatetimeTZDtype
+
+from LimbleConnection.untracked_config.timezones import local_tz
 
 
 def encode_credentials(client_id: str, client_secret: str) -> str:
@@ -39,6 +42,112 @@ task_status_dict = {
     1: 'Complete'
 }
 div_pattern = re.compile(r'(\<(\/)?div\>)')  # regex pattern for cleaning errant <div> tags from user strings
+remove_html_pattern = re.compile(r'(\<(\/)?div\>)|(\<(\/)?a\>)|()')  # regex pattern for cleaning errant html tags
+new_line_pattern = re.compile(r'(\<(\/)?\s?br\s?(\/)?\>)')
+
+def escape_xlsx_char(ch):
+    # thanks to https://www.havnemark.dk/?p=185 for a solution to the openpyxl.utils.exceptions.IllegalCharacterError
+    illegal_xlsx_chars = {
+        '\x00': '\\x00',  # NULL
+        '\x01': '\\x01',  # SOH
+        '\x02': '\\x02',  # STX
+        '\x03': '\\x03',  # ETX
+        '\x04': '\\x04',  # EOT
+        '\x05': '\\x05',  # ENQ
+        '\x06': '\\x06',  # ACK
+        '\x07': '\\x07',  # BELL
+        '\x08': '\\x08',  # BS
+        '\x0b': '\\x0b',  # VT
+        '\x0c': '\\x0c',  # FF
+        '\x0e': '\\x0e',  # SO
+        '\x0f': '\\x0f',  # SI
+        '\x10': '\\x10',  # DLE
+        '\x11': '\\x11',  # DC1
+        '\x12': '\\x12',  # DC2
+        '\x13': '\\x13',  # DC3
+        '\x14': '\\x14',  # DC4
+        '\x15': '\\x15',  # NAK
+        '\x16': '\\x16',  # SYN
+        '\x17': '\\x17',  # ETB
+        '\x18': '\\x18',  # CAN
+        '\x19': '\\x19',  # EM
+        '\x1a': '\\x1a',  # SUB
+        '\x1b': '\\x1b',  # ESC
+        '\x1c': '\\x1c',  # FS
+        '\x1d': '\\x1d',  # GS
+        '\x1e': '\\x1e',  # RS
+        '\x1f': '\\x1f'}  # US
+
+    if ch in illegal_xlsx_chars:
+        return illegal_xlsx_chars[ch]
+
+    return ch
+
+# Wraps the function escape_xlsx_char(ch).
+def escape_xlsx_string(st):
+    escaped_text = ''.join([escape_xlsx_char(ch) for ch in st])
+    if escaped_text != st:
+        print(f"Original text: {st}\nescaped text: {escaped_text}")
+    return escaped_text
+
+def clean_text(text: str) -> str:
+    """Clean lingering html tags from the text."""
+    if text is None:
+        return ''
+    cleaned_txt = escape_xlsx_string(clean_html_from_text(fix_br_newlines(text)).strip(' \t\n'))
+    # if cleaned_txt != text:
+    #     print(f"Cleaned text: {cleaned_txt}")
+    return cleaned_txt
+
+
+def clean_html_from_text(text: str) -> str:
+    """Clean lingering html tags from the text."""
+    try:
+        fixed_text = remove_html_pattern.sub("", text)
+        if fixed_text != text:
+            print(f"Original text: {text}\nCleaned text: {fixed_text}")
+        return fixed_text
+    except TypeError as te:
+        print(f"Error cleaning text: {te}")
+        return ""
+
+def fix_br_newlines(text: str) -> str:
+    """Replace <br> tags with newlines."""
+    return new_line_pattern.sub("\n", text)
+
+
+def is_string_series(s : pd.Series):
+    """Check if a Pandas Series is a string series."""
+    # Thanks to https://stackoverflow.com/a/67001213
+    if isinstance(s.dtype, pd.StringDtype):
+        # The series was explicitly created as a string series (Pandas>=1.0.0)
+        return True
+    elif s.dtype == 'object':
+        # Object series, check each value
+        return all((v is None) or isinstance(v, str) for v in s)
+    else:
+        return False
+
+
+def clean_column_text(df: pd.DataFrame, columns: list[str] = None, in_place: bool = False) -> pd.DataFrame:
+    """Clean lingering html tags from the text from a DataFrame column.
+
+    The Limble web interface will insert html tags like <div>, </ br> in the text of some fields, and that carries over
+    to the data returned by the API."""
+
+    if not columns:
+        columns = [col for col in df.columns if is_string_series(df[col])]
+    print(f'cleaning these columns: {columns}')
+    for col in columns:
+        print(f'cleaning column {col}')
+        if in_place:
+            df.loc[:, col] = df.loc[:, col].apply(clean_text)
+        else:
+            df.loc[:, f'{col}_clean'] = df.loc[:, col].copy().apply(clean_text)
+    if not in_place:
+        # print([(col, 'is changed?', any(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns])
+        print('changed: ', [(col, sum(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns if any(df.loc[:, f'{col}_clean'] != df.loc[:, col])])
+    return df
 
 
 def convert_timestamp_to_datetime(timestamp: int, timezone) -> datetime.datetime:
@@ -104,4 +213,19 @@ class RateLimitHandler:
         time.sleep(self.ttls)
 
 
+def localize_dt_columns(df: pd.DataFrame, dt_cols: list[str] = None) -> pd.DataFrame:
+    """Convert the specified columns in a DataFrame to local time."""
 
+    if dt_cols is None:
+        dt_cols = [col for col in df.columns if isinstance(df[col].dtype, DatetimeTZDtype)]
+
+    # if not dt_cols:
+    #     print(f'No datetime columns to be converted.')
+
+    for dt_col in dt_cols:
+        holder = df.loc[:, dt_col]
+        df.loc[:, dt_col] = None
+        df.loc[:, dt_col] = holder.dt.tz_convert(local_tz)
+        # df.loc[:, dt_col].apply(lambda t: t.tz is None).all()  # this is a mask
+        # df.loc[:, dt_col] = df.loc[:, dt_col].dt.tz_localize(None)
+    return df
