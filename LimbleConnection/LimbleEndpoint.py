@@ -38,7 +38,7 @@ class LimbleEndpoint:
 
         self.epoch_columns = [
             'createdDate', 'startDate', 'due', 'dateCompleted', 'lastEdited',
-            'startedOn', 'lastEdited', 'dateAdded'
+            'startedOn', 'lastEdited', 'dateAdded', 'dateLogged', 'dateCreated'
         ]
 
         # placeholders - these unfortunately show in every LimbleEndpoint in IDE type resolution/autocomplete
@@ -103,9 +103,6 @@ class LimbleEndpoint:
             else:
                 raise ConnectionError(add_response.status_code)
         return add_response
-
-    def _convert_timestamp_to_datetime(self, timestamp: int) -> datetime:
-        return pd.to_datetime(timestamp, unit='s', origin='unix', utc=True).tz_convert(self.connection.timezone)
 
     def _ensure_parameters_for_user_add_or_remove_team(self, team=None, username=None, location=None, team_id=None, user_id=None,
                                                        location_id=None):
