@@ -24,6 +24,7 @@ class LimbleEndpoint:
             that can be converted to datetime objects.
     """
 
+    # todo: __slots__
     def __init__(self, connection, endpoint_name, rt_addr):
         """Initializes a LimbleEndpoint instance.
 
@@ -431,7 +432,7 @@ class LimbleEndpoint:
             **kwargs: Keyword arguments, including:
                 - convert_datetimes (bool, optional): If True, converts epoch timestamp
                   columns to datetime objects.
-                - rq_params (dict, optional): Dictionary of parameters to pass therequesting API get requests for data.
+                - rq_params (dict, optional): Dictionary of parameters to pass the requesting API get requests for data.
 
         Returns:
             pd.DataFrame: A DataFrame containing the API response data as a pandas DataFrame.

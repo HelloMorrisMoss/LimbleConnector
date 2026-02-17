@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 import requests
 import tzlocal
@@ -27,7 +27,7 @@ class LimbleConnection:
         convert_datetimes (bool): Whether to convert epoch seconds columns to a pandas Timestamp in dataframes.
         __endpoints__ (dict): Dictionary of API endpoints and their paths.
     """
-
+    # todo: __slots__
     def __init__(self, convert_datetimes=False, auto_page_all=True, location:str=None, location_id:int=None,
                  *args, **kwargs):
         """Initializes a LimbleConnection instance.
@@ -108,7 +108,7 @@ class LimbleConnection:
                 propertish, epn = self.__create_endpoint(epn, epaddr)
                 setattr(self, epn, propertish)
 
-    def get_from_path(self, path_route:str, **kwargs) -> Union[requests.Response, pd.DataFrame]:
+    def get_from_path(self, path_route:str, **kwargs) -> Any:
         """Send a GET request to a route provided as a string. Intended for development purposes.
 
         ex:
@@ -137,7 +137,8 @@ class LimbleConnection:
                 - as_df (bool, optional): If True, returns the results as a pandas DataFrame, just as df_from_path.
                 - rq_params (dict, optional): Additional query parameters for the request, see Limble API docs.
                 - any other keyword arguments will be passed to the GET request as query parameters.
-        return: Union[requests.Response, pd.DataFrame]
+
+        return: Any, depends on the endpoint.
             """
         raw = kwargs.pop('raw', False)
 
