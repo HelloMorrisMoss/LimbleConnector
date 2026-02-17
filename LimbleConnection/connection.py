@@ -74,14 +74,15 @@ class LimbleConnection:
                               'locations': 'locations',
 
                               'parts': 'parts',
-                              'parts.categories': 'parts/categories',  # todo: check this one
+                              'parts.categories': 'parts/categories',
                               'parts.fields': 'parts/fields',
+                              'parts.logs': 'parts/logs',
 
                               'tasks': 'tasks',
                               'tasks.labor': 'tasks/labor',
                               'tasks.labor.categories': 'tasks/labor/categories',
 
-                              'teams': 'teams',  # todo: filter by location
+                              'teams': 'teams',
 
                               'users': 'users',
                               'users.teams': 'users/{path_param}/teams',
