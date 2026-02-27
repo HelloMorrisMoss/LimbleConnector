@@ -1,3 +1,18 @@
+<!--
+Sync Impact Report
+- Version change: 0.0.0 → 0.1.0
+- Modified principles: 
+    - XIV. Mapping Verification (Clarified with fixture requirements)
+    - XXI. Release Quality Gates (Expanded with explicit tool chain)
+- Added sections: 
+    - Development Workflow (New Section)
+- Removed sections: None
+- Templates requiring updates: 
+    - ✅ .specify/templates/plan-template.md (Synced Quality Gates)
+    - ✅ .specify/templates/tasks-template.md (Synced Task Categories)
+- Follow-up TODOs: 
+    - TODO(RATIFICATION_DATE): Confirm original adoption date for v0.1.0.
+-->
 # LimbleConnection Constitution
 
 Interpretation of Requirement Language
@@ -101,7 +116,13 @@ User‑visible changes MUST be recorded in the changelog.
 ### Release Requirements
 
 #### XXI. Release Quality Gates
-Releases MUST pass linting, typing, tests, and changelog verification.
+To ensure stability, every release MUST satisfy the following automated and manual gates:
+
+1.  **Static Analysis**: Linter MUST pass with zero errors.
+2.  **Type Safety**: Type checker MUST pass on all public modules with no "missing member" errors.
+3.  **Test Coverage**: Full suite execution via testing MUST achieve 100% pass rate.
+4.  **Contract Integrity**: New or modified endpoints MUST include representative JSON fixtures and validated mapping tests.
+5.  **Documentation**: All public methods MUST have docstrings, and the `CHANGELOG.md` MUST be updated for the current version.
 
 ---
 
@@ -122,6 +143,20 @@ Generated artifacts MUST be reproducible and MUST NOT be manually edited.
 
 ---
 
+## Development Workflow
+
+To maintain the "Spec-Driven" nature of the project, the following workflow is MANDATORY:
+
+1.  **Specify**: Document the endpoint contract in `.specify` (using `speckit.specify`).
+2.  **Generate**: Execute scaffolding scripts to update typing stubs and documentation placeholders.
+3.  **Implement**: Map the endpoint in `LimbleConnection` using the dynamic `LimbleEndpoint` logic.
+4.  **Test**: 
+    - Create a mock-based test using `responses` or `pytest-mock`.
+    - Validate `.df()` output structure via snapshot tests.
+5.  **Verify**: Run the `/speckit.analyze` command to ensure the implementation plan aligns with the Constitution.
+
+---
+
 ## Technical Constraints
 Python 3.11+ runtime.
 Dependencies SHOULD remain minimal.
@@ -130,6 +165,30 @@ Target API: Limble v2.
 ---
 
 ## Governance
-This constitution supersedes individual coding preferences.
-All PRs and updates to the core connection logic MUST verify compliance with these principles.
-Complexity added to the library MUST be justified by a significant improvement in developer ergonomics.
+
+### I. Authority
+This constitution is the supreme authority for the LimbleConnector project. It supersedes individual coding preferences. All Pull Requests MUST be audited for compliance with these principles. Complexity added to the library MUST be justified by a documented improvement in developer ergonomics.
+
+### II. Amendment Procedure
+1. **Proposal**: Amendments are proposed via Pull Request to `.specify/memory/constitution.md`.
+2. **Review**: Amendments require a "Request for Comments" (RFC) period.
+3. **Ratification**: Merging the PR constitutes ratification. The `LAST_AMENDED_DATE` MUST be updated to the merge date.
+
+### III. Versioning Policy (SemVer)
+The SDK follows Semantic Versioning (`MAJOR.MINOR.PATCH`):
+- **MAJOR**: Breaking changes to the Public API Surface (renaming methods, changing return types, removing deprecated features).
+- **MINOR**: Backward-compatible feature additions (new endpoints, optional parameters).
+- **PATCH**: Backward-compatible bug fixes or documentation updates.
+
+### IV. Deprecation Cycle
+Breaking changes MUST follow a structured cycle:
+1. Feature marked `Deprecated` in a MINOR release with a `FutureWarning`.
+2. Migration guidance MUST be provided in the documentation and warning message.
+3. Feature remains available for at least one MINOR release or 60 days.
+4. Removal occurs ONLY in a MAJOR release.
+
+### V. Compliance Review
+Every release MUST include a "Public API Diff" review. All PRs modifying the Public API Surface MUST include a `CHANGELOG.md` entry following the "Keep a Changelog" format.
+
+
+**Version**: 0.1.0 | **Ratified**: 2026-02-27 | **Last Amended**: 2026-02-27
