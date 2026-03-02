@@ -190,12 +190,6 @@ Given that feature description, do this:
 
    d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
 
-7. **Commit Changes**: Add and commit the specification and checklist files to the feature branch:
-   - `git add <SPEC_FILE> <CHECKLIST_FILE>`
-   - `git commit -m "Initialize specification and quality checklist for $ARGUMENTS"`
-
-8. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/speckit.clarify` or `/speckit.plan`).
-
 **NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
 
 ## General Guidelines
