@@ -63,6 +63,11 @@ As an SDK user, I want my code to continue working without modification even whe
 - Q: How should the generator and SDK handle complex auth overrides in Postman? → A: Default to the collection's primary auth; provide a manual override mechanism in the internal spec for specific endpoints.
 - Q: How should the IDE typing artifacts (stubs/modules) for the generic layer be managed? → A: Generate generic layer stubs and commit them to the repository (synchronized via internal spec updates).
 - Q: What format should the "internal spec file" (endpoint registry) use for stabilization? → A: YAML (for high readability and powerful mapping/override support).
+- Q: Should the initial version of the spec-driven generic layer support asynchronous calls (`async/await`)? → A: No, synchronous only for the initial version; `async` is out of scope.
+- Q: How should the SDK handle logging of request/response cycles? → A: Use standard Python `logging` with a dedicated logger name (e.g., `LimbleConnector`).
+- Q: Should the SDK automatically handle 429 (Too Many Requests) errors? → A: Yes, implement automatic retries with exponential backoff for transient errors (429, 502, 503). Reference `RateLimitHandler` in `util.py` for inspiration but adapt it to best practices.
+- Q: How should the SDK handle large result sets from `list()` operations? → A: Return a full list of all items by auto-paginating until the end by default.
+- Q: Are specialized features like webhooks and file uploads in scope? → A: No, they are out of scope for the initial version of the generic layer.
 
 ## Requirements *(mandatory)*
 
@@ -80,6 +85,7 @@ As an SDK user, I want my code to continue working without modification even whe
 
 - FR-010: Unknown Response Handling: If an endpoint lacks a defined response schema in Postman, the system MUST default its return type to a generic dictionary (`dict[str, Any]`) and emit a warning during the generation phase to ensure SC-001 is met.
 - FR-011: Unified Pagination: The system MUST provide a standard `Paginator` interface for generic endpoints, with specific field mapping (e.g., `next_token` vs `page`) defined in the internal spec file to ensure consistency.
+- FR-014: Auto-Pagination by Default: The `list()` method on generic endpoints MUST auto-paginate until the end of the result set and return a full list of items, abstracting away individual page requests.
 - FR-012: Auth Strategy Overrides: The system MUST support an auth strategy registry in the internal spec, defaulting to the collection-level auth but allowing per-endpoint overrides.
 - FR-013: Committed Typing Stubs: The system MUST generate and commit IDE-visible typing stubs (`.pyi` files) for all Postman-derived generic endpoints to the repository to ensure SC-002 is met across all developer environments.
 
@@ -88,6 +94,16 @@ As an SDK user, I want my code to continue working without modification even whe
 - **Endpoint Registry**: A centralized definition of all generic endpoints and their mapping rules.
 - **Curated Operation**: A stable, high-level method that encapsulates one or more generic endpoint calls.
 - **Normalized Schema**: A stable data structure returned by curated operations and some generic helpers (e.g., `.df()`).
+
+### Non-Functional Requirements
+
+- **NFR-001: Standard Logging**: The SDK MUST use the standard Python `logging` module with a dedicated logger named `LimbleConnector` to allow user-configurable observability of request/response cycles.
+- **NFR-002: Automatic Resilience**: The SDK MUST implement a retry mechanism with exponential backoff for transient errors (HTTP 429, 502, 503) to ensure robustness without requiring user-side retry loops.
+
+## Out of Scope
+
+- **Asynchronous (async/await) support**: The initial implementation is limited to synchronous Python calls only.
+- **Specialized Features (Webhooks/File Uploads)**: These features are excluded from the initial scope to prioritize stabilizing core CRUD/Search operations.
 
 ## Success Criteria *(mandatory)*
 

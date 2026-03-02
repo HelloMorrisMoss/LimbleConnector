@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [/] No [NEEDS CLARIFICATION] markers remain (Remaining: 1)
+- [x] No [NEEDS CLARIFICATION] markers remain (Remaining: 0)
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,5 +31,4 @@
 
 ## Notes
 
-- [NEEDS CLARIFICATION] remains regarding handling of unknown response shapes. This is acceptable for a Draft but should be resolved before implementation.
 - Success criteria SC-003 has a long time-horizon (12 months), which is hard to measure in a short-term CI, but serves as a guiding principle.
