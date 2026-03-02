@@ -51,12 +51,14 @@ class TestGenerator(unittest.TestCase):
         
         # Verify .pyi stubs
         self.assertTrue(os.path.exists(self.stubs_pyi))
-        with open(self.stubs_pyi, 'r') as f:
+        with open(self.stubs_pyi, 'r', encoding='utf-8') as f:
             content = f.read()
         self.assertIn('class LimbleConnection(object):', content)
         self.assertIn('def assets(self) -> AssetsNamespace: ...', content)
         self.assertIn('class AssetsNamespace(object):', content)
-        self.assertIn('def list_assets(self) -> AssetsList_assetsNamespace: ...', content)
+        # Check that docstring is present for the property
+        self.assertIn('def list_assets(self) -> AssetsList_assetsNamespace:', content)
+        self.assertIn('Get all assets', content)
 
 if __name__ == '__main__':
     unittest.main()
