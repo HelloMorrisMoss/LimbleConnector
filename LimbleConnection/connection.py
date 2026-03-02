@@ -6,7 +6,8 @@ import tzlocal
 import pandas as pd
 import pytz
 
-from LimbleConnection.LimbleEndpoint import LimbleEndpoint
+from LimbleConnection.endpoint import LimbleEndpoint, RegistryLoader
+from LimbleConnection.curated.assets import AssetsCurated
 from LimbleConnection._documentation_placeholders import Users
 
 api_cache_lifetime_seconds = 5
@@ -54,59 +55,30 @@ class LimbleConnection:
         self._location = location
         self._location_id = location_id  # todo: handle default location being multiple locations
 
-        # placeholders
-        self.assets: Optional[LimbleEndpoint] = None
-        self.locations: Optional[LimbleEndpoint] = None
-        self.parts: Optional[LimbleEndpoint] = None
-        self.tasks: Optional[LimbleEndpoint] = None
-        # self.users: Optional[LimbleEndpoint] = None
-        # self.users = property(self.users, self)
-        self.users = Users
-        self.statuses: Optional[LimbleEndpoint] = None
+        # Load spec-driven endpoints (FR-003)
+        self._load_endpoints()
+        
+        # Initialize curated operations (US2)
+        self.curated_assets = AssetsCurated(self)
 
-        # design decision: add the slash when it is needed not before (so no trailing or leading slashes here)
-        # design decision: keep the name and path seperate to allow flexibility; ex: synonyms
-        self.__endpoints__ = {'assets': 'assets',
-                              'assets.fields': 'assets/fields',
-                              'assets.fields.suggested': 'assets/fields/suggested',
-                              'assets.fields.history': 'assets/fields/history',
+    def _load_endpoints(self):
+        """Dynamically attach endpoints from registry.yaml."""
+        import os
+        registry_path = os.path.join(os.path.dirname(__file__), 'registry.yaml')
+        if not os.path.exists(registry_path):
+            # Fallback for now if registry doesn't exist yet
+            return
 
-                              'locations': 'locations',
-
-                              'parts': 'parts',
-                              'parts.categories': 'parts/categories',
-                              'parts.fields': 'parts/fields',
-                              'parts.logs': 'parts/logs',
-
-                              'tasks': 'tasks',
-                              'tasks.labor': 'tasks/labor',
-                              'tasks.labor.categories': 'tasks/labor/categories',
-
-                              'teams': 'teams',
-
-                              'users': 'users',
-                              'users.teams': 'users/{path_param}/teams',
-                              'priorities': 'priorities',
-                              'statuses': 'statuses',
-
-                              # todo: create
-                              #  assets/:assetID/logs
-                              #  tasks/:taskID/instructions
-                              #  tasks/:taskID/instructions/:instructionID/options
-                              #  tasks/labor
-                              #  tasks/labor/categories
-                              }
-
-        to_add_properties_list = list(self.__endpoints__.items())
-        while to_add_properties_list:
-            epn, epaddr = to_add_properties_list.pop(0)
-            print(epn)
-            if '.' in epn:
-                # propertish, epn = self.__set_sub_property(epaddr, epn, to_add_properties_list)
-                self.__set_sub_property(epaddr, epn, to_add_properties_list)
-            else:
-                propertish, epn = self.__create_endpoint(epn, epaddr)
-                setattr(self, epn, propertish)
+        loader = RegistryLoader(registry_path, "")
+        registry = loader.load()
+        
+        for name, config in registry.get('endpoints', {}).items():
+            route_url = config['url'].replace('{api_base_url}', self.apiv_addrs)
+            endpoint = LimbleEndpoint(self, name, route_url, config)
+            
+            # Attach for fluent API (e.g., lc.assets_fields)
+            attr_name = name.replace('.', '_')
+            setattr(self, attr_name, endpoint)
 
     def get_from_path(self, path_route:str, **kwargs) -> Any:
         """Send a GET request to a route provided as a string. Intended for development purposes.

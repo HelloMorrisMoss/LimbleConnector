@@ -1,0 +1,77 @@
+# Registry Schema: Stability and Drift Detection (FR-009)
+
+# This schema defines the structure of the internal spec (registry.yaml)
+# used to stabilize the Postman collection.
+
+type: object
+required:
+  - version
+  - resources
+properties:
+  version:
+    type: string
+    pattern: '^\d+\.\d+\.\d+$'
+  resources:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/Resource'
+
+definitions:
+  Resource:
+    type: object
+    properties:
+      endpoints:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/Endpoint'
+      sub_resources:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/Resource'
+
+  Endpoint:
+    type: object
+    required:
+      - postman_id
+      - method
+      - path
+    properties:
+      postman_id:
+        type: string
+      method:
+        type: string
+        enum: [GET, POST, PUT, DELETE, PATCH]
+      path:
+        type: string
+      stability:
+        type: string
+        enum: [Stable, Experimental, Deprecated]
+        default: Experimental
+      pagination:
+        $ref: '#/definitions/PaginationMapping'
+      responses:
+        $ref: '#/definitions/ResponseMapping'
+
+  PaginationMapping:
+    type: object
+    properties:
+      strategy:
+        type: string
+        enum: [offset, cursor, page]
+      next_field:
+        type: string
+      limit_field:
+        type: string
+
+  ResponseMapping:
+    type: object
+    properties:
+      fields:
+        type: object
+        additionalProperties:
+          type: string
+      defaults:
+        type: object
+      type:
+        type: string
+        enum: [dict, list, dataframe]

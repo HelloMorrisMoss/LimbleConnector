@@ -13,13 +13,19 @@ import base64
 import datetime
 import math
 import re
+import logging
 import time
+from typing import Callable, Any
+
+# Configure standard logger (NFR-001)
+logger = logging.getLogger("LimbleConnector")
 from pprint import pprint, pformat
 
 import pandas as pd
 from pandas import DatetimeTZDtype
 
-from LimbleConnection.untracked_config.timezones import local_tz
+# from LimbleConnection.untracked_config.timezones import local_tz
+local_tz = None
 
 
 def encode_credentials(client_id: str, client_secret: str) -> str:
@@ -173,6 +179,45 @@ class RateLimit:
     def next_live_time(self):
         return datetime.timedelta(seconds=self.ttls) + self.first_call
 
+
+
+
+class ResilienceHandler:
+    """Handles automatic retries for transient errors (NFR-002)."""
+
+    def __init__(self, max_retries: int = 3, backoff_factor: float = 0.5):
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
+
+    def execute(self, func: Callable[..., Any], *args, **kwargs) -> Any:
+        """Executes a function with exponential backoff for 429, 502, 503 errors."""
+        retries = 0
+        while retries <= self.max_retries:
+            try:
+                response = func(*args, **kwargs)
+                if response.status_code in [429, 502, 503]:
+                    if retries == self.max_retries:
+                        response.raise_for_status()
+                    
+                    wait_time = self.backoff_factor * (2 ** retries)
+                    if response.status_code == 429:
+                        # Try to use X-RateLimit-TTL if available
+                        ttl_ms = response.headers.get("X-RateLimit-TTL") or response.headers.get("X-RateLimit-Minute-TTL")
+                        if ttl_ms:
+                            wait_time = int(ttl_ms) / 1000.0 + 0.1 # Add a small buffer
+
+                    logger.warning(f"Transient error {response.status_code}. Retrying in {wait_time:.2f}s... ({retries+1}/{self.max_retries})")
+                    time.sleep(wait_time)
+                    retries += 1
+                    continue
+                return response
+            except Exception as e:
+                if retries == self.max_retries:
+                    raise e
+                wait_time = self.backoff_factor * (2 ** retries)
+                logger.warning(f"Exception {type(e).__name__} occurred. Retrying in {wait_time:.2f}s... ({retries+1}/{self.max_retries})")
+                time.sleep(wait_time)
+                retries += 1
 
 
 class RateLimitHandler:
