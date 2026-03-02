@@ -64,24 +64,62 @@ class Generator:
         self.generate_stubs(registry)
 
     def generate_stubs(self, registry: Dict[str, Any]):
-        from jinja2 import Template
-        
-        stub_template = """
-from typing import List, Dict, Any, Optional, Union
-import pandas as pd
-from LimbleConnection.endpoint import LimbleEndpoint
+        """Build a tree and generate nested stubs for the fluent API."""
+        tree = {}
+        for name in registry['endpoints']:
+            parts = name.split('.')
+            if parts[0] == 'routes':
+                parts = parts[1:]
+            
+            if len(parts) > 1 and parts[-1] == parts[-2]:
+                parts = parts[:-1]
+                
+            current = tree
+            for part in parts:
+                if part not in current:
+                    current[part] = {"_is_endpoint": False, "_children": {}}
+                current_node = current[part]
+                current = current_node["_children"]
+            
+            current_node["_is_endpoint"] = True
 
-class LimbleConnection:
-{%- for endpoint_name in endpoints %}
-    @property
-    def {{ endpoint_name.replace('.', '_') }}(self) -> LimbleEndpoint: ...
-{%- endfor %}
-"""
-        template = Template(stub_template)
-        stubs = template.render(endpoints=registry['endpoints'])
-        
+        lines = [
+            "from typing import List, Dict, Any, Optional, Union",
+            "import pandas as pd",
+            "from LimbleConnection.endpoint import LimbleEndpoint",
+            ""
+        ]
+
+        def get_class_name(path: List[str]) -> str:
+            if not path: return "LimbleConnection"
+            return "".join(p.capitalize() for p in path) + "Namespace"
+
+        def process_node(node_name: str, node: Dict[str, Any], path: List[str]):
+            class_name = get_class_name(path)
+            base = "LimbleEndpoint" if node["_is_endpoint"] else "object"
+            
+            class_lines = [f"class {class_name}({base}):"]
+            if not node["_children"]:
+                class_lines.append("    pass")
+            else:
+                for child_name, child_node in node["_children"].items():
+                    child_path = path + [child_name]
+                    child_class = get_class_name(child_path)
+                    class_lines.append(f"    @property")
+                    class_lines.append(f"    def {child_name}(self) -> {child_class}: ...")
+            
+            # Recursively process children
+            for child_name, child_node in node["_children"].items():
+                process_node(child_name, child_node, path + [child_name])
+            
+            lines.insert(4, "\n".join(class_lines) + "\n")
+
+        # Start from root
+        root_node = {"_is_endpoint": False, "_children": tree}
+        process_node("root", root_node, [])
+
         with open(self.output_stubs_path, 'w') as f:
-            f.write(stubs)
+            f.write("\n".join(lines))
 
 if __name__ == "__main__":
     import os

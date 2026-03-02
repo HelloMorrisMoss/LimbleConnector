@@ -31,6 +31,11 @@ class DefaultPaginator(Paginator):
         next_params['page'] = next_params.get('page', 1) + 1
         return next_params
 
+class Namespace:
+    """A generic container for nested attributes to provide a fluent API."""
+    def __repr__(self):
+        return f"<Namespace {list(self.__dict__.keys())}>"
+
 class LimbleEndpoint:
     """Base class for all dynamic endpoints (FR-004)."""
 

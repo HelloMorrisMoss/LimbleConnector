@@ -53,8 +53,10 @@ class TestGenerator(unittest.TestCase):
         self.assertTrue(os.path.exists(self.stubs_pyi))
         with open(self.stubs_pyi, 'r') as f:
             content = f.read()
-        self.assertIn('@property', content)
-        self.assertIn('def assets_list_assets(self) -> LimbleEndpoint: ...', content)
+        self.assertIn('class LimbleConnection(object):', content)
+        self.assertIn('def assets(self) -> AssetsNamespace: ...', content)
+        self.assertIn('class AssetsNamespace(object):', content)
+        self.assertIn('def list_assets(self) -> AssetsList_assetsNamespace: ...', content)
 
 if __name__ == '__main__':
     unittest.main()

@@ -24,8 +24,11 @@ from LimbleConnection import LimbleConnection
 # Initialize connection
 lc = LimbleConnection(b64_credentials="YOUR_BASE64_CREDENTIALS")
 
-# List assets (auto-paginated)
-assets = lc.routes_assets_assets.list()
+# List assets (auto-paginated, fluent API)
+assets = lc.assets.list()
+
+# Access nested endpoints
+fields = lc.assets.fields.asset_fields.list()
 
 # Search assets (curated operation)
 found = lc.curated_assets.search_assets("Forklift")

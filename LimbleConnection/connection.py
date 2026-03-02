@@ -62,11 +62,12 @@ class LimbleConnection:
         self.curated_assets = AssetsCurated(self)
 
     def _load_endpoints(self):
-        """Dynamically attach endpoints from registry.yaml."""
+        """Dynamically attach endpoints from registry.yaml as a nested fluent API."""
         import os
+        from LimbleConnection.endpoint import RegistryLoader, LimbleEndpoint, Namespace
+        
         registry_path = os.path.join(os.path.dirname(__file__), 'registry.yaml')
         if not os.path.exists(registry_path):
-            # Fallback for now if registry doesn't exist yet
             return
 
         loader = RegistryLoader(registry_path, "")
@@ -76,9 +77,30 @@ class LimbleConnection:
             route_url = config['url'].replace('{api_base_url}', self.apiv_addrs)
             endpoint = LimbleEndpoint(self, name, route_url, config)
             
-            # Attach for fluent API (e.g., lc.assets_fields)
-            attr_name = name.replace('.', '_')
-            setattr(self, attr_name, endpoint)
+            parts = name.split('.')
+            if parts[0] == 'routes':
+                parts = parts[1:]
+            
+            # Simple merging logic: if last part is same as second-to-last, skip last part
+            # e.g. assets.assets -> assets
+            # e.g. locations.locations -> locations
+            if len(parts) > 1 and parts[-1] == parts[-2]:
+                parts = parts[:-1]
+                
+            current = self
+            for part in parts[:-1]:
+                if not hasattr(current, part):
+                    setattr(current, part, Namespace())
+                current = getattr(current, part)
+                # Ensure we can add sub-attributes even if it's already an endpoint
+            
+            # If replacing a Namespace with a LimbleEndpoint, preserve sub-attributes
+            existing = getattr(current, parts[-1], None)
+            if isinstance(existing, Namespace):
+                for k, v in existing.__dict__.items():
+                    setattr(endpoint, k, v)
+            
+            setattr(current, parts[-1], endpoint)
 
     def get_from_path(self, path_route:str, **kwargs) -> Any:
         """Send a GET request to a route provided as a string. Intended for development purposes.
