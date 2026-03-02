@@ -24,7 +24,7 @@ As an SDK developer, I want to add a new upstream endpoint by importing its defi
 
 ### User Story 2 - Curated Operation Implementation (Priority: P2)
 
-As an SDK user, I want stable, high-level methods for common workflows (like "Search and update work orders") that remain consistent even if the underlying generic endpoints change.
+As an SDK user, I want stable, high-level methods for common workflows (like "Get a user and add them to a team") that remain consistent even if the underlying generic endpoints change.
 
 **Why this priority**: Provides the "premium" developer experience for high-value tasks while keeping the base generic layer clean and unpolluted.
 
@@ -51,9 +51,18 @@ As an SDK user, I want my code to continue working without modification even whe
 
 ### Edge Cases
 
-- **Handling Unknown Response Shapes**: How does the system handle an endpoint with no defined response schema in Postman? [NEEDS CLARIFICATION: Should we default to a generic dict or require a manual fixture?]
-- **Auth Inheritance Complexity**: What happens if an endpoint has complex auth overrides that differ from the collection default?
-- **Pagination Misalignment**: How to handle upstream endpoints that use inconsistent pagination tokens?
+- **Handling Unknown Response Shapes**: For endpoints without a defined response schema in Postman, the generator will default to a generic `dict[str, Any]` to ensure all endpoints are accessible (SC-001) while emitting a warning for further documentation.
+- **Auth Inheritance Complexity**: The SDK will default to the collection-level auth, with per-endpoint overrides defined in the internal spec for requests requiring custom authentication methods.
+- **Pagination Misalignment**: The SDK will use a unified `Paginator` interface defined in the internal spec to map varied upstream pagination strategies to a consistent `list().next()` behavior.
+
+## Clarifications
+
+### Session 2026-03-02
+- Q: How should the system handle an endpoint with no defined response schema in Postman? → A: Default to a generic dictionary (`dict[str, Any]`) and emit a warning during generation.
+- Q: How should the SDK handle varied pagination methods (e.g., limit/offset vs. cursor-based)? → A: Provide a standard `Paginator` interface where the internal spec file defines the mapping for each endpoint.
+- Q: How should the generator and SDK handle complex auth overrides in Postman? → A: Default to the collection's primary auth; provide a manual override mechanism in the internal spec for specific endpoints.
+- Q: How should the IDE typing artifacts (stubs/modules) for the generic layer be managed? → A: Generate generic layer stubs and commit them to the repository (synchronized via internal spec updates).
+- Q: What format should the "internal spec file" (endpoint registry) use for stabilization? → A: YAML (for high readability and powerful mapping/override support).
 
 ## Requirements *(mandatory)*
 
@@ -63,11 +72,16 @@ As an SDK user, I want my code to continue working without modification even whe
 - **FR-002: Naming Normalization**: System MUST translate Postman's folder-based hierarchy and endpoint names into a predictable, snake_case fluent namespace (e.g., `Routes > Assets > Search` -> `lc.assets.search`).
 - **FR-003: Dynamic Attachment**: Generic endpoints MUST be attached to the `LimbleConnection` instance at runtime using a deterministic registry derived from the internal spec.
 - **FR-004: Standard Method Contract**: Every generic endpoint MUST support baseline methods: `get()`, `list()`, `create()`, `update()`, `delete()`, and `raw()` where applicable.
-- **FR-005: Internal Spec Source-of-Truth**: The SDK's public contract MUST be defined in an internal spec file that stabilizes the Postman definitions.
+- **FR-005: Internal Spec Source-of-Truth**: The SDK's public contract MUST be defined in an internal YAML spec file that stabilizes the Postman definitions and defines mapping/override logic.
 - **FR-006: Curated Layer Separation**: Curated operations MUST live in a separate layer from generic endpoints to avoid polluting the dynamic base implementation.
 - **FR-007: Scaffolding and Typing**: System MUST generate IDE-visible typing artifacts (stubs or modules) that synchronize with the dynamic endpoint registry.
 - **FR-008: Error Normalization**: Errors MUST be mapped to a typed exception hierarchy with metadata including endpoint name, status code, and redacted response context.
 - **FR-009: Contract Validation**: Every endpoint MUST have associated JSON fixtures and validation tests to detect upstream drift.
+
+- FR-010: Unknown Response Handling: If an endpoint lacks a defined response schema in Postman, the system MUST default its return type to a generic dictionary (`dict[str, Any]`) and emit a warning during the generation phase to ensure SC-001 is met.
+- FR-011: Unified Pagination: The system MUST provide a standard `Paginator` interface for generic endpoints, with specific field mapping (e.g., `next_token` vs `page`) defined in the internal spec file to ensure consistency.
+- FR-012: Auth Strategy Overrides: The system MUST support an auth strategy registry in the internal spec, defaulting to the collection-level auth but allowing per-endpoint overrides.
+- FR-013: Committed Typing Stubs: The system MUST generate and commit IDE-visible typing stubs (`.pyi` files) for all Postman-derived generic endpoints to the repository to ensure SC-002 is met across all developer environments.
 
 ### Key Entities
 
