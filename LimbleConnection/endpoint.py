@@ -65,6 +65,9 @@ class LimbleEndpoint:
             for k, v in path_params.items():
                 url = url.replace(f':{k}', str(v))
         
+        logger.info(f"Executing {method} request to {self.name}")
+        logger.debug(f"Full URL: {url}")
+        
         headers = self._get_headers()
         if 'headers' in kwargs:
             headers.update(kwargs.pop('headers'))
@@ -110,6 +113,8 @@ class LimbleEndpoint:
         current_params = params
         
         while current_params:
+            if 'page' in current_params:
+                logger.info(f"Fetching page {current_params['page']} for {self.name}")
             response = self.raw('GET', params=current_params)
             page_data = response.json()
             

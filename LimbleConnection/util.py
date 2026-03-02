@@ -93,7 +93,7 @@ def escape_xlsx_char(ch):
 def escape_xlsx_string(st):
     escaped_text = ''.join([escape_xlsx_char(ch) for ch in st])
     if escaped_text != st:
-        print(f"Original text: {st}\nescaped text: {escaped_text}")
+        logger.debug(f"Original text: {st}\nescaped text: {escaped_text}")
     return escaped_text
 
 def clean_text(text: str) -> str:
@@ -111,10 +111,10 @@ def clean_html_from_text(text: str) -> str:
     try:
         fixed_text = remove_html_pattern.sub("", text)
         if fixed_text != text:
-            print(f"Original text: {text}\nCleaned text: {fixed_text}")
+            logger.debug(f"Original text: {text}\nCleaned text: {fixed_text}")
         return fixed_text
     except TypeError as te:
-        print(f"Error cleaning text: {te}")
+        logger.error(f"Error cleaning text: {te}")
         return ""
 
 def fix_br_newlines(text: str) -> str:
@@ -143,16 +143,16 @@ def clean_column_text(df: pd.DataFrame, columns: list[str] = None, in_place: boo
 
     if not columns:
         columns = [col for col in df.columns if is_string_series(df[col])]
-    print(f'cleaning these columns: {columns}')
+    logger.info(f'Cleaning these columns: {columns}')
     for col in columns:
-        print(f'cleaning column {col}')
+        logger.debug(f'Cleaning column {col}')
         if in_place:
             df.loc[:, col] = df.loc[:, col].apply(clean_text)
         else:
             df.loc[:, f'{col}_clean'] = df.loc[:, col].copy().apply(clean_text)
     if not in_place:
         # print([(col, 'is changed?', any(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns])
-        print('changed: ', [(col, sum(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns if any(df.loc[:, f'{col}_clean'] != df.loc[:, col])])
+        logger.info(f"Changed: {[(col, sum(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns if any(df.loc[:, f'{col}_clean'] != df.loc[:, col])]}")
     return df
 
 

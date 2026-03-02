@@ -6,6 +6,7 @@ import tzlocal
 import pandas as pd
 import pytz
 
+from LimbleConnection.util import logger
 from LimbleConnection.endpoint import LimbleEndpoint, RegistryLoader
 from LimbleConnection.curated.assets import AssetsCurated
 from LimbleConnection._documentation_placeholders import Users
@@ -54,6 +55,7 @@ class LimbleConnection:
         self.convert_datetimes = convert_datetimes
         self._location = location
         self._location_id = location_id  # todo: handle default location being multiple locations
+        self.__endpoints__ = {}
 
         # Load spec-driven endpoints (FR-003)
         self._load_endpoints()
@@ -72,15 +74,23 @@ class LimbleConnection:
 
         loader = RegistryLoader(registry_path, "")
         registry = loader.load()
+        logger.info(f"Loading endpoints from {registry_path}")
         
         for name, config in registry.get('endpoints', {}).items():
+            if config.get('is_folder') or 'url' not in config:
+                continue
+            
             route_url = config['url'].replace('{api_base_url}', self.apiv_addrs)
             endpoint = LimbleEndpoint(self, name, route_url, config)
+            self.__endpoints__[name] = endpoint
             
             parts = name.split('.')
             if parts[0] == 'routes':
                 parts = parts[1:]
             
+            if not parts:
+                continue
+                
             # Simple merging logic: if last part is same as second-to-last, skip last part
             # e.g. assets.assets -> assets
             # e.g. locations.locations -> locations
@@ -101,6 +111,8 @@ class LimbleConnection:
                     setattr(endpoint, k, v)
             
             setattr(current, parts[-1], endpoint)
+        
+        logger.info(f"Loaded {len(self.__endpoints__)} endpoints from registry.")
 
     def get_from_path(self, path_route:str, **kwargs) -> Any:
         """Send a GET request to a route provided as a string. Intended for development purposes.
@@ -137,8 +149,8 @@ class LimbleConnection:
         raw = kwargs.pop('raw', False)
 
         if raw:
-            print(f'Processing path as-is, convenience features will not be available,'
-                  f' except for authentication and proxy. {path_route=}')
+            logger.warning(f'Processing path as-is, convenience features will not be available,'
+                           f' except for authentication and proxy. {path_route=}')
             value = LimbleEndpoint(self, '_', rt_addr='_')._get_request(kwargs, path_route)
         else:
             ep_keys = {key: kwargs.pop(key, None) for key in ('auto_page_all', 'path_param', 'rq_params')}
@@ -149,8 +161,8 @@ class LimbleConnection:
             route_name = path_route.replace('/', '.')
 
             if not route_name in self.__endpoints__.keys():
-                print(f'Custom route {route_name} is not implemented in LimbleConnector yet, some convenience features may'
-                      f' not be available.')
+                logger.warning(f'Custom route {route_name} is not implemented in LimbleConnector yet, some convenience features may'
+                               f' not be available.')
 
             if as_df:
                 value = LimbleEndpoint(self, route_name, rt_addr=this_address).df_params(

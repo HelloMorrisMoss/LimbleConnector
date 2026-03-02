@@ -147,6 +147,9 @@ class TranslationEngine:
                 url = url.replace('{{baseUrl}}', '{api_base_url}')
                 url = url.replace('{{protocol}}://{{server}}:{{port}}/v2', '{api_base_url}')
                 
+                # Strip query parameters from the URL as they should not be part of the endpoint definition (FR-001)
+                url = url.split('?')[0]
+                
                 # Update folder entry if it exists (some items are both folder and request? unlikely in this structure but possible)
                 endpoints[endpoint_key] = {
                     'url': url,

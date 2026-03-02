@@ -84,7 +84,7 @@ endpoints:
         Manuals, Pictures, Contracts etc.
       non_table_after: ''
   routes.assets.fields.asset_fields:
-    url: '{api_base_url}/assets/fields/?assets=171'
+    url: '{api_base_url}/assets/fields/'
     method: GET
     description_data:
       headers: []
@@ -530,7 +530,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.assets.delete_asset:
-    url: '{api_base_url}/assets/1?assetID={{assetID}}'
+    url: '{api_base_url}/assets/1'
     method: DELETE
     description_data:
       headers: []
@@ -1567,7 +1567,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.tasks.instructions.task_instructions:
-    url: '{api_base_url}/tasks/:taskID/instructions?limit=2&page=1'
+    url: '{api_base_url}/tasks/:taskID/instructions'
     method: GET
     description_data:
       headers:
@@ -1699,7 +1699,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.tasks.instructions.batch_task_instructions:
-    url: '{api_base_url}/tasks/instructions?tasks=1,2,3,4,5,6,7&limit=100&page=1'
+    url: '{api_base_url}/tasks/instructions'
     method: GET
     description_data:
       headers:
@@ -1895,7 +1895,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.tasks.labor.task_labor:
-    url: '{api_base_url}/tasks/labor?tasks=6,11&users=0&start=1564895015&end=1564895015&limit=100&cursor=0&locations=0&orderBy=-dateLogged'
+    url: '{api_base_url}/tasks/labor'
     method: GET
     description_data:
       headers:
@@ -1991,7 +1991,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.tasks.parts.get_all_attached_parts:
-    url: '{api_base_url}/tasks/parts?tasks=5,10,12'
+    url: '{api_base_url}/tasks/parts'
     method: GET
     description_data:
       headers:
@@ -2172,7 +2172,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.tasks.work_request_submissions.list_wr_submissions:
-    url: '{api_base_url}/work-requests/work-request-submissions?orderBy=createdAt&locationIDs=1&statuses=open&limit=100&createdDateStart=2025-06-20T20:51:13.000Z&createdDateEnd=2025-06-20T20:51:13.000Z&workRequestIDs=1,2,3&page=1&cursor=1'
+    url: '{api_base_url}/work-requests/work-request-submissions'
     method: GET
     description_data:
       non_table_before: 'Lists WR submissions
@@ -2480,8 +2480,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.tasks.tasks:
-    url: '{api_base_url}/tasks/?tasks=9109&assets=1&locations=73&type=6&name=%test%&start=1000000000&end=2500000000&cursor=0&limit=2&page=2&completedStart=0&completedEnd=2500000000&scheduledStart=0&scheduledEnd=2500000000&orderBy=-createdDate&geoLocation=true&lastEditedByUsers=0,340,341&status=1&meta1=1&meta2=2&meta3=3&statusIDs=0,1,2&page=2&geoLocation=true&tag=@My
-      Custom Tag;'
+    url: '{api_base_url}/tasks/'
     method: GET
     description_data:
       headers:
@@ -2647,7 +2646,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.users.teams.get_user_teams:
-    url: '{api_base_url}/users/:userID/teams?teams=436,437&locations=163,74&limit=100&cursor=0&name=%Manager%'
+    url: '{api_base_url}/users/:userID/teams'
     method: GET
     description_data:
       headers: []
@@ -2675,7 +2674,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.users.users:
-    url: '{api_base_url}/users?users=342'
+    url: '{api_base_url}/users'
     method: GET
     description_data:
       headers:
@@ -2852,7 +2851,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.vendors.fields.vendor_fields:
-    url: '{api_base_url}/vendors/fields/?fields=1,2&name=%pic%&vendors=1&start=1555105636&end=1555105636&cursor=0&limit=1&value=355&page=1'
+    url: '{api_base_url}/vendors/fields/'
     method: GET
     description_data:
       headers: []
@@ -2871,7 +2870,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.vendors.fields.vendor_suggested_fields:
-    url: '{api_base_url}/vendors/fields/suggested?fields=1,2&name=%pic%&cursor=0&limit=100'
+    url: '{api_base_url}/vendors/fields/suggested'
     method: GET
     description_data:
       headers: []
@@ -3200,7 +3199,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.roles.get_roles:
-    url: '{api_base_url}/roles/?roles=1032&name=%view%&cursor=0&limit=100'
+    url: '{api_base_url}/roles/'
     method: GET
     description_data:
       headers: []
@@ -3334,7 +3333,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.purchase_orders.items.get_purchase_order_items:
-    url: '{api_base_url}/po/items?pos=1,2,3&items=45,8998,3434&numbers=1,2&cursor=112&limit=100&lastEditedStart=1518559856&lastEditedEnd=1518559856'
+    url: '{api_base_url}/po/items'
     method: GET
     description_data:
       headers:
@@ -3599,7 +3598,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.purchase_orders.comments.po_comments:
-    url: '{api_base_url}/po/:poID/comments?cursor=0&limit=100'
+    url: '{api_base_url}/po/:poID/comments'
     method: GET
     description_data:
       headers:
@@ -3664,7 +3663,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.purchase_orders.comments.delete_po_comment_file:
-    url: '{api_base_url}/po/:poID/comments/:commentID/file?filename=invoice.pdf'
+    url: '{api_base_url}/po/:poID/comments/:commentID/file'
     method: DELETE
     description_data:
       non_table_before: 'Deletes a file from a PO comment.
@@ -4093,7 +4092,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.general_ledgers.get_general_ledgers:
-    url: '{api_base_url}/gl?cursor=0&limit=100&name=%office%&abbr=%off%&locations=1,163,2&gls=1,2,3&assets=1,2,3'
+    url: '{api_base_url}/gl'
     method: GET
     description_data:
       headers:
@@ -4255,7 +4254,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.budgets.steps.get_steps:
-    url: '{api_base_url}/budgets/steps?name=%test%&steps=1,2,3&budgets=158&locations=1,2,3&cursor=0&limit=100'
+    url: '{api_base_url}/budgets/steps'
     method: GET
     description_data:
       headers: []
@@ -4313,7 +4312,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.budgets.get_budgets:
-    url: '{api_base_url}/budgets?cursor=0&limit=1&name=%General%&locations=1,2,3&budgets=1,2,3'
+    url: '{api_base_url}/budgets'
     method: GET
     description_data:
       headers:
@@ -4483,7 +4482,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.priorities.get_priorities:
-    url: '{api_base_url}/priorities?priorities=118'
+    url: '{api_base_url}/priorities'
     method: GET
     description_data:
       headers:
@@ -4606,7 +4605,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.tags.get_tags:
-    url: '{api_base_url}/tags?name=safety'
+    url: '{api_base_url}/tags'
     method: GET
     description_data:
       headers:
@@ -4724,7 +4723,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.statuses.statuses:
-    url: '{api_base_url}/statuses?limit=3&cursor=1&name=%ogr%&statuses=1'
+    url: '{api_base_url}/statuses'
     method: GET
     description_data:
       headers:
@@ -4780,7 +4779,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.statuses.delete_status:
-    url: '{api_base_url}/statuses/:statusID?replacementStatusID=1'
+    url: '{api_base_url}/statuses/:statusID'
     method: DELETE
     description_data:
       headers: []
@@ -4835,7 +4834,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.bills.transactions.bill_transactions:
-    url: '{api_base_url}/bills/transactions?bills=423&items=358&start=1630611650&end=1630611660&transactions=397&limit=10&locations=163'
+    url: '{api_base_url}/bills/transactions'
     method: GET
     description_data:
       headers: []
@@ -4972,7 +4971,7 @@ endpoints:
       non_table_after: ''
     is_folder: false
   routes.bills.comments.delete_bill_comment_file:
-    url: '{api_base_url}/bills/:billID/comments/:commentID/file?filename=receipt.png'
+    url: '{api_base_url}/bills/:billID/comments/:commentID/file'
     method: DELETE
     description_data:
       non_table_before: 'Deletes a file from a Bill comment.
@@ -5046,7 +5045,7 @@ endpoints:
         - 404 Not Found: Comment not found.'
     is_folder: false
   routes.bills.get_bills:
-    url: '{api_base_url}/bills?bills=1&numbers=1&status=0,1&end=1697443800&limit=2&pos=5&start=1597443703&locations=163&cursor=0&page=2'
+    url: '{api_base_url}/bills'
     method: GET
     description_data:
       headers:
@@ -5152,7 +5151,7 @@ endpoints:
       non_table_before: ''
       non_table_after: ''
   routes.regions.regions:
-    url: '{api_base_url}/regions/?regions=1&name=%One%&cursor=0&limit=100'
+    url: '{api_base_url}/regions/'
     method: GET
     description_data:
       headers:
