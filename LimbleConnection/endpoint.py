@@ -1,11 +1,19 @@
 from __future__ import annotations
+
+from pprint import pprint
+from traceback import format_exc
 from typing import TYPE_CHECKING, Any, Optional, Union, List, Dict
+import re
+
 import pandas as pd
 import requests
 from LimbleConnection.util import logger, ResilienceHandler
 
 if TYPE_CHECKING:
     from LimbleConnection.connection import LimbleConnection
+
+
+url_still_contains_path_params_pattern = re.compile(r':[a-zA-Z]+')
 
 class Paginator:
     """Interface for handling different pagination strategies (FR-011)."""
@@ -60,11 +68,18 @@ class LimbleEndpoint:
     def raw(self, method: str, **kwargs) -> Any:
         """Execute a raw request to this endpoint."""
         url = self.route_url
-        if 'path_params' in kwargs:
-            path_params = kwargs.pop('path_params')
+        if (pprm:= 'path_params' in kwargs) or (ppprm := 'path_params' in kwargs.get('params', {})):
+            logger.debug(f"Path params passed to raw via: {pprm=} {ppprm=}")
+            if pprm:
+                path_params = kwargs.pop('path_params')
+            else:
+                path_params = kwargs['params'].pop('path_params')
+            logger.debug(f"Path params values as passed to raw: {path_params=}")
             for k, v in path_params.items():
                 url = url.replace(f':{k}', str(v))
-        
+        if url_still_contains_path_params_pattern.search(url):
+            raise ValueError(f"Path params not all replaced in URL: {url}")
+
         logger.info(f"Executing {method} request to {self.name}")
         logger.debug(f"Full URL: {url}")
         
@@ -91,9 +106,9 @@ class LimbleEndpoint:
             try:
                 data = response.json()
                 error_msg = data.get('error') or data.get('message') or response.text
-                logger.error(f"API Error {response.status_code} on {self.name}: {error_msg}")
+                logger.error(f"API Error {response.status_code} on {self.name}: {error_msg}\n{pprint(data)}")
             except Exception:
-                logger.error(f"API Error {response.status_code} on {self.name}: {response.text}")
+                logger.error(f"API Error {response.status_code} on {self.name}: {response.text}\n{pprint(data)}")
 
     def get(self, **kwargs) -> Dict[str, Any]:
         """GET a single resource or the endpoint root."""
@@ -107,12 +122,15 @@ class LimbleEndpoint:
             params['limit'] = 100
         
         if not auto_paginate:
+            logger.debug(f"Auto-pagination disabled for {self.name}")
+            logger.debug(f"Params passed to .raw: {params}")
             return self._map_response(self.raw('GET', params=params).json())
 
         all_results = []
         current_params = params
         
         while current_params:
+            logger.debug(f"Current params: {current_params}")
             if 'page' in current_params:
                 logger.info(f"Fetching page {current_params['page']} for {self.name}")
             response = self.raw('GET', params=current_params)
@@ -175,6 +193,10 @@ class LimbleEndpoint:
     def df(self) -> pd.DataFrame:
         """Return the list results as a pandas DataFrame."""
         return pd.DataFrame(self.list())
+
+    def df_params(self, **kwargs) -> pd.DataFrame:
+        """Return the list results as a pandas DataFrame."""
+        return pd.DataFrame(self.list(**kwargs))
 
 
 class RegistryLoader:

@@ -19,6 +19,7 @@ from typing import Callable, Any
 
 # Configure standard logger (NFR-001)
 logger = logging.getLogger("LimbleConnector")
+logging.basicConfig(level=logging.INFO)
 from pprint import pprint, pformat
 
 import pandas as pd
