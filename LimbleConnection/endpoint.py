@@ -68,19 +68,19 @@ class LimbleEndpoint:
     def raw(self, method: str, **kwargs) -> Any:
         """Execute a raw request to this endpoint."""
         url = self.route_url
-        if (pprm:= 'path_params' in kwargs) or (ppprm := 'path_params' in kwargs.get('params', {})):
-            logger.debug(f"Path params passed to raw via: {pprm=} {ppprm=}")
-            if pprm:
-                path_params = kwargs.pop('path_params')
-            else:
-                path_params = kwargs['params'].pop('path_params')
-            logger.debug(f"Path params values as passed to raw: {path_params=}")
-            for k, v in path_params.items():
-                url = url.replace(f':{k}', str(v))
+
+        _ = kwargs.pop('limit', None)  # don't pass this to the request
+        path_params = kwargs.pop('path_params')
+        for k, v in path_params.items():
+            url = url.replace(f':{k}', str(v))
         if url_still_contains_path_params_pattern.search(url):
             raise ValueError(f"Path params not all replaced in URL: {url}")
 
-        logger.info(f"Executing {method} request to {self.name}")
+        # add any params to url in the 'base_url?key1=value1&key2=value2' format
+        if 'query_params' in kwargs:
+            url += '?' + '&'.join([f'{k}={v}' for k, v in kwargs.pop('query_params').items()])
+
+        logger.debug(f"Executing {method} request to {self.name}")
         logger.debug(f"Full URL: {url}")
         
         headers = self._get_headers()
@@ -112,7 +112,7 @@ class LimbleEndpoint:
 
     def get(self, **kwargs) -> Dict[str, Any]:
         """GET a single resource or the endpoint root."""
-        response = self.raw('GET', params=kwargs)
+        response = self.raw('GET', **kwargs)
         return self._map_response(response.json())
 
     def list(self, auto_paginate: bool = True, **kwargs) -> List[Dict[str, Any]]:
@@ -120,11 +120,11 @@ class LimbleEndpoint:
         params = kwargs.copy()
         if 'limit' not in params:
             params['limit'] = 100
-        
+
         if not auto_paginate:
             logger.debug(f"Auto-pagination disabled for {self.name}")
             logger.debug(f"Params passed to .raw: {params}")
-            return self._map_response(self.raw('GET', params=params).json())
+            return self._map_response(self.raw('GET', **params).json())
 
         all_results = []
         current_params = params
@@ -132,8 +132,8 @@ class LimbleEndpoint:
         while current_params:
             logger.debug(f"Current params: {current_params}")
             if 'page' in current_params:
-                logger.info(f"Fetching page {current_params['page']} for {self.name}")
-            response = self.raw('GET', params=current_params)
+                logger.debug(f"Fetching page {current_params['page']} for {self.name}")
+            response = self.raw('GET', **current_params)
             page_data = response.json()
             
             if not page_data or not isinstance(page_data, list):
@@ -191,11 +191,12 @@ class LimbleEndpoint:
 
     @property
     def df(self) -> pd.DataFrame:
-        """Return the list results as a pandas DataFrame."""
-        return pd.DataFrame(self.list())
+        """Convenience property to return the list results as a pandas DataFrame using default parameters."""
+        return self.df_params()
 
     def df_params(self, **kwargs) -> pd.DataFrame:
         """Return the list results as a pandas DataFrame."""
+        logger.debug(f"Fetching data for {self.name} with params: {kwargs=}")
         return pd.DataFrame(self.list(**kwargs))
 
 
