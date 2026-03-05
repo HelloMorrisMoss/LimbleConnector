@@ -69,10 +69,16 @@ class LimbleEndpoint:
         """Execute a raw request to this endpoint."""
         url = self.route_url
 
-        _ = kwargs.pop('limit', None)  # don't pass this to the request
-        path_params = kwargs.pop('path_params')
+        # _ = kwargs.pop('limit', None)  # don't pass this to the request
+        path_params = kwargs.pop('path_params', {})
         for k, v in path_params.items():
             url = url.replace(f':{k}', str(v))
+        
+        # Also try to replace any remaining path params from kwargs if they match the :name pattern
+        remaining_params = re.findall(r':(\w+)', url)
+        for param in remaining_params:
+            if param in kwargs:
+                url = url.replace(f':{param}', str(kwargs.pop(param)))
         if url_still_contains_path_params_pattern.search(url):
             raise ValueError(f"Path params not all replaced in URL: {url}")
 
@@ -109,6 +115,9 @@ class LimbleEndpoint:
                 logger.error(f"API Error {response.status_code} on {self.name}: {error_msg}\n{pprint(data)}")
             except Exception:
                 logger.error(f"API Error {response.status_code} on {self.name}: {response.text}\n{pprint(data)}")
+            if response.status_code == 404:
+                raise ValueError(f"Resource not found: {self.name}")
+            raise ConnectionError(f"API Error {response.status_code} on {self.name}: {response.text}")
 
     def get(self, **kwargs) -> Dict[str, Any]:
         """GET a single resource or the endpoint root."""
@@ -166,27 +175,16 @@ class LimbleEndpoint:
         response = self.raw('POST', json=data)
         return response.json()
 
-    def update(self, resource_id: Union[int, str], data: Dict[str, Any]) -> Dict[str, Any]:
+    def update(self, data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """UPDATE an existing resource."""
-        path_params = {'id': resource_id} # Default path param name
-        # In reality, this should be driven by config
-        url = f"{self.route_url}/{resource_id}"
-        response = self.resilience.execute(lambda: requests.patch(
-            url=url,
-            json=data,
-            headers=self._get_headers(),
-            proxies=self.connection.proxy
-        ))
+        # Note: kwargs should contain path_params if required by the URL
+        response = self.raw('PATCH', json=data, **kwargs)
         return response.json()
 
-    def delete(self, resource_id: Union[int, str]) -> bool:
+    def delete(self, **kwargs) -> bool:
         """DELETE a resource."""
-        url = f"{self.route_url}/{resource_id}"
-        response = self.resilience.execute(lambda: requests.delete(
-            url=url,
-            headers=self._get_headers(),
-            proxies=self.connection.proxy
-        ))
+        # Note: kwargs should contain path_params if required by the URL
+        response = self.raw('DELETE', **kwargs)
         return response.status_code == 200
 
     @property
