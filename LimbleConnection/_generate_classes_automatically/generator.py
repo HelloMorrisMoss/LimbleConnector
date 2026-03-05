@@ -140,8 +140,10 @@ class TranslationEngine:
                 
                 if isinstance(url_obj, str):
                     url = url_obj
+                    query_params = []
                 else:
                     url = url_obj.get('raw', '')
+                    query_params = url_obj.get('query', [])
                 
                 # Normalize URL: replace {{baseUrl}} with a placeholder
                 url = url.replace('{{baseUrl}}', '{api_base_url}')
@@ -155,7 +157,8 @@ class TranslationEngine:
                     'url': url,
                     'method': request.get('method', 'GET'),
                     'description_data': request_description_data,
-                    'is_folder': False
+                    'is_folder': False,
+                    'query_params': query_params
                 }
 
 class Generator:
@@ -207,37 +210,47 @@ class Generator:
             if not path: return "LimbleConnection"
             return "".join(p.capitalize() for p in path) + "Namespace"
 
-        def format_docstring(description_data: Dict[str, Any], indent_level: int) -> List[str]:
-            if not description_data:
+        def format_docstring(description_data: Dict[str, Any], indent_level: int, query_params: List[Dict[str, Any]] = None) -> List[str]:
+            if not description_data and not query_params:
                 return []
             
             doc_lines = []
             indent = "    " * indent_level
             
-            text_before = description_data.get('non_table_before', "")
-            if text_before:
-                for line in text_before.splitlines():
-                    doc_lines.append(f"{indent}{line}")
-            
-            headers = description_data.get('headers', [])
-            rows = description_data.get('data_rows', [])
-            
-            if headers or rows:
-                doc_lines.append("") # Spacer
-                # Basic table formatting
-                if headers:
-                    header_line = " | ".join(headers)
-                    doc_lines.append(f"{indent}{header_line}")
-                    doc_lines.append(f"{indent}{'-' * len(header_line)}")
+            if description_data:
+                text_before = description_data.get('non_table_before', "")
+                if text_before:
+                    for line in text_before.splitlines():
+                        doc_lines.append(f"{indent}{line}")
                 
-                for row in rows:
-                    doc_lines.append(f"{indent}{' | '.join(row)}")
+                headers = description_data.get('headers', [])
+                rows = description_data.get('data_rows', [])
+                
+                if headers or rows:
+                    doc_lines.append("") # Spacer
+                    # Basic table formatting
+                    if headers:
+                        header_line = " | ".join(headers)
+                        doc_lines.append(f"{indent}{header_line}")
+                        doc_lines.append(f"{indent}{'-' * len(header_line)}")
+                    
+                    for row in rows:
+                        doc_lines.append(f"{indent}{' | '.join(row)}")
 
-            text_after = description_data.get('non_table_after', "")
-            if text_after:
-                doc_lines.append("") # Spacer
-                for line in text_after.splitlines():
-                    doc_lines.append(f"{indent}{line}")
+                text_after = description_data.get('non_table_after', "")
+                if text_after:
+                    doc_lines.append("") # Spacer
+                    for line in text_after.splitlines():
+                        doc_lines.append(f"{indent}{line}")
+            
+            if query_params:
+                doc_lines.append("")
+                doc_lines.append(f"{indent}Query Parameters:")
+                for param in query_params:
+                    key = param.get('key', '')
+                    desc = param.get('description', '')
+                    disabled = " (disabled)" if param.get('disabled') else ""
+                    doc_lines.append(f"{indent}- {key}{disabled}: {desc}")
             
             if not doc_lines:
                 return []
@@ -251,8 +264,11 @@ class Generator:
             class_lines = [f"class {class_name}({base}):"]
             
             # Add docstring for the class if available
-            if node.get("_data") and node["_data"].get("description_data"):
-                class_lines.extend(format_docstring(node["_data"]["description_data"], 1))
+            if node.get("_data"):
+                desc_data = node["_data"].get("description_data")
+                q_params = node["_data"].get("query_params")
+                if desc_data or q_params:
+                    class_lines.extend(format_docstring(desc_data, 1, q_params))
             
             if not node["_children"]:
                 if len(class_lines) == 1: # only class def
@@ -265,8 +281,11 @@ class Generator:
                     
                     # Add docstring for the property if available from child
                     prop_doc = []
-                    if child_node.get("_data") and child_node["_data"].get("description_data"):
-                        prop_doc = format_docstring(child_node["_data"]["description_data"], 2)
+                    if child_node.get("_data"):
+                        c_desc_data = child_node["_data"].get("description_data")
+                        c_q_params = child_node["_data"].get("query_params")
+                        if c_desc_data or c_q_params:
+                            prop_doc = format_docstring(c_desc_data, 2, c_q_params)
                     
                     if prop_doc:
                         class_lines.append(f"    def {child_name}(self) -> {child_class}:")

@@ -21,7 +21,16 @@ class TestGenerator(unittest.TestCase):
                             "name": "List Assets",
                             "request": {
                                 "method": "GET",
-                                "url": {"raw": "{{baseUrl}}/assets"},
+                                "url": {
+                                    "raw": "{{baseUrl}}/assets?limit=10",
+                                    "query": [
+                                        {
+                                            "key": "limit",
+                                            "value": "10",
+                                            "description": "Number of results to return"
+                                        }
+                                    ]
+                                },
                                 "description": "Get all assets"
                             }
                         }
@@ -48,6 +57,8 @@ class TestGenerator(unittest.TestCase):
         
         self.assertIn('assets.list_assets', registry['endpoints'])
         self.assertEqual(registry['endpoints']['assets.list_assets']['url'], '{api_base_url}/assets')
+        self.assertIn('query_params', registry['endpoints']['assets.list_assets'])
+        self.assertEqual(registry['endpoints']['assets.list_assets']['query_params'][0]['key'], 'limit')
         
         # Verify .pyi stubs
         self.assertTrue(os.path.exists(self.stubs_pyi))
@@ -59,6 +70,8 @@ class TestGenerator(unittest.TestCase):
         # Check that docstring is present for the property
         self.assertIn('def list_assets(self) -> AssetsList_assetsNamespace:', content)
         self.assertIn('Get all assets', content)
+        self.assertIn('Query Parameters:', content)
+        self.assertIn('- limit: Number of results to return', content)
 
 if __name__ == '__main__':
     unittest.main()

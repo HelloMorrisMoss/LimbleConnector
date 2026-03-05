@@ -36,6 +36,19 @@ class LimbleConnection(object):
         workRequestPortal | The url work requestors can use to submit problems with this Asset.
         image | Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         geoLocation | The location of an asset on a Map.
+
+        Query Parameters:
+        - assets (disabled): This parameter is used to only get specific Assets. This parameter expects a comma delimited list of Asset IDs.
+        - name (disabled): This is a parameter used to string search for a name or partial name of an asset this parameter expects a string with the wildcard %.
+        - locations (disabled): This parameter is used to only get Assets at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - start (disabled): This parameter is used to only get Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Assets that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. Without ordering, this will return results with an ID greater than the value of cursor. With ordering, this will return results starting at the next item in the order, regardless of whether its ID is greater than or lesser than the value of cursor.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - parentAssetID (disabled): This parameter can be used to get asset(s) children using the Parent's ID. This parameter accepts a comma delimited list of Asset IDs.
+        - orderBy (disabled): This parameter is used to order results by their lastEdited property instead of the default ordering by ascending assetID. CANNOT be provided alongside the cursor parameter. to paginate in this ordering, use the start or end parameters.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - geoLocation (disabled): This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** assets with and without geoLocation property. If true, it will only return assets with a geoLocation property.
         """
         ...
     @property
@@ -60,6 +73,16 @@ class LimbleConnection(object):
         workRequestPortal | This is a URL you can use to submit Work Requests to this Location.
         geoLocation | The location of a Limble location on a Map.
         currencyCode | The ISO code for the currency at this location.
+
+        Query Parameters:
+        - locations (disabled): This parameter is used to only get locations in the list provided. This parameter accepts a comma delimited list of Location IDs.
+        - name (disabled): This parameter is used to only get specific locations by name. This parameter expects a string full name of a location or partial name with the wildcard %.
+        - cursor (disabled): This parameter is a cursor that selects what locationID you want to start receiving results at. e.g. passing 137 here will only get you locations with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - regions (disabled): This parameter is used to get locations that belong to a region.
+This parameter expects a regionID a location may belong to.
+        - geoLocation (disabled): This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** locations with and without geoLocation property. If true, it will only return locations with a geoLocation property.
+        - page (disabled): 
         """
         ...
     @property
@@ -90,6 +113,17 @@ class LimbleConnection(object):
         stockOnHand | General Stock plus any unused, received PO Quantities for this part. This matches the 'Qty' value seen in the CMMS Part Management page.
         pos | Array of purchase order objects. price and quantity do not effect generalStock and generalPrice listed above.
         image | Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
+
+        Query Parameters:
+        - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+        - locations (disabled): This parameter is used to only get Parts at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - name (disabled): This parameter is used to only get specific parts. This parameter expects a string either a full name of a part or a partial name with the wildcard %.
+        - start (disabled): This parameter is used to only get Parts that were last edited after the unix timestamp passed into the start parameter. For example, all Parts that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Parts that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - numbers (disabled): This parameter is used to only get parts with part numbers that match the list provided. This parameter accepts a comma delimited list of Part Numbers.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information. 
         """
         ...
     @property
@@ -143,6 +177,33 @@ class LimbleConnection(object):
         meta3 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         geoLocation | The location of a task on a Map.
         customTags | An array of custom tags associated with the task.
+
+        Query Parameters:
+        - tasks: This parameter is used to only get specific Tasks. This parameter accepts a comma delimited list of task IDs.
+        - assets: This parameter is used to only get Tasks that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
+        - locations: This parameter is used to only get Tasks at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - type: This parameter is used to only get Tasks of a specific type. This parameter accepts a comma delimited list of task types.
+        - name: This is a parameter used to string search for a name or partial name of a task this parameter expects a string with the wildcard %.
+        - start: This parameter is used to only get Tasks that were last edited after the unix timestamp passed into the start parameter. For example, all Tasks that were last edited after April 18th, 2018.
+        - end: This parameter is used to only get Tasks that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - completedStart: This parameter is used to only get Tasks that were completed after the unix timestamp passed into this parameter. For example, all Assets that were completed after April 18th, 2018.
+        - completedEnd: This parameter is used to only get Tasks that were completed *before* the unix timestamp passed into this parameter.
+        - scheduledStart: This parameter is used to only get Tasks whose scheduled start is after the unix timestamp passed into this parameter. 
+        - scheduledEnd: This parameter is used to only get Tasks whose scheduled end is *before* the unix timestamp passed into this parameter. 
+        - orderBy: This parameter sorts based on the value you pass. I.e. passing createdDate will order the results based on createdDate. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted and lastEdited.
+        - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+        - lastEditedByUsers: This parameter is used to filter tasks by users that have completed tasks.
+        - status: This parameter is used to filter tasks by completed status. 1 - Complete  0 - Incomplete
+        - meta1: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+        - meta2: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+        - meta3: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+        - statusIDs: This parameter is used to filter tasks by their associated statusID.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+        - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semi-colon (";") colon at the end it is recommended that the param follows the same format. 
         """
         ...
     @property
@@ -162,6 +223,14 @@ class LimbleConnection(object):
         workdayHours | The number of hours a day this employee works.
         dateAdded | The date a user was added to Limble.  This is a unix timestamp.
         teams | What Teams a User has at specific Locations.
+
+        Query Parameters:
+        - users: This parameter expects a comma-separated list of users to get by id
+        - name (disabled): This parameter is used to only get specific user by name. This parameter expects a string full name of a user or partial name with the wildcard %.
+        - roles (disabled): This parameter expects a comma-separated list of users to get by roleID
+        - teams (disabled): This parameter expects a comma-separated list of users to get by teamID
+        - cursor (disabled): This parameter is a cursor that selects what userID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -174,6 +243,16 @@ class LimbleConnection(object):
         This call will also return an image array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         
         **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+        Query Parameters:
+        - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+        - locations (disabled): This parameter is used to only get Vendors at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - name (disabled): This parameter is used to only get specific vendor by name. This parameter expects a string full name of a vendor or partial name with the wildcard %.
+        - start (disabled): This parameter is used to only get Vendors that were last edited after the unix timestamp passed into the start parameter. For example, all Vendors that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Vendors that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what vendorID you want to start receiving results at. e.g. passing 137 here will only get you vendors with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
         """
         ...
     @property
@@ -202,6 +281,12 @@ class LimbleConnection(object):
         statusID | A unique identifier for this status.
         name | A custom string that labels this status.
         description | An optional description that elaborates on what this status means.
+
+        Query Parameters:
+        - limit: 
+        - cursor: 
+        - name: 
+        - statuses: 
         """
         ...
     @property
@@ -218,6 +303,15 @@ class LimbleConnection(object):
         regionID | The ID of the Region
         regionName | The name of the Region
         parentRegionID | The regionID of the parent of a region.
+
+        Query Parameters:
+        - regions: This parameter is used to only get regions in the list provided. This parameter accepts a comma delimited list of Region IDs.
+        - name: This parameter is used to only get specific regions by name. This parameter expects a string- the full name of a region
+ or partial name with the wildcard %.
+        - cursor: This parameter is a cursor that selects what regionID you want to start receiving results at. e.g. passing 137 here will only get you regions
+ with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 
+results at one time.
         """
         ...
     @property
@@ -241,6 +335,13 @@ class Units_of_measureNamespace(object):
         defaultAbbreviation | This is always the same as abbreviation for custom units. For provided units, this never changes. If you choose to alias the abbreviation, this will show the original, and the abbreivation property will be your alias.
         category | Also known as the "physical quantity" of a unit, which tells you what exactly this is measuring. The possibilities are `volume`, `weight`, `length`, `count`. All custom units will have the category of `count`, as there is no way to setup custom conversion rates.
         isCustom | Boolean which tells you if this is a custom unit or provided unit.
+
+        Query Parameters:
+        - unitCodes (disabled): This parameter is used to only get specific units. This parameter accepts a comma delimited list of unit codes.
+        - limit (disabled): This parameter is a result limiter. The default is 20 units and the max is 100.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information. 
+        - nameStartsWith (disabled): Filter by units that have a name which starts with this string.
+        - abbreviationStartsWith (disabled): Filter by units that have an abbreviation which starts with this string.
         """
         ...
     @property
@@ -332,6 +433,13 @@ class Units_of_measureGet_unitsNamespace(LimbleEndpoint):
     defaultAbbreviation | This is always the same as abbreviation for custom units. For provided units, this never changes. If you choose to alias the abbreviation, this will show the original, and the abbreivation property will be your alias.
     category | Also known as the "physical quantity" of a unit, which tells you what exactly this is measuring. The possibilities are `volume`, `weight`, `length`, `count`. All custom units will have the category of `count`, as there is no way to setup custom conversion rates.
     isCustom | Boolean which tells you if this is a custom unit or provided unit.
+
+    Query Parameters:
+    - unitCodes (disabled): This parameter is used to only get specific units. This parameter accepts a comma delimited list of unit codes.
+    - limit (disabled): This parameter is a result limiter. The default is 20 units and the max is 100.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information. 
+    - nameStartsWith (disabled): Filter by units that have a name which starts with this string.
+    - abbreviationStartsWith (disabled): Filter by units that have an abbreviation which starts with this string.
     """
 
 class WebhooksNamespace(object):
@@ -348,6 +456,14 @@ class WebhooksNamespace(object):
         endpoint | The webhook URL.
         type | The type of webhook. Webhooks can be of type task, po, poItem.
         enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
+
+        Query Parameters:
+        - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
+        - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
+        - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
+        - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
+        - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -420,6 +536,14 @@ class WebhooksGet_webhooksNamespace(LimbleEndpoint):
     endpoint | The webhook URL.
     type | The type of webhook. Webhooks can be of type task, po, poItem.
     enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
+
+    Query Parameters:
+    - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
+    - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
+    - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
+    - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
+    - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class RegionsNamespace(LimbleEndpoint):
@@ -433,6 +557,15 @@ class RegionsNamespace(LimbleEndpoint):
     regionID | The ID of the Region
     regionName | The name of the Region
     parentRegionID | The regionID of the parent of a region.
+
+    Query Parameters:
+    - regions: This parameter is used to only get regions in the list provided. This parameter accepts a comma delimited list of Region IDs.
+    - name: This parameter is used to only get specific regions by name. This parameter expects a string- the full name of a region
+ or partial name with the wildcard %.
+    - cursor: This parameter is a cursor that selects what regionID you want to start receiving results at. e.g. passing 137 here will only get you regions
+ with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 
+results at one time.
     """
     @property
     def create_region(self) -> RegionsCreate_regionNamespace:
@@ -556,6 +689,19 @@ class BillsNamespace(object):
         userID | The Id of the user this Bill was assigned to.
         userIDStarted | The ID of the user this Bill was created by.
         userIDMarkPaid | The ID of the user this Bill was marked paid by.
+
+        Query Parameters:
+        - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
+        - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
+        - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
+
+        - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
+        - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
+        - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
         """
         ...
     @property
@@ -640,6 +786,19 @@ class BillsGet_billsNamespace(LimbleEndpoint):
     userID | The Id of the user this Bill was assigned to.
     userIDStarted | The ID of the user this Bill was created by.
     userIDMarkPaid | The ID of the user this Bill was marked paid by.
+
+    Query Parameters:
+    - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
+    - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
+    - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
+
+    - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
+    - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
+    - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
 
 class BillsCommentsNamespace(object):
@@ -658,6 +817,10 @@ class BillsCommentsNamespace(object):
         userID | The ID of the user that made the comment.
         commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
         commentFiles | Array containing fileName and link properties.
+
+        Query Parameters:
+        - cursor (disabled): This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 100 here will only get you comments with an id greater than 100
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -707,6 +870,9 @@ class BillsCommentsNamespace(object):
         Responses:
         - 200 OK: Deleted.
         - 404 Not Found: File not found.
+
+        Query Parameters:
+        - filename: 
         """
         ...
     @property
@@ -758,6 +924,9 @@ class BillsCommentsDelete_bill_comment_fileNamespace(LimbleEndpoint):
     Responses:
     - 200 OK: Deleted.
     - 404 Not Found: File not found.
+
+    Query Parameters:
+    - filename: 
     """
 
 class BillsCommentsUpload_bill_comment_fileNamespace(LimbleEndpoint):
@@ -803,6 +972,10 @@ class BillsCommentsBill_commentsNamespace(LimbleEndpoint):
     userID | The ID of the user that made the comment.
     commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
     commentFiles | Array containing fileName and link properties.
+
+    Query Parameters:
+    - cursor (disabled): This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 100 here will only get you comments with an id greater than 100
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class BillsTransactionsNamespace(object):
@@ -821,6 +994,15 @@ class BillsTransactionsNamespace(object):
     def bill_transactions(self) -> BillsTransactionsBill_transactionsNamespace:
         """
         This request gets information about the transactions made for a Bill.
+
+        Query Parameters:
+        - bills: This parameter is used to only get specific Bill Transactions by billID. This parameter expects a comma delimited list of billIDs.
+        - items: This parameter is used to only get specific Bill Transactions by items in a Bill. This parameter expects a comma delimited list of poItem IDs.
+        - start: This parameter is used to only get Bill Transactions that were created after or on the unix timestamp passed into it. 
+        - end: This parameter is used to only get Bill transactions that were created before or on the unix timestamp passed into it. 
+        - transactions: This parameter is used to only get specific Bill Transactions. This parameter expects a comma delimited list of transactionIDs.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - locations: This parameter is used to only get Bill Transactions at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
         """
         ...
     @property
@@ -837,6 +1019,15 @@ class BillsTransactionsUpdate_bill_transactionNamespace(LimbleEndpoint):
 class BillsTransactionsBill_transactionsNamespace(LimbleEndpoint):
     """
     This request gets information about the transactions made for a Bill.
+
+    Query Parameters:
+    - bills: This parameter is used to only get specific Bill Transactions by billID. This parameter expects a comma delimited list of billIDs.
+    - items: This parameter is used to only get specific Bill Transactions by items in a Bill. This parameter expects a comma delimited list of poItem IDs.
+    - start: This parameter is used to only get Bill Transactions that were created after or on the unix timestamp passed into it. 
+    - end: This parameter is used to only get Bill transactions that were created before or on the unix timestamp passed into it. 
+    - transactions: This parameter is used to only get specific Bill Transactions. This parameter expects a comma delimited list of transactionIDs.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - locations: This parameter is used to only get Bill Transactions at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
     """
 
 class BillsTransactionsAdd_bill_itemNamespace(LimbleEndpoint):
@@ -860,6 +1051,12 @@ class StatusesNamespace(LimbleEndpoint):
     statusID | A unique identifier for this status.
     name | A custom string that labels this status.
     description | An optional description that elaborates on what this status means.
+
+    Query Parameters:
+    - limit: 
+    - cursor: 
+    - name: 
+    - statuses: 
     """
     @property
     def create_status(self) -> StatusesCreate_statusNamespace:
@@ -945,6 +1142,9 @@ class StatusesNamespace(LimbleEndpoint):
         - replacementStatusID must differ from statusID
             
         - replacementStatusID must be valid for the customer
+
+        Query Parameters:
+        - replacementStatusID: ID of the status to reassign tasks to (required)
         """
         ...
 
@@ -973,6 +1173,9 @@ class StatusesDelete_statusNamespace(LimbleEndpoint):
     - replacementStatusID must differ from statusID
         
     - replacementStatusID must be valid for the customer
+
+    Query Parameters:
+    - replacementStatusID: ID of the status to reassign tasks to (required)
     """
 
 class StatusesUpdate_statusNamespace(LimbleEndpoint):
@@ -1042,6 +1245,9 @@ class TagsNamespace(object):
         Property | Description
         ----------------------
         name | A search-string for tags.
+
+        Query Parameters:
+        - name: 
         """
         ...
     @property
@@ -1265,6 +1471,9 @@ class TagsGet_tagsNamespace(LimbleEndpoint):
     Property | Description
     ----------------------
     name | A search-string for tags.
+
+    Query Parameters:
+    - name: 
     """
 
 class PrioritiesNamespace(object):
@@ -1282,6 +1491,9 @@ class PrioritiesNamespace(object):
         priorityLevel | A number representing ordering or indicator of severity.
         color | A hex-color string that will be used to color tasks associated to this priority.
         isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
+
+        Query Parameters:
+        - priorities: 
         """
         ...
     @property
@@ -1383,6 +1595,9 @@ class PrioritiesGet_prioritiesNamespace(LimbleEndpoint):
     priorityLevel | A number representing ordering or indicator of severity.
     color | A hex-color string that will be used to color tasks associated to this priority.
     isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
+
+    Query Parameters:
+    - priorities: 
     """
 
 class BudgetsNamespace(object):
@@ -1400,6 +1615,13 @@ class BudgetsNamespace(object):
         budgetID | The Budget's unique identifier.
         name | The full name of the Budget.
         locationID | Which Location this Budget belongs to.
+
+        Query Parameters:
+        - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+        - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+        - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
         """
         ...
     @property
@@ -1513,6 +1735,13 @@ class BudgetsGet_budgetsNamespace(LimbleEndpoint):
     budgetID | The Budget's unique identifier.
     name | The full name of the Budget.
     locationID | Which Location this Budget belongs to.
+
+    Query Parameters:
+    - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+    - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+    - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
     """
 
 class BudgetsStepsNamespace(object):
@@ -1538,7 +1767,18 @@ class BudgetsStepsNamespace(object):
         """
         ...
     @property
-    def get_steps(self) -> BudgetsStepsGet_stepsNamespace: ...
+    def get_steps(self) -> BudgetsStepsGet_stepsNamespace:
+        """
+
+        Query Parameters:
+        - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+        - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
+        - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
+        - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
+        - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        """
+        ...
     @property
     def update_step(self) -> BudgetsStepsUpdate_stepNamespace:
         """
@@ -1572,7 +1812,16 @@ class BudgetsStepsUpdate_stepNamespace(LimbleEndpoint):
     """
 
 class BudgetsStepsGet_stepsNamespace(LimbleEndpoint):
-    pass
+    """
+
+    Query Parameters:
+    - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+    - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
+    - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
+    - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
+    - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    """
 
 class BudgetsStepsDelete_stepNamespace(LimbleEndpoint):
     """
@@ -1609,6 +1858,15 @@ class General_ledgersNamespace(object):
         locationID | Which Location this GL belongs to.
         description | An optional bit of descriptive text for the GL.
         assetID | Which Asset this GL belongs to.
+
+        Query Parameters:
+        - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
+        - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
+        - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+        - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
+        - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
         """
         ...
     @property
@@ -1689,6 +1947,15 @@ class General_ledgersGet_general_ledgersNamespace(LimbleEndpoint):
     locationID | Which Location this GL belongs to.
     description | An optional bit of descriptive text for the GL.
     assetID | Which Asset this GL belongs to.
+
+    Query Parameters:
+    - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
+    - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
+    - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+    - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
+    - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
     """
 
 class Purchase_ordersNamespace(object):
@@ -1730,6 +1997,18 @@ class Purchase_ordersNamespace(object):
         status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
         stateDetails | JSON object containing details about the PO's current state, and available state transitions.
         poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
+
+        Query Parameters:
+        - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+        - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+        - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+        - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
+        - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
+        - status (disabled): This parameter is used to only get POs for a specific group of status.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
         """
         ...
     @property
@@ -1863,6 +2142,18 @@ class Purchase_ordersGet_purchase_ordersNamespace(LimbleEndpoint):
     status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
     stateDetails | JSON object containing details about the PO's current state, and available state transitions.
     poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
+
+    Query Parameters:
+    - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+    - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+    - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+    - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
+    - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
+    - status (disabled): This parameter is used to only get POs for a specific group of status.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
 
 class Purchase_ordersStateNamespace(object):
@@ -1981,6 +2272,10 @@ class Purchase_ordersCommentsNamespace(object):
         userID | The ID of the user that made the comment.
         commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
         commentFiles | Array containing fileName and link properties.
+
+        Query Parameters:
+        - cursor: This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 137 here will only get you comments with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -2013,6 +2308,9 @@ class Purchase_ordersCommentsNamespace(object):
         Responses:
         - 200 OK: Deleted.
         - 404 Not Found: File not found.
+
+        Query Parameters:
+        - filename: 
         """
         ...
     @property
@@ -2097,6 +2395,9 @@ class Purchase_ordersCommentsDelete_po_comment_fileNamespace(LimbleEndpoint):
     Responses:
     - 200 OK: Deleted.
     - 404 Not Found: File not found.
+
+    Query Parameters:
+    - filename: 
     """
 
 class Purchase_ordersCommentsUpload_po_comment_fileNamespace(LimbleEndpoint):
@@ -2126,6 +2427,10 @@ class Purchase_ordersCommentsPo_commentsNamespace(LimbleEndpoint):
     userID | The ID of the user that made the comment.
     commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
     commentFiles | Array containing fileName and link properties.
+
+    Query Parameters:
+    - cursor: This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 137 here will only get you comments with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class Purchase_ordersItemsNamespace(object):
@@ -2155,6 +2460,15 @@ class Purchase_ordersItemsNamespace(object):
         qtyReceived | A number representing the total quantity that has been marked as "received" for this item.
         lastEdited | Last time this PO item was edited, this field outputs a UNIX timestamp.
         orderUnitAbbreviation | The abbreviation for the unit of measure in which the PO item was ordered. (NULL for items not assigned to a unit of measure)
+
+        Query Parameters:
+        - pos: This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+        - items: This parameter is used to only get specific PO Items by ID. This parameter expects a comma delimited list of poItem IDs.
+        - numbers: This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+        - cursor: This parameter is a cursor that selects what vendorID you want to start receiving results at. e.g. passing 137 here will only get you vendors with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - lastEditedStart: This parameter is used to only get PO items that were last edited after the unix timestamp passed into the start parameter. For example, all PO items that were last edited after April 18th, 2018.
+        - lastEditedEnd: This parameter is used to only get POs items that were last edited *before* the unix timestamp passed in.
         """
         ...
     @property
@@ -2335,6 +2649,15 @@ class Purchase_ordersItemsGet_purchase_order_itemsNamespace(LimbleEndpoint):
     qtyReceived | A number representing the total quantity that has been marked as "received" for this item.
     lastEdited | Last time this PO item was edited, this field outputs a UNIX timestamp.
     orderUnitAbbreviation | The abbreviation for the unit of measure in which the PO item was ordered. (NULL for items not assigned to a unit of measure)
+
+    Query Parameters:
+    - pos: This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+    - items: This parameter is used to only get specific PO Items by ID. This parameter expects a comma delimited list of poItem IDs.
+    - numbers: This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+    - cursor: This parameter is a cursor that selects what vendorID you want to start receiving results at. e.g. passing 137 here will only get you vendors with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - lastEditedStart: This parameter is used to only get PO items that were last edited after the unix timestamp passed into the start parameter. For example, all PO items that were last edited after April 18th, 2018.
+    - lastEditedEnd: This parameter is used to only get POs items that were last edited *before* the unix timestamp passed in.
     """
 
 class TeamsNamespace(object):
@@ -2342,6 +2665,14 @@ class TeamsNamespace(object):
     def get_teams(self) -> TeamsGet_teamsNamespace:
         """
         This request returns a list of Teams.
+
+        Query Parameters:
+        - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
+        - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
+        - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
         """
         ...
     @property
@@ -2399,6 +2730,14 @@ class TeamsCreate_teamNamespace(LimbleEndpoint):
 class TeamsGet_teamsNamespace(LimbleEndpoint):
     """
     This request returns a list of Teams.
+
+    Query Parameters:
+    - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
+    - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
+    - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
     """
 
 class RolesNamespace(object):
@@ -2406,6 +2745,12 @@ class RolesNamespace(object):
     def get_roles(self) -> RolesGet_rolesNamespace:
         """
         This request returns a list of Roles.
+
+        Query Parameters:
+        - roles: 
+        - name: 
+        - cursor: 
+        - limit: 
         """
         ...
     @property
@@ -2461,6 +2806,12 @@ class RolesCreate_roleNamespace(LimbleEndpoint):
 class RolesGet_rolesNamespace(LimbleEndpoint):
     """
     This request returns a list of Roles.
+
+    Query Parameters:
+    - roles: 
+    - name: 
+    - cursor: 
+    - limit: 
     """
 
 class VendorsNamespace(LimbleEndpoint):
@@ -2472,6 +2823,16 @@ class VendorsNamespace(LimbleEndpoint):
     This call will also return an image array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     
     **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+    Query Parameters:
+    - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+    - locations (disabled): This parameter is used to only get Vendors at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - name (disabled): This parameter is used to only get specific vendor by name. This parameter expects a string full name of a vendor or partial name with the wildcard %.
+    - start (disabled): This parameter is used to only get Vendors that were last edited after the unix timestamp passed into the start parameter. For example, all Vendors that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Vendors that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what vendorID you want to start receiving results at. e.g. passing 137 here will only get you vendors with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
     @property
     def fields(self) -> VendorsFieldsNamespace: ...
@@ -2571,6 +2932,16 @@ class VendorsLogsNamespace(object):
         logEntry | The log entry for the vendor.
         userID | The ID of the user that created the log.
         logFiles | An array of objects that have a fileID, fileName and a link that can used to download the files attached to the log. All links are only valid for 15 minutes, a new call will generate a new link.
+
+        Query Parameters:
+        - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+        - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+        - logEntry (disabled): This is a parameter used to string search for manual log entry. This parameter expects a string with the wildcard %.
+        - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+        - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
         """
         ...
     @property
@@ -2635,6 +3006,16 @@ class VendorsLogsVendor_logsNamespace(LimbleEndpoint):
     logEntry | The log entry for the vendor.
     userID | The ID of the user that created the log.
     logFiles | An array of objects that have a fileID, fileName and a link that can used to download the files attached to the log. All links are only valid for 15 minutes, a new call will generate a new link.
+
+    Query Parameters:
+    - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+    - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+    - logEntry (disabled): This is a parameter used to string search for manual log entry. This parameter expects a string with the wildcard %.
+    - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+    - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
     """
 
 class VendorsLogsFilesNamespace(object):
@@ -2706,12 +3087,30 @@ class VendorsFieldsNamespace(object):
         This request will return an array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         
         **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+        Query Parameters:
+        - fields: This parameter is used to only get specific fields by ID. This parameter expects a comma delimited list of fieldIDs.
+        - name: This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - vendors: This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+        - start: This parameter is used to only get vendor fields for vendors that were last edited after the unix timestamp passed into the start parameter. For example, all Vendors that were last edited after April 18th, 2018.
+        - end: This parameter is used to only get vendor fields for vendors that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor: This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - value: This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - values (disabled): This parameter is used to get vendor fields by their valueID. This parameter expects a comma delimited list of Value IDs.
         """
         ...
     @property
     def vendor_suggested_fields(self) -> VendorsFieldsVendor_suggested_fieldsNamespace:
         """
         This request gets all possible fields a Vendor can pick from when deciding which fields it should have.
+
+        Query Parameters:
+        - fields: This parameter can be used to get a single Vendor Fields or a list of Vendor Fields in a comma-separated list.
+        - name: This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - cursor: This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -2782,6 +3181,12 @@ class VendorsFieldsUpdate_vendor_field_valueNamespace(LimbleEndpoint):
 class VendorsFieldsVendor_suggested_fieldsNamespace(LimbleEndpoint):
     """
     This request gets all possible fields a Vendor can pick from when deciding which fields it should have.
+
+    Query Parameters:
+    - fields: This parameter can be used to get a single Vendor Fields or a list of Vendor Fields in a comma-separated list.
+    - name: This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - cursor: This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class VendorsFieldsVendor_fieldsNamespace(LimbleEndpoint):
@@ -2791,6 +3196,18 @@ class VendorsFieldsVendor_fieldsNamespace(LimbleEndpoint):
     This request will return an array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     
     **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+    Query Parameters:
+    - fields: This parameter is used to only get specific fields by ID. This parameter expects a comma delimited list of fieldIDs.
+    - name: This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - vendors: This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+    - start: This parameter is used to only get vendor fields for vendors that were last edited after the unix timestamp passed into the start parameter. For example, all Vendors that were last edited after April 18th, 2018.
+    - end: This parameter is used to only get vendor fields for vendors that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor: This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - value: This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - values (disabled): This parameter is used to get vendor fields by their valueID. This parameter expects a comma delimited list of Value IDs.
     """
 
 class UsersNamespace(LimbleEndpoint):
@@ -2809,6 +3226,14 @@ class UsersNamespace(LimbleEndpoint):
     workdayHours | The number of hours a day this employee works.
     dateAdded | The date a user was added to Limble.  This is a unix timestamp.
     teams | What Teams a User has at specific Locations.
+
+    Query Parameters:
+    - users: This parameter expects a comma-separated list of users to get by id
+    - name (disabled): This parameter is used to only get specific user by name. This parameter expects a string full name of a user or partial name with the wildcard %.
+    - roles (disabled): This parameter expects a comma-separated list of users to get by roleID
+    - teams (disabled): This parameter expects a comma-separated list of users to get by teamID
+    - cursor (disabled): This parameter is a cursor that selects what userID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
     @property
     def roles(self) -> UsersRolesNamespace: ...
@@ -2905,6 +3330,13 @@ class UsersTeamsNamespace(object):
     def get_user_teams(self) -> UsersTeamsGet_user_teamsNamespace:
         """
         This request gets all of the Teams a User has and what Location they have that Team at.
+
+        Query Parameters:
+        - teams: This parameter expects a comma-separated list of teamIDs to filter teams by
+        - locations: This parameter expects a comma-separated list of locationIDs to filter teams by
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor: This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - name: This parameter is used to only get specific team by name. This parameter expects a string full name of a user or partial name with the wildcard %.
         """
         ...
     @property
@@ -2933,6 +3365,13 @@ class UsersTeamsAdd_user_to_teamNamespace(LimbleEndpoint):
 class UsersTeamsGet_user_teamsNamespace(LimbleEndpoint):
     """
     This request gets all of the Teams a User has and what Location they have that Team at.
+
+    Query Parameters:
+    - teams: This parameter expects a comma-separated list of teamIDs to filter teams by
+    - locations: This parameter expects a comma-separated list of locationIDs to filter teams by
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor: This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - name: This parameter is used to only get specific team by name. This parameter expects a string full name of a user or partial name with the wildcard %.
     """
 
 class UsersRolesNamespace(object):
@@ -2940,6 +3379,13 @@ class UsersRolesNamespace(object):
     def get_user_roles(self) -> UsersRolesGet_user_rolesNamespace:
         """
         This request gets all of the Roles a User has and what Location they have that Role at.
+
+        Query Parameters:
+        - roles (disabled): This parameter expects a comma-separated list of roleIDs to filter teams by
+        - locations (disabled): This parameter expects a comma-separated list of locationIDs to filter roles by
+        - name (disabled): This parameter is used to only get specific role by name. This parameter expects a string full name of a user or partial name with the wildcard %.
+        - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -2968,6 +3414,13 @@ class UsersRolesAdd_user_to_roleNamespace(LimbleEndpoint):
 class UsersRolesGet_user_rolesNamespace(LimbleEndpoint):
     """
     This request gets all of the Roles a User has and what Location they have that Role at.
+
+    Query Parameters:
+    - roles (disabled): This parameter expects a comma-separated list of roleIDs to filter teams by
+    - locations (disabled): This parameter expects a comma-separated list of locationIDs to filter roles by
+    - name (disabled): This parameter is used to only get specific role by name. This parameter expects a string full name of a user or partial name with the wildcard %.
+    - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class TasksNamespace(LimbleEndpoint):
@@ -3020,11 +3473,46 @@ class TasksNamespace(LimbleEndpoint):
     meta3 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     geoLocation | The location of a task on a Map.
     customTags | An array of custom tags associated with the task.
+
+    Query Parameters:
+    - tasks: This parameter is used to only get specific Tasks. This parameter accepts a comma delimited list of task IDs.
+    - assets: This parameter is used to only get Tasks that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
+    - locations: This parameter is used to only get Tasks at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - type: This parameter is used to only get Tasks of a specific type. This parameter accepts a comma delimited list of task types.
+    - name: This is a parameter used to string search for a name or partial name of a task this parameter expects a string with the wildcard %.
+    - start: This parameter is used to only get Tasks that were last edited after the unix timestamp passed into the start parameter. For example, all Tasks that were last edited after April 18th, 2018.
+    - end: This parameter is used to only get Tasks that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - completedStart: This parameter is used to only get Tasks that were completed after the unix timestamp passed into this parameter. For example, all Assets that were completed after April 18th, 2018.
+    - completedEnd: This parameter is used to only get Tasks that were completed *before* the unix timestamp passed into this parameter.
+    - scheduledStart: This parameter is used to only get Tasks whose scheduled start is after the unix timestamp passed into this parameter. 
+    - scheduledEnd: This parameter is used to only get Tasks whose scheduled end is *before* the unix timestamp passed into this parameter. 
+    - orderBy: This parameter sorts based on the value you pass. I.e. passing createdDate will order the results based on createdDate. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted and lastEdited.
+    - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+    - lastEditedByUsers: This parameter is used to filter tasks by users that have completed tasks.
+    - status: This parameter is used to filter tasks by completed status. 1 - Complete  0 - Incomplete
+    - meta1: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+    - meta2: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+    - meta3: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
+    - statusIDs: This parameter is used to filter tasks by their associated statusID.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+    - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semi-colon (";") colon at the end it is recommended that the param follows the same format. 
     """
     @property
     def invoices(self) -> TasksInvoicesNamespace:
         """
         This request gets all Invoices associated with Tasks.
+
+        Query Parameters:
+        - invoices (disabled): This parameter is used to only get specific invoices or invoices. This parameter accepts a comma delimited list of invoice IDs.
+        - tasks (disabled): This parameter is used to only get invoices on a task or tasks. This parameter accepts a comma delimited list of task IDs.
+        - start (disabled): This parameter is used to only get invoices that were logged after the unix timestamp passed into the start parameter. For example, all Invoices that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get invoices that were logged *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what invoiceID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -3078,6 +3566,13 @@ class TasksNamespace(LimbleEndpoint):
         meta3 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         geoLocation | geoJSON | Optional | The geoJSON Feature object that can be used to locate a task on a Map.
         multiUsers | array | Optional. Required if assignmentType = multi | Array list of users a task is being assigned to.
+
+        Query Parameters:
+        - name (disabled): 
+        - locationID (disabled): 
+        - due (disabled): 
+        - type (disabled): 
+        - templateID (disabled): 
         """
         ...
     @property
@@ -3171,6 +3666,13 @@ class TasksNew_taskNamespace(LimbleEndpoint):
     meta3 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     geoLocation | geoJSON | Optional | The geoJSON Feature object that can be used to locate a task on a Map.
     multiUsers | array | Optional. Required if assignmentType = multi | Array list of users a task is being assigned to.
+
+    Query Parameters:
+    - name (disabled): 
+    - locationID (disabled): 
+    - due (disabled): 
+    - type (disabled): 
+    - templateID (disabled): 
     """
 
 class TasksWork_request_submissionsNamespace(object):
@@ -3204,6 +3706,19 @@ class TasksWork_request_submissionsNamespace(object):
         requestDescription | The description of the problem filled out in the Work Request Portal.
         checklistID | The unique identifier of the task generated from the submission when it is approved. Will be NULL if submission status is declined or pending.
         requesterName | The name of the person who submitted the work request submission.
+
+        Query Parameters:
+        - orderBy: This parameter is used to order results by their createdAt, status, requestTitle, workRequestSubmissionID, and location property instead of the default ordering. each property can be flipped reverse by putting a minus before the property e.g. "-createdAt".
+        - search (disabled): Free-text search
+        - locationIDs: This parameter is used to only get work requests at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - statuses: CSV of statuses
+        - limit: Max rows
+        - columns (disabled): CSV of field names (letters only); forwarded upstream as array
+        - createdDateStart: ISO 8601 start
+        - createdDateEnd: ISO 8601 end (≥ start)
+        - workRequestIDs: CSV of WR IDs
+        - page: Page-based pagination (mutually exclusive with cursor)
+        - cursor: Cursor for pagination (forbidden with page)
         """
         ...
 
@@ -3236,6 +3751,19 @@ class TasksWork_request_submissionsList_wr_submissionsNamespace(LimbleEndpoint):
     requestDescription | The description of the problem filled out in the Work Request Portal.
     checklistID | The unique identifier of the task generated from the submission when it is approved. Will be NULL if submission status is declined or pending.
     requesterName | The name of the person who submitted the work request submission.
+
+    Query Parameters:
+    - orderBy: This parameter is used to order results by their createdAt, status, requestTitle, workRequestSubmissionID, and location property instead of the default ordering. each property can be flipped reverse by putting a minus before the property e.g. "-createdAt".
+    - search (disabled): Free-text search
+    - locationIDs: This parameter is used to only get work requests at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - statuses: CSV of statuses
+    - limit: Max rows
+    - columns (disabled): CSV of field names (letters only); forwarded upstream as array
+    - createdDateStart: ISO 8601 start
+    - createdDateEnd: ISO 8601 end (≥ start)
+    - workRequestIDs: CSV of WR IDs
+    - page: Page-based pagination (mutually exclusive with cursor)
+    - cursor: Cursor for pagination (forbidden with page)
     """
 
 class TasksTagsNamespace(LimbleEndpoint):
@@ -3362,6 +3890,10 @@ class TasksCommentsNamespace(object):
         commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
         showExternalUsers | The comment can be seen by external users or not.default value : true
         commentFiles | Array of objects that have a file name and a link you can use to download that file. All links are only valid for 15 minutes, a new call will generate a new link.
+
+        Query Parameters:
+        - cursor (disabled): This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -3401,6 +3933,10 @@ class TasksCommentsTask_commentsNamespace(LimbleEndpoint):
     commentEmailAddress | The email address of the external user that made this comment. This is only populated if the comment was made by an external user via the comment reply system.
     showExternalUsers | The comment can be seen by external users or not.default value : true
     commentFiles | Array of objects that have a file name and a link you can use to download that file. All links are only valid for 15 minutes, a new call will generate a new link.
+
+    Query Parameters:
+    - cursor (disabled): This parameter is a cursor that selects what commentID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class TasksPartsNamespace(object):
@@ -3441,6 +3977,12 @@ class TasksPartsNamespace(object):
         usedPrice | The price of the part at the time of use.
         partName | The name of the part.
         poItemID | The unique ID of the PO item associated with this record.
+
+        Query Parameters:
+        - tasks: This parameter is used to get parts attached to a list of tasks. This parameter accepts a comma delimited list of task IDs.
+        - parts (disabled): This parameter is used to get only certain. This parameter accepts a comma delimited list of task IDs.
+        - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you assets with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -3484,6 +4026,12 @@ class TasksPartsGet_all_attached_partsNamespace(LimbleEndpoint):
     usedPrice | The price of the part at the time of use.
     partName | The name of the part.
     poItemID | The unique ID of the PO item associated with this record.
+
+    Query Parameters:
+    - tasks: This parameter is used to get parts attached to a list of tasks. This parameter accepts a comma delimited list of task IDs.
+    - parts (disabled): This parameter is used to get only certain. This parameter accepts a comma delimited list of task IDs.
+    - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you assets with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class TasksPartsGet_attached_partsNamespace(LimbleEndpoint):
@@ -3525,6 +4073,16 @@ class TasksLaborNamespace(object):
         taskName | The name of the task associated with this labor entry.
         taskPriorityID | The Priority ID of the task this labor entry is associated with.
         taskPriorityLevel | The Priority value of the task this labor entry is associated with.
+
+        Query Parameters:
+        - tasks: This parameter is used to only get specific Tasks. This parameter accepts a comma delimited list of task IDs.
+        - users: This parameter is used to only get labor records for a specific user or set of users in a comma delimited list.
+        - start: This parameter is used to only get labor that was logged after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+        - end: This parameter is used to only get labor that was logged *before* the unix timestamp passed into the end parameter.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - locations: This parameter is used to retrieve labor entries for particular locations. This parameter accepts a comma delimited list of location IDs.
+        - orderBy: This parameter is used to order results by their dateLogged property instead of the default ordering. CANNOT be provided alongside the cursor parameter. to paginate in this ordering, use the start or end parameters.
         """
         ...
     @property
@@ -3539,6 +4097,11 @@ class TasksLaborNamespace(object):
         categoryID | The unique ID for this billing category.
         categoryName | The name of this billing category.
         categoryRate | The rate per hour of this billing category.
+
+        Query Parameters:
+        - name (disabled): This is a parameter used to string search for a name or partial name of a category this parameter expects a string with the wildcard %.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
         """
         ...
 
@@ -3553,6 +4116,11 @@ class TasksLaborGet_labor_categoriesNamespace(LimbleEndpoint):
     categoryID | The unique ID for this billing category.
     categoryName | The name of this billing category.
     categoryRate | The rate per hour of this billing category.
+
+    Query Parameters:
+    - name (disabled): This is a parameter used to string search for a name or partial name of a category this parameter expects a string with the wildcard %.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
     """
 
 class TasksLaborTask_laborNamespace(LimbleEndpoint):
@@ -3575,6 +4143,16 @@ class TasksLaborTask_laborNamespace(LimbleEndpoint):
     taskName | The name of the task associated with this labor entry.
     taskPriorityID | The Priority ID of the task this labor entry is associated with.
     taskPriorityLevel | The Priority value of the task this labor entry is associated with.
+
+    Query Parameters:
+    - tasks: This parameter is used to only get specific Tasks. This parameter accepts a comma delimited list of task IDs.
+    - users: This parameter is used to only get labor records for a specific user or set of users in a comma delimited list.
+    - start: This parameter is used to only get labor that was logged after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+    - end: This parameter is used to only get labor that was logged *before* the unix timestamp passed into the end parameter.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - locations: This parameter is used to retrieve labor entries for particular locations. This parameter accepts a comma delimited list of location IDs.
+    - orderBy: This parameter is used to order results by their dateLogged property instead of the default ordering. CANNOT be provided alongside the cursor parameter. to paginate in this ordering, use the start or end parameters.
     """
 
 class TasksImagesNamespace(object):
@@ -3594,6 +4172,9 @@ class TasksImagesNamespace(object):
     def delete_task_instruction_image(self) -> TasksImagesDelete_task_instruction_imageNamespace:
         """
         This request removes an instructional image from an Instruction.
+
+        Query Parameters:
+        - filename (disabled): The name of the instruction file that needs to be deleted. This is an optional parameter. If not given, **all** the files attached to an instruction will be deleted.
         """
         ...
     @property
@@ -3656,6 +4237,9 @@ class TasksImagesUpload_task_main_imageNamespace(LimbleEndpoint):
 class TasksImagesDelete_task_instruction_imageNamespace(LimbleEndpoint):
     """
     This request removes an instructional image from an Instruction.
+
+    Query Parameters:
+    - filename (disabled): The name of the instruction file that needs to be deleted. This is an optional parameter. If not given, **all** the files attached to an instruction will be deleted.
     """
 
 class TasksImagesTask_instruction_imageNamespace(LimbleEndpoint):
@@ -3690,6 +4274,11 @@ class TasksInstructionsNamespace(object):
         options | Array of objects that have an itemOptionID, itemOptionOrder, and itemOptionText.
         response | This field is the "response" of an instruction i.e. what a user filled out when doing this instruction. The return value changes based on the instruction type:1 Check Box - true/false2 Radio List - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.3 Text Box - string4 Dropdown Box - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.5 Date Picker - unix time stamp7 Label - labels will never have a user response9 File or Picture Attachment - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.10 Assign PM - not supported yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.16 Request Approval - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         meta | This property is useful to get more information related to the Task Instructions. Different instruction types may have different properties in the meta section.Instruction Type:14 Start WO - If this instruction is completed on the task, the meta property would have an "associatedTask" property on it. The associatedTask gives the route for the task created by this instruction. For example, if task 2 was created by a "Start WO" instruction on task 1. In GET Task Instruction for task 1, this instruction would have a meta associatedTask property pointing to task 2.
+
+        Query Parameters:
+        - limit: 
+        - page: 
+        - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
         """
         ...
     @property
@@ -3750,6 +4339,11 @@ class TasksInstructionsNamespace(object):
         options | Array of objects that have an itemOptionID, itemOptionOrder, and itemOptionText.
         response | This field is the "response" of an instruction i.e. what a user filled out when doing this instruction. The return value changes based on the instruction type:1 Check Box - true/false2 Radio List - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.3 Text Box - string4 Dropdown Box - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.5 Date Picker - unix time stamp7 Label - labels will never have a user response9 File or Picture Attachment - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.10 Assign PM - not supported yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.16 Request Approval - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         meta | This property is useful to get more information related to the Task Instructions. Different instruction types may have different properties in the meta section.Instruction Type:14 Start WO - If this instruction is completed on the task, the meta property would have an "associatedTask" property on it. The associatedTask gives the route for the task created by this instruction. For example, if task 2 was created by a "Start WO" instruction on task 1. In GET Task Instruction for task 1, this instruction would have a meta associatedTask property pointing to task 2.
+
+        Query Parameters:
+        - tasks: CSV of task IDs 
+        - limit: Page size (1..1000)
+        - page: Page-based pagination (mutually exclusive with cursor)
         """
         ...
     @property
@@ -3819,6 +4413,11 @@ class TasksInstructionsBatch_task_instructionsNamespace(LimbleEndpoint):
     options | Array of objects that have an itemOptionID, itemOptionOrder, and itemOptionText.
     response | This field is the "response" of an instruction i.e. what a user filled out when doing this instruction. The return value changes based on the instruction type:1 Check Box - true/false2 Radio List - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.3 Text Box - string4 Dropdown Box - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.5 Date Picker - unix time stamp7 Label - labels will never have a user response9 File or Picture Attachment - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.10 Assign PM - not supported yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.16 Request Approval - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     meta | This property is useful to get more information related to the Task Instructions. Different instruction types may have different properties in the meta section.Instruction Type:14 Start WO - If this instruction is completed on the task, the meta property would have an "associatedTask" property on it. The associatedTask gives the route for the task created by this instruction. For example, if task 2 was created by a "Start WO" instruction on task 1. In GET Task Instruction for task 1, this instruction would have a meta associatedTask property pointing to task 2.
+
+    Query Parameters:
+    - tasks: CSV of task IDs 
+    - limit: Page size (1..1000)
+    - page: Page-based pagination (mutually exclusive with cursor)
     """
 
 class TasksInstructionsDelete_task_instructionNamespace(LimbleEndpoint):
@@ -3877,6 +4476,11 @@ class TasksInstructionsTask_instructionsNamespace(LimbleEndpoint):
     options | Array of objects that have an itemOptionID, itemOptionOrder, and itemOptionText.
     response | This field is the "response" of an instruction i.e. what a user filled out when doing this instruction. The return value changes based on the instruction type:1 Check Box - true/false2 Radio List - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.3 Text Box - string4 Dropdown Box - if no option is selected, this will be 0. If an option is selected, this will be a number that maps to the itemOptionID of one of the members of the options array.5 Date Picker - unix time stamp7 Label - labels will never have a user response9 File or Picture Attachment - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.10 Assign PM - not supported yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.16 Request Approval - Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     meta | This property is useful to get more information related to the Task Instructions. Different instruction types may have different properties in the meta section.Instruction Type:14 Start WO - If this instruction is completed on the task, the meta property would have an "associatedTask" property on it. The associatedTask gives the route for the task created by this instruction. For example, if task 2 was created by a "Start WO" instruction on task 1. In GET Task Instruction for task 1, this instruction would have a meta associatedTask property pointing to task 2.
+
+    Query Parameters:
+    - limit: 
+    - page: 
+    - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
     """
 
 class TasksInstructionsOptionsNamespace(object):
@@ -3934,6 +4538,14 @@ class TasksInstructionsOptionsInstruction_optionsNamespace(LimbleEndpoint):
 class TasksInvoicesNamespace(LimbleEndpoint):
     """
     This request gets all Invoices associated with Tasks.
+
+    Query Parameters:
+    - invoices (disabled): This parameter is used to only get specific invoices or invoices. This parameter accepts a comma delimited list of invoice IDs.
+    - tasks (disabled): This parameter is used to only get invoices on a task or tasks. This parameter accepts a comma delimited list of task IDs.
+    - start (disabled): This parameter is used to only get invoices that were logged after the unix timestamp passed into the start parameter. For example, all Invoices that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get invoices that were logged *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what invoiceID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
     @property
     def files(self) -> TasksInvoicesFilesNamespace: ...
@@ -4040,6 +4652,17 @@ class PartsNamespace(LimbleEndpoint):
     stockOnHand | General Stock plus any unused, received PO Quantities for this part. This matches the 'Qty' value seen in the CMMS Part Management page.
     pos | Array of purchase order objects. price and quantity do not effect generalStock and generalPrice listed above.
     image | Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
+
+    Query Parameters:
+    - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+    - locations (disabled): This parameter is used to only get Parts at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - name (disabled): This parameter is used to only get specific parts. This parameter expects a string either a full name of a part or a partial name with the wildcard %.
+    - start (disabled): This parameter is used to only get Parts that were last edited after the unix timestamp passed into the start parameter. For example, all Parts that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Parts that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you parts with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - numbers (disabled): This parameter is used to only get parts with part numbers that match the list provided. This parameter accepts a comma delimited list of Part Numbers.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information. 
     """
     @property
     def images(self) -> PartsImagesNamespace: ...
@@ -4123,6 +4746,15 @@ class PartsNamespace(LimbleEndpoint):
         usedPrice | The price per 1 part.
         usedOn | The date when the part was used.  This is a unix timestamp.
         poItemID | The unique ID of the PO item associated with this usage record.
+
+        Query Parameters:
+        - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+        - tasks (disabled): This parameter is used to only get Parts at a specific group of Tasks. This parameter accepts a comma delimited list of Task IDs.
+        - start (disabled): This parameter is used to only get Parts that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Parts that were last edited *before* the unix timestamp passed into the end parameter.
+        - name (disabled): This parameter is used to string search part names either partial or full name with the wildcard %.
+        - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you part usage records with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
 
@@ -4141,6 +4773,15 @@ class PartsParts_usageNamespace(LimbleEndpoint):
     usedPrice | The price per 1 part.
     usedOn | The date when the part was used.  This is a unix timestamp.
     poItemID | The unique ID of the PO item associated with this usage record.
+
+    Query Parameters:
+    - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+    - tasks (disabled): This parameter is used to only get Parts at a specific group of Tasks. This parameter accepts a comma delimited list of Task IDs.
+    - start (disabled): This parameter is used to only get Parts that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Parts that were last edited *before* the unix timestamp passed into the end parameter.
+    - name (disabled): This parameter is used to string search part names either partial or full name with the wildcard %.
+    - cursor (disabled): This parameter is a cursor that selects what partID you want to start receiving results at. e.g. passing 137 here will only get you part usage records with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class PartsDelete_partNamespace(LimbleEndpoint):
@@ -4211,6 +4852,11 @@ class PartsPurchasablesNamespace(object):
         size | The size of the purchasable.
         orderUnitCode | The unit that describes how this purchasable is ordered. E.g. "by the box", or "by the foot".
         sizeUnitCode | The unit that qualifies the size value. E.g. this tells you whether this purchasable is 10 liters, or cans, or feet, etc.
+
+        Query Parameters:
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - nameStartsWith (disabled): Filter purchasables that have a name which starts with this string.
         """
         ...
 
@@ -4227,6 +4873,11 @@ class PartsPurchasablesGet_purchasablesNamespace(LimbleEndpoint):
     size | The size of the purchasable.
     orderUnitCode | The unit that describes how this purchasable is ordered. E.g. "by the box", or "by the foot".
     sizeUnitCode | The unit that qualifies the size value. E.g. this tells you whether this purchasable is 10 liters, or cans, or feet, etc.
+
+    Query Parameters:
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - nameStartsWith (disabled): Filter purchasables that have a name which starts with this string.
     """
 
 class PartsLogsNamespace(object):
@@ -4248,6 +4899,17 @@ class PartsLogsNamespace(object):
         logEntry | The log entry for the part.
         userID | The ID of the user that created the log.
         associatedID | The ID of the item associated with this log, if any. Current examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID type: BillsourceID: 20, associatedID type: Bill
+
+        Query Parameters:
+        - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+        - sources (disabled): This parameter is used to only get logs for a specific sourceID. This parameter accepts a comma delimited list of sourceIDs.
+        - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+        - logEntry (disabled): This is a parameter used to string search for manual log entry (sourceID: 4). This parameter expects a string with the wildcard %.
+        - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+        - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
         """
         ...
     @property
@@ -4293,6 +4955,18 @@ class PartsLogsNamespace(object):
         logEntry | The log entry for the part.
         userID | The ID of the user that created the log.
         associatedID | The ID of the item associated with this log, if any. Current examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID type: BillsourceID: 20, associatedID type: Bill
+
+        Query Parameters:
+        - logs (disabled): 
+        - sources (disabled): 
+        - users (disabled): 
+        - logEntry (disabled): 
+        - start (disabled): 
+        - end (disabled): 
+        - page (disabled): 
+        - parts (disabled): 
+        - limit (disabled): 
+        - cursor (disabled): 
         """
         ...
 
@@ -4313,6 +4987,18 @@ class PartsLogsAll_part_logsNamespace(LimbleEndpoint):
     logEntry | The log entry for the part.
     userID | The ID of the user that created the log.
     associatedID | The ID of the item associated with this log, if any. Current examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID type: BillsourceID: 20, associatedID type: Bill
+
+    Query Parameters:
+    - logs (disabled): 
+    - sources (disabled): 
+    - users (disabled): 
+    - logEntry (disabled): 
+    - start (disabled): 
+    - end (disabled): 
+    - page (disabled): 
+    - parts (disabled): 
+    - limit (disabled): 
+    - cursor (disabled): 
     """
 
 class PartsLogsDelete_part_logNamespace(LimbleEndpoint):
@@ -4354,6 +5040,17 @@ class PartsLogsPart_logsNamespace(LimbleEndpoint):
     logEntry | The log entry for the part.
     userID | The ID of the user that created the log.
     associatedID | The ID of the item associated with this log, if any. Current examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID type: BillsourceID: 20, associatedID type: Bill
+
+    Query Parameters:
+    - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+    - sources (disabled): This parameter is used to only get logs for a specific sourceID. This parameter accepts a comma delimited list of sourceIDs.
+    - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+    - logEntry (disabled): This is a parameter used to string search for manual log entry (sourceID: 4). This parameter expects a string with the wildcard %.
+    - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+    - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
     """
 
 class PartsFieldsNamespace(object):
@@ -4365,12 +5062,31 @@ class PartsFieldsNamespace(object):
         This request will return an array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
         
         **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+        Query Parameters:
+        - fields (disabled): This parameter is used to only get specific fields by ID. This parameter expects a comma delimited list of fieldIDs.
+        - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - parts (disabled): This parameter is used to only get part fields for a specific Part. This parameter expects a partID.
+        - start (disabled): This parameter is used to only get part fields for parts that were last edited after the unix timestamp passed into the start parameter.
+        - end (disabled): This parameter is used to only get parts fields for part fields that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - value (disabled): This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - locations (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - values (disabled): This parameter is used to get part fields by their valueID. This parameter expects a comma delimited list of Value IDs.
+        - page (disabled): 
         """
         ...
     @property
     def part_suggested_fields(self) -> PartsFieldsPart_suggested_fieldsNamespace:
         """
         This request gets all possible fields a Part can pick from when deciding which fields it should have.
+
+        Query Parameters:
+        - fields (disabled): This parameter can be used to get a single Part Fields or a list of Part Fields in a comma-separated list.
+        - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - cursor (disabled): This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -4441,6 +5157,12 @@ class PartsFieldsUpdate_part_field_valueNamespace(LimbleEndpoint):
 class PartsFieldsPart_suggested_fieldsNamespace(LimbleEndpoint):
     """
     This request gets all possible fields a Part can pick from when deciding which fields it should have.
+
+    Query Parameters:
+    - fields (disabled): This parameter can be used to get a single Part Fields or a list of Part Fields in a comma-separated list.
+    - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - cursor (disabled): This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class PartsFieldsPart_fieldsNamespace(LimbleEndpoint):
@@ -4450,6 +5172,19 @@ class PartsFieldsPart_fieldsNamespace(LimbleEndpoint):
     This request will return an array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     
     **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+    Query Parameters:
+    - fields (disabled): This parameter is used to only get specific fields by ID. This parameter expects a comma delimited list of fieldIDs.
+    - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - parts (disabled): This parameter is used to only get part fields for a specific Part. This parameter expects a partID.
+    - start (disabled): This parameter is used to only get part fields for parts that were last edited after the unix timestamp passed into the start parameter.
+    - end (disabled): This parameter is used to only get parts fields for part fields that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what fieldID you want to start receiving results at. e.g. passing 137 here will only get you vendor fields with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - value (disabled): This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - locations (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - values (disabled): This parameter is used to get part fields by their valueID. This parameter expects a comma delimited list of Value IDs.
+    - page (disabled): 
     """
 
 class PartsCategoriesNamespace(object):
@@ -4464,7 +5199,14 @@ class PartsCategoriesNamespace(object):
         """
         ...
     @property
-    def get_categories(self) -> PartsCategoriesGet_categoriesNamespace: ...
+    def get_categories(self) -> PartsCategoriesGet_categoriesNamespace:
+        """
+
+        Query Parameters:
+        - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
+        - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
+        """
+        ...
     @property
     def update_part_category(self) -> PartsCategoriesUpdate_part_categoryNamespace:
         """
@@ -4497,7 +5239,12 @@ class PartsCategoriesUpdate_part_categoryNamespace(LimbleEndpoint):
     """
 
 class PartsCategoriesGet_categoriesNamespace(LimbleEndpoint):
-    pass
+    """
+
+    Query Parameters:
+    - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
+    - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
+    """
 
 class PartsCategoriesCreate_part_categoryNamespace(LimbleEndpoint):
     """
@@ -4553,6 +5300,16 @@ class LocationsNamespace(LimbleEndpoint):
     workRequestPortal | This is a URL you can use to submit Work Requests to this Location.
     geoLocation | The location of a Limble location on a Map.
     currencyCode | The ISO code for the currency at this location.
+
+    Query Parameters:
+    - locations (disabled): This parameter is used to only get locations in the list provided. This parameter accepts a comma delimited list of Location IDs.
+    - name (disabled): This parameter is used to only get specific locations by name. This parameter expects a string full name of a location or partial name with the wildcard %.
+    - cursor (disabled): This parameter is a cursor that selects what locationID you want to start receiving results at. e.g. passing 137 here will only get you locations with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - regions (disabled): This parameter is used to get locations that belong to a region.
+This parameter expects a regionID a location may belong to.
+    - geoLocation (disabled): This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** locations with and without geoLocation property. If true, it will only return locations with a geoLocation property.
+    - page (disabled): 
     """
     @property
     def new_location(self) -> LocationsNew_locationNamespace:
@@ -4661,6 +5418,19 @@ class AssetsNamespace(LimbleEndpoint):
     workRequestPortal | The url work requestors can use to submit problems with this Asset.
     image | Array of objects that have a file name and a link you can use to download that image. All links are only valid for 15 minutes, a new call will generate a new link.
     geoLocation | The location of an asset on a Map.
+
+    Query Parameters:
+    - assets (disabled): This parameter is used to only get specific Assets. This parameter expects a comma delimited list of Asset IDs.
+    - name (disabled): This is a parameter used to string search for a name or partial name of an asset this parameter expects a string with the wildcard %.
+    - locations (disabled): This parameter is used to only get Assets at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - start (disabled): This parameter is used to only get Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Assets that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. Without ordering, this will return results with an ID greater than the value of cursor. With ordering, this will return results starting at the next item in the order, regardless of whether its ID is greater than or lesser than the value of cursor.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - parentAssetID (disabled): This parameter can be used to get asset(s) children using the Parent's ID. This parameter accepts a comma delimited list of Asset IDs.
+    - orderBy (disabled): This parameter is used to order results by their lastEdited property instead of the default ordering by ascending assetID. CANNOT be provided alongside the cursor parameter. to paginate in this ordering, use the start or end parameters.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - geoLocation (disabled): This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** assets with and without geoLocation property. If true, it will only return assets with a geoLocation property.
     """
     @property
     def image(self) -> AssetsImageNamespace: ...
@@ -4708,6 +5478,9 @@ class AssetsNamespace(LimbleEndpoint):
     def delete_asset(self) -> AssetsDelete_assetNamespace:
         """
         This request removes an Asset from your Limble account.
+
+        Query Parameters:
+        - assetID: assetID of the asset you are removing.
         """
         ...
     @property
@@ -4739,6 +5512,9 @@ class AssetsMove_asset_to_another_locationNamespace(LimbleEndpoint):
 class AssetsDelete_assetNamespace(LimbleEndpoint):
     """
     This request removes an Asset from your Limble account.
+
+    Query Parameters:
+    - assetID: assetID of the asset you are removing.
     """
 
 class AssetsPatch_assetNamespace(LimbleEndpoint):
@@ -4786,6 +5562,16 @@ class AssetsPartsNamespace(object):
         createdAt | The unix timestamp at which this Relation was created
         lastEdited | The unix timestamp at which this Relation last saw a change
         associationType | The method used to create this Relation. At this time, only "manual" is supported
+
+        Query Parameters:
+        - assets (disabled): This parameter is used to only get specific Assets. This parameter expects a comma delimited list of Asset IDs.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. Without ordering, this will return results with an ID greater than the value of cursor. With ordering, this will return results starting at the next item in the order, regardless of whether its ID is greater than or lesser than the value of cursor.
+        - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+        - relations (disabled): This parameter is used to only get specific relations. This parameter expects a comma delimited list of relation IDs.
+        - start (disabled): This parameter is used to only get relations that were last edited after the unix timestamp passed into the start parameter. For example, all relations that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get relations that were last edited *before* the unix timestamp passed into the end parameter.
         """
         ...
 
@@ -4806,6 +5592,16 @@ class AssetsPartsAsset_partsNamespace(LimbleEndpoint):
     createdAt | The unix timestamp at which this Relation was created
     lastEdited | The unix timestamp at which this Relation last saw a change
     associationType | The method used to create this Relation. At this time, only "manual" is supported
+
+    Query Parameters:
+    - assets (disabled): This parameter is used to only get specific Assets. This parameter expects a comma delimited list of Asset IDs.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. Without ordering, this will return results with an ID greater than the value of cursor. With ordering, this will return results starting at the next item in the order, regardless of whether its ID is greater than or lesser than the value of cursor.
+    - parts (disabled): This parameter is used to only get specific Parts. This parameter accepts a comma delimited list of part IDs.
+    - relations (disabled): This parameter is used to only get specific relations. This parameter expects a comma delimited list of relation IDs.
+    - start (disabled): This parameter is used to only get relations that were last edited after the unix timestamp passed into the start parameter. For example, all relations that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get relations that were last edited *before* the unix timestamp passed into the end parameter.
     """
 
 class AssetsBatchNamespace(object):
@@ -4855,6 +5651,16 @@ class AssetsLogsNamespace(object):
         logEntry | The log entry for the asset.
         userID | The ID of the user that created the log.
         logFiles | An array of objects that have a fileID, fileName and a link that can used to download the files attached to the log. All links are only valid for 15 minutes, a new call will generate a new link.
+
+        Query Parameters:
+        - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+        - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+        - logEntry (disabled): This is a parameter used to string search for manual log entry. This parameter expects a string with the wildcard %.
+        - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+        - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
         """
         ...
     @property
@@ -4917,6 +5723,16 @@ class AssetsLogsAsset_logsNamespace(LimbleEndpoint):
     logEntry | The log entry for the asset.
     userID | The ID of the user that created the log.
     logFiles | An array of objects that have a fileID, fileName and a link that can used to download the files attached to the log. All links are only valid for 15 minutes, a new call will generate a new link.
+
+    Query Parameters:
+    - logs (disabled): This parameter is used to only get specific logs. This parameter accepts a comma delimited list of logIDs.
+    - users (disabled): This parameter is used to only get logs created by specific users. This parameter accepts a comma delimited list of userIDs.
+    - logEntry (disabled): This is a parameter used to string search for manual log entry. This parameter expects a string with the wildcard %.
+    - start (disabled): This parameter is used to only get logs that were last edited after the unix timestamp passed into the start parameter. 
+    - end (disabled): This parameter is used to only get logs that were last edited before the unix timestamp passed into the end parameter.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what ID you want to start receiving results at. 
     """
 
 class AssetsLogsFilesNamespace(object):
@@ -4967,6 +5783,22 @@ class AssetsFieldsNamespace(object):
         This call also returns "files" which is an array of objects that have a file name and a link you can use to download that file. All links are only valid for 15 minutes, a new call will generate a new link.
         
         **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+        Query Parameters:
+        - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+        - start (disabled): This parameter is used to only get Asset Fields for Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Asset Fields for Assets that were last edited *before* the unix timestamp passed into the end parameter.
+        - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - locations (disabled): This parameter can be used to get a group of asset fields in a location in a comma-separated list.
+        - value (disabled): This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - assetName (disabled): This parameter is used to only get specific fields by asset name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - fieldType[0] (disabled): This parameter is used to only get specific fields by type. This parameter expects an array of strings "Text, Date, Pictures, Documents, Number, Currency, Dropdown"
+        - fieldType[1] (disabled): This parameter is used to only get specific fields by type. This parameter expects an array of strings "Text, Date, Pictures, Documents, Number, Currency, Dropdown"
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - values (disabled): This parameter is used to get asset fields by their valueID. This parameter expects a comma delimited list of Value IDs.
+        - assets: This parameter can be used to get a group of asset fields for a specific set of asset ids in a comma-separated list.
         """
         ...
     @property
@@ -4983,6 +5815,13 @@ class AssetsFieldsNamespace(object):
         This would mean there are 4 suggested fields that exist:  Make, Model, VIN and Serial Number.  If I added a third new asset I could pick from any of the 4 suggested fields.
         
         Suggested fields are the full list of possible fields that can be added to assets at that location.
+
+        Query Parameters:
+        - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+        - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+        - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - locations (disabled): This parameter is used to only get fields at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
         """
         ...
     @property
@@ -4991,6 +5830,14 @@ class AssetsFieldsNamespace(object):
         Any time an Asset's field is changed an entry is inserted into a history.  
         
         This request allows you to pull that information so you can see trends over time.
+
+        Query Parameters:
+        - assets (disabled): This parameter can be used to get a single Asset or a list of Assets in a comma-separated list.
+        - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+        - start (disabled): This parameter is used to only get Asset Fields for Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+        - end (disabled): This parameter is used to only get Asset Fields for Assets that were last edited *before* the unix timestamp passed into the end parameter.
+        - limit (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+        - cursor (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -5016,6 +5863,9 @@ class AssetsFieldsNamespace(object):
         Parameter | Type | Required? | Description
         ------------------------------------------
         value | Varies depending on the Field's type | Required | The value that will be written to the field, overwriting the previous value and creating an entry in the field history.  "value" must correspond to the fieldType of the field. For example, if the field is a "number" fieldType, then "value" must be a number.
+
+        Query Parameters:
+        -  (disabled): 
         """
         ...
     @property
@@ -5062,6 +5912,9 @@ class AssetsFieldsUpdate_asset_field_valueNamespace(LimbleEndpoint):
     Parameter | Type | Required? | Description
     ------------------------------------------
     value | Varies depending on the Field's type | Required | The value that will be written to the field, overwriting the previous value and creating an entry in the field history.  "value" must correspond to the fieldType of the field. For example, if the field is a "number" fieldType, then "value" must be a number.
+
+    Query Parameters:
+    -  (disabled): 
     """
 
 class AssetsFieldsNew_asset_suggested_fieldNamespace(LimbleEndpoint):
@@ -5083,6 +5936,14 @@ class AssetsFieldsAsset_field_historyNamespace(LimbleEndpoint):
     Any time an Asset's field is changed an entry is inserted into a history.  
     
     This request allows you to pull that information so you can see trends over time.
+
+    Query Parameters:
+    - assets (disabled): This parameter can be used to get a single Asset or a list of Assets in a comma-separated list.
+    - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+    - start (disabled): This parameter is used to only get Asset Fields for Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Asset Fields for Assets that were last edited *before* the unix timestamp passed into the end parameter.
+    - limit (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+    - cursor (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class AssetsFieldsAsset_suggested_fieldsNamespace(LimbleEndpoint):
@@ -5098,6 +5959,13 @@ class AssetsFieldsAsset_suggested_fieldsNamespace(LimbleEndpoint):
     This would mean there are 4 suggested fields that exist:  Make, Model, VIN and Serial Number.  If I added a third new asset I could pick from any of the 4 suggested fields.
     
     Suggested fields are the full list of possible fields that can be added to assets at that location.
+
+    Query Parameters:
+    - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+    - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - locations (disabled): This parameter is used to only get fields at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
     """
 
 class AssetsFieldsAsset_fieldsNamespace(LimbleEndpoint):
@@ -5107,6 +5975,22 @@ class AssetsFieldsAsset_fieldsNamespace(LimbleEndpoint):
     This call also returns "files" which is an array of objects that have a file name and a link you can use to download that file. All links are only valid for 15 minutes, a new call will generate a new link.
     
     **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+
+    Query Parameters:
+    - name (disabled): This parameter is used to only get specific field by name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - fields (disabled): This parameter can be used to get a single Asset Fields or a list of Asset Fields in a comma-separated list.
+    - start (disabled): This parameter is used to only get Asset Fields for Assets that were last edited after the unix timestamp passed into the start parameter. For example, all Assets that were last edited after April 18th, 2018.
+    - end (disabled): This parameter is used to only get Asset Fields for Assets that were last edited *before* the unix timestamp passed into the end parameter.
+    - cursor (disabled): This parameter is a cursor that selects what id you want to start receiving results at. e.g. passing 137 here will only get you asset fields with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - locations (disabled): This parameter can be used to get a group of asset fields in a location in a comma-separated list.
+    - value (disabled): This parameter is used to only get specific field by value. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - assetName (disabled): This parameter is used to only get specific fields by asset name. This parameter expects a string full name of a field or partial name with the wildcard %.
+    - fieldType[0] (disabled): This parameter is used to only get specific fields by type. This parameter expects an array of strings "Text, Date, Pictures, Documents, Number, Currency, Dropdown"
+    - fieldType[1] (disabled): This parameter is used to only get specific fields by type. This parameter expects an array of strings "Text, Date, Pictures, Documents, Number, Currency, Dropdown"
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    - values (disabled): This parameter is used to get asset fields by their valueID. This parameter expects a comma delimited list of Value IDs.
+    - assets: This parameter can be used to get a group of asset fields for a specific set of asset ids in a comma-separated list.
     """
 
 class AssetsImageNamespace(object):
