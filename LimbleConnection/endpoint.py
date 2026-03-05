@@ -106,7 +106,7 @@ class LimbleEndpoint:
                 url=url,
                 headers=headers,
                 proxies=self.connection.proxy,
-                **kwargs
+                params=kwargs,
             )
             self._normalize_error(response)
             return response
@@ -135,6 +135,7 @@ class LimbleEndpoint:
         """LIST resources with optional auto-pagination (FR-014)."""
         params = kwargs.copy()
         if 'limit' not in params and self.supports_query_param('limit'):
+            logger.debug(f"setting default limit to {self.connection.page_limit} for {self.name}")
             params['limit'] = self.connection.page_limit
 
         if not auto_paginate:
