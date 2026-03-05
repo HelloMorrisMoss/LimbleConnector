@@ -256,19 +256,158 @@ This parameter expects a regionID a location may belong to.
         """
         ...
     @property
-    def roles(self) -> RolesNamespace: ...
+    def roles(self) -> RolesNamespace:
+        """
+        This request returns a list of Roles.
+
+        Query Parameters:
+        - roles: 
+        - name: 
+        - cursor: 
+        - limit: 
+        """
+        ...
     @property
-    def teams(self) -> TeamsNamespace: ...
+    def teams(self) -> TeamsNamespace:
+        """
+        This request returns a list of Teams.
+
+        Query Parameters:
+        - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
+        - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+        - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
+        - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
+        """
+        ...
     @property
-    def purchase_orders(self) -> Purchase_ordersNamespace: ...
+    def purchase_orders(self) -> Purchase_ordersNamespace:
+        """
+
+        Property | Description
+        ----------------------
+        meta | useful links relating to this Purchase order
+        poID | The unique ID of the Purchase Order.
+        poNumber | The user-set Purchase Order number.
+        budgetID | The unique ID of the budget associated with this Purchase Order.
+        vendorID | The unique ID of the vendor associated with this Purchase Order.
+        locationID | The unique ID of the location associated with this Purchase Order.
+        userIDStarted | The unique ID of the user that started this Purchase Order.
+        userID | The unique ID of the user this Purchase Order is currently assigned to.
+        teamID | The unique ID of the team the user of this Purchase Order is currently assigned to.
+        requestedByUserID | The userID of the user that request this Purchase Order. A value of 0 means this PO wasn't requested, but was manually started by the userIDStarted.
+        date | The date this PO was started as a UNIX timestamp, or the date the user inputted for the Purchase Order.
+        expectedDate | The date this PO is expected as a UNIX timestamp to receive items.
+        billTo | The address that should receive the bill for the PO.
+        shipTo | The address the PO's items should be delivered to.
+        notesToVendor | Any notes sent to the vendor, possibly containing handling, packaging, or delivery instructions.
+        customField1 | PO custom field, the customer chooses which custom fields are available on all POs.
+        customField2 | PO custom field, the customer chooses which custom fields are available on all POs.
+        customField3 | PO custom field, the customer chooses which custom fields are available on all POs.
+        customField4 | PO custom field, the customer chooses which custom fields are available on all POs.
+        customField5 | PO custom field, the customer chooses which custom fields are available on all POs.
+        customField6 | PO custom field, the customer chooses which custom fields are available on all POs.
+        poPrefix | If a PO prefix is configured, it will show up here.
+        lastEdited | Last time this PO was edited as a UNIX timestamp.
+        status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
+        stateDetails | JSON object containing details about the PO's current state, and available state transitions.
+        poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
+
+        Query Parameters:
+        - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+        - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+        - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+        - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
+        - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
+        - status (disabled): This parameter is used to only get POs for a specific group of status.
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        """
+        ...
     @property
-    def general_ledgers(self) -> General_ledgersNamespace: ...
+    def general_ledgers(self) -> General_ledgersNamespace:
+        """
+        This request returns your GLs in Limble.  
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        glID | The GL's unique identifier.
+        abbr | An abbreviation for the GL.
+        name | The full name of the GL.
+        locationID | Which Location this GL belongs to.
+        description | An optional bit of descriptive text for the GL.
+        assetID | Which Asset this GL belongs to.
+
+        Query Parameters:
+        - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
+        - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
+        - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+        - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
+        - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
+        """
+        ...
     @property
-    def budgets(self) -> BudgetsNamespace: ...
+    def budgets(self) -> BudgetsNamespace:
+        """
+        This request returns your Budgets in Limble.  
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        budgetID | The Budget's unique identifier.
+        name | The full name of the Budget.
+        locationID | Which Location this Budget belongs to.
+
+        Query Parameters:
+        - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+        - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+        - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
+        """
+        ...
     @property
-    def priorities(self) -> PrioritiesNamespace: ...
+    def priorities(self) -> PrioritiesNamespace:
+        """
+        This request returns your priorities in Limble.  
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        priorityID | The priority's unique identifier.
+        name | The full name of the priority.
+        priorityLevel | A number representing ordering or indicator of severity.
+        color | A hex-color string that will be used to color tasks associated to this priority.
+        isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
+
+        Query Parameters:
+        - priorities: 
+        """
+        ...
     @property
-    def tags(self) -> TagsNamespace: ...
+    def tags(self) -> TagsNamespace:
+        """
+        This request returns your tags in Limble.
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        name | A search-string for tags.
+
+        Query Parameters:
+        - name: 
+        """
+        ...
     @property
     def statuses(self) -> StatusesNamespace:
         """
@@ -290,7 +429,47 @@ This parameter expects a regionID a location may belong to.
         """
         ...
     @property
-    def bills(self) -> BillsNamespace: ...
+    def bills(self) -> BillsNamespace:
+        """
+        This request gets information such as Bill IDs, Bill Numbers, etc.
+        
+        This call returns a "meta" object containing URLs that can be used to get data related to the Bill.
+        
+        Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        meta | useful links relating to this Bill
+        billID | The unique ID of the Bill.
+        billNumber | The bill number assigned to the Bill.
+        poID | The poID of which the Bill was made.
+        locationID | The unique ID of the location associated with this Bill.
+        date | The date this Bill was created as a UNIX timestamp.
+        status | The status of this Bill.
+            The status can be as follows:
+            0: The bill is setup.
+            1: The bill is submitted.
+            2: The bill is closed i.e. Marked as Paid
+        userID | The Id of the user this Bill was assigned to.
+        userIDStarted | The ID of the user this Bill was created by.
+        userIDMarkPaid | The ID of the user this Bill was marked paid by.
+
+        Query Parameters:
+        - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
+        - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
+        - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
+
+        - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
+        - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
+        - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+        - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        """
+        ...
     @property
     def regions(self) -> RegionsNamespace:
         """
@@ -315,7 +494,28 @@ results at one time.
         """
         ...
     @property
-    def webhooks(self) -> WebhooksNamespace: ...
+    def webhooks(self) -> WebhooksNamespace:
+        """
+        This request returns your Webhooks configured for Limble.  
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        webhhokID | The ID of the Webhook
+        endpoint | The webhook URL.
+        type | The type of webhook. Webhooks can be of type task, po, poItem.
+        enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
+
+        Query Parameters:
+        - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
+        - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
+        - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
+        - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
+        - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        """
+        ...
     @property
     def units_of_measure(self) -> Units_of_measureNamespace: ...
 
@@ -442,30 +642,27 @@ class Units_of_measureGet_unitsNamespace(LimbleEndpoint):
     - abbreviationStartsWith (disabled): Filter by units that have an abbreviation which starts with this string.
     """
 
-class WebhooksNamespace(object):
-    @property
-    def get_webhooks(self) -> WebhooksGet_webhooksNamespace:
-        """
-        This request returns your Webhooks configured for Limble.  
-        
-        Return data description
+class WebhooksNamespace(LimbleEndpoint):
+    """
+    This request returns your Webhooks configured for Limble.  
+    
+    Return data description
 
-        Property | Description
-        ----------------------
-        webhhokID | The ID of the Webhook
-        endpoint | The webhook URL.
-        type | The type of webhook. Webhooks can be of type task, po, poItem.
-        enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
+    Property | Description
+    ----------------------
+    webhhokID | The ID of the Webhook
+    endpoint | The webhook URL.
+    type | The type of webhook. Webhooks can be of type task, po, poItem.
+    enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
 
-        Query Parameters:
-        - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
-        - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
-        - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
-        - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
-        - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
-        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        """
-        ...
+    Query Parameters:
+    - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
+    - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
+    - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
+    - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
+    - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    """
     @property
     def delete_webhook(self) -> WebhooksDelete_webhookNamespace:
         """
@@ -522,28 +719,6 @@ class WebhooksNew_webhookNamespace(LimbleEndpoint):
 class WebhooksDelete_webhookNamespace(LimbleEndpoint):
     """
     This request deletes a Webhook.
-    """
-
-class WebhooksGet_webhooksNamespace(LimbleEndpoint):
-    """
-    This request returns your Webhooks configured for Limble.  
-    
-    Return data description
-
-    Property | Description
-    ----------------------
-    webhhokID | The ID of the Webhook
-    endpoint | The webhook URL.
-    type | The type of webhook. Webhooks can be of type task, po, poItem.
-    enabled | Determines if the webhook is enabled. 0 = Disabled 1=Enabled
-
-    Query Parameters:
-    - webhooks (disabled): This parameter is used to only get specific Webhooks. This parameter expects a comma delimited list of webhookIDs.
-    - endpoint (disabled): This parameter is used for a string search by the webhook endpoint. This parameter expects a URL or partial URL of a webhook using a string with the wildcard %.
-    - type (disabled): This parameter is used to only get Webhooks of a specific type. This parameter accepts a comma delimited list of webhook types.
-    - enabled (disabled): This parameter is used to get Webooks which are enabled. This paramter expects 1: Enabled or 0: Disabled
-    - cursor (disabled): This parameter is a cursor that selects what webhookID you want to start receiving results at. e.g. passing 10 here will only get you webhooks with an id greater than 10.
-    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
 
 class RegionsNamespace(LimbleEndpoint):
@@ -657,53 +832,50 @@ class RegionsCreate_regionNamespace(LimbleEndpoint):
     - 201 Created: { regionID } with Location header.
     """
 
-class BillsNamespace(object):
-    @property
-    def transactions(self) -> BillsTransactionsNamespace: ...
-    @property
-    def comments(self) -> BillsCommentsNamespace: ...
-    @property
-    def get_bills(self) -> BillsGet_billsNamespace:
-        """
-        This request gets information such as Bill IDs, Bill Numbers, etc.
-        
-        This call returns a "meta" object containing URLs that can be used to get data related to the Bill.
-        
-        Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
-        
-        Return data description
+class BillsNamespace(LimbleEndpoint):
+    """
+    This request gets information such as Bill IDs, Bill Numbers, etc.
+    
+    This call returns a "meta" object containing URLs that can be used to get data related to the Bill.
+    
+    Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+    
+    Return data description
 
-        Property | Description
-        ----------------------
-        meta | useful links relating to this Bill
-        billID | The unique ID of the Bill.
-        billNumber | The bill number assigned to the Bill.
-        poID | The poID of which the Bill was made.
-        locationID | The unique ID of the location associated with this Bill.
-        date | The date this Bill was created as a UNIX timestamp.
-        status | The status of this Bill.
+    Property | Description
+    ----------------------
+    meta | useful links relating to this Bill
+    billID | The unique ID of the Bill.
+    billNumber | The bill number assigned to the Bill.
+    poID | The poID of which the Bill was made.
+    locationID | The unique ID of the location associated with this Bill.
+    date | The date this Bill was created as a UNIX timestamp.
+    status | The status of this Bill.
             The status can be as follows:
             0: The bill is setup.
             1: The bill is submitted.
             2: The bill is closed i.e. Marked as Paid
-        userID | The Id of the user this Bill was assigned to.
-        userIDStarted | The ID of the user this Bill was created by.
-        userIDMarkPaid | The ID of the user this Bill was marked paid by.
+    userID | The Id of the user this Bill was assigned to.
+    userIDStarted | The ID of the user this Bill was created by.
+    userIDMarkPaid | The ID of the user this Bill was marked paid by.
 
-        Query Parameters:
-        - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
-        - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
-        - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
+    Query Parameters:
+    - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
+    - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
+    - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
 
-        - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
-        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
-        - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
-        - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
-        - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
-        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
-        """
-        ...
+    - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
+    - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
+    - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+    """
+    @property
+    def transactions(self) -> BillsTransactionsNamespace: ...
+    @property
+    def comments(self) -> BillsCommentsNamespace: ...
     @property
     def new_bill(self) -> BillsNew_billNamespace:
         """
@@ -758,47 +930,6 @@ class BillsNew_billNamespace(LimbleEndpoint):
     ------------------------------------------
     poID | Int | Required | The poID for which the Bill is made.
     userID | Int | Optional | The ID of the user that this Bill will be assigned to.
-    """
-
-class BillsGet_billsNamespace(LimbleEndpoint):
-    """
-    This request gets information such as Bill IDs, Bill Numbers, etc.
-    
-    This call returns a "meta" object containing URLs that can be used to get data related to the Bill.
-    
-    Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination) section for more information.
-    
-    Return data description
-
-    Property | Description
-    ----------------------
-    meta | useful links relating to this Bill
-    billID | The unique ID of the Bill.
-    billNumber | The bill number assigned to the Bill.
-    poID | The poID of which the Bill was made.
-    locationID | The unique ID of the location associated with this Bill.
-    date | The date this Bill was created as a UNIX timestamp.
-    status | The status of this Bill.
-            The status can be as follows:
-            0: The bill is setup.
-            1: The bill is submitted.
-            2: The bill is closed i.e. Marked as Paid
-    userID | The Id of the user this Bill was assigned to.
-    userIDStarted | The ID of the user this Bill was created by.
-    userIDMarkPaid | The ID of the user this Bill was marked paid by.
-
-    Query Parameters:
-    - bills: This parameter is used to only get specific Bills. This parameter expects a comma delimited list of billIDs.
-    - numbers: This parameter is used to only get specific Bills by Number. This parameter expects a comma delimited list of billNumbers.
-    - status: This parameter is used to only get specific Bills by their status. The bill status could be 0,1 or 2
-
-    - end: This parameter is used to only get Bills that were created before or on the unix timestamp passed into it. 
-    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-    - pos: This parameter is used to only get specific Bills by POs. This parameter expects a comma delimited list of PO IDs.
-    - start: This parameter is used to only get Bills that were created after or on the unix timestamp passed into it. 
-    - locations: This parameter is used to only get Bills at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
-    - cursor: This parameter is a cursor that selects what billID you want to start receiving results at. e.g. passing 130 here will only get you bills with an id greater than 130.
-    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
 
 class BillsCommentsNamespace(object):
@@ -1234,22 +1365,19 @@ class StatusesCreate_statusNamespace(LimbleEndpoint):
     - Name is compared case-insensitively
     """
 
-class TagsNamespace(object):
-    @property
-    def get_tags(self) -> TagsGet_tagsNamespace:
-        """
-        This request returns your tags in Limble.
-        
-        Return data description
+class TagsNamespace(LimbleEndpoint):
+    """
+    This request returns your tags in Limble.
+    
+    Return data description
 
-        Property | Description
-        ----------------------
-        name | A search-string for tags.
+    Property | Description
+    ----------------------
+    name | A search-string for tags.
 
-        Query Parameters:
-        - name: 
-        """
-        ...
+    Query Parameters:
+    - name: 
+    """
     @property
     def create_account_tag(self) -> TagsCreate_account_tagNamespace:
         """
@@ -1462,40 +1590,23 @@ class TagsCreate_account_tagNamespace(LimbleEndpoint):
     - 409 Conflict - Tag already exists (case-insensitive comparison)
     """
 
-class TagsGet_tagsNamespace(LimbleEndpoint):
+class PrioritiesNamespace(LimbleEndpoint):
     """
-    This request returns your tags in Limble.
+    This request returns your priorities in Limble.  
     
     Return data description
 
     Property | Description
     ----------------------
-    name | A search-string for tags.
+    priorityID | The priority's unique identifier.
+    name | The full name of the priority.
+    priorityLevel | A number representing ordering or indicator of severity.
+    color | A hex-color string that will be used to color tasks associated to this priority.
+    isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
 
     Query Parameters:
-    - name: 
+    - priorities: 
     """
-
-class PrioritiesNamespace(object):
-    @property
-    def get_priorities(self) -> PrioritiesGet_prioritiesNamespace:
-        """
-        This request returns your priorities in Limble.  
-        
-        Return data description
-
-        Property | Description
-        ----------------------
-        priorityID | The priority's unique identifier.
-        name | The full name of the priority.
-        priorityLevel | A number representing ordering or indicator of severity.
-        color | A hex-color string that will be used to color tasks associated to this priority.
-        isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
-
-        Query Parameters:
-        - priorities: 
-        """
-        ...
     @property
     def update_priority(self) -> PrioritiesUpdate_priorityNamespace:
         """
@@ -1582,46 +1693,36 @@ class PrioritiesUpdate_priorityNamespace(LimbleEndpoint):
     isDefault | Boolean | Optional | Should this be the default priority that tasks are assigned to when a priority is not specified? When setting this to true, any other priorities whose isDefault is true will have it set to false.
     """
 
-class PrioritiesGet_prioritiesNamespace(LimbleEndpoint):
+class BudgetsNamespace(LimbleEndpoint):
     """
-    This request returns your priorities in Limble.  
+    This request returns your Budgets in Limble.  
     
     Return data description
 
     Property | Description
     ----------------------
-    priorityID | The priority's unique identifier.
-    name | The full name of the priority.
-    priorityLevel | A number representing ordering or indicator of severity.
-    color | A hex-color string that will be used to color tasks associated to this priority.
-    isDefault | A boolean representing whether or not this is the priority that will be associated to tasks by default.
+    budgetID | The Budget's unique identifier.
+    name | The full name of the Budget.
+    locationID | Which Location this Budget belongs to.
 
     Query Parameters:
-    - priorities: 
+    - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
+    - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+    - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
     """
-
-class BudgetsNamespace(object):
     @property
-    def steps(self) -> BudgetsStepsNamespace: ...
-    @property
-    def get_budgets(self) -> BudgetsGet_budgetsNamespace:
+    def steps(self) -> BudgetsStepsNamespace:
         """
-        This request returns your Budgets in Limble.  
-        
-        Return data description
-
-        Property | Description
-        ----------------------
-        budgetID | The Budget's unique identifier.
-        name | The full name of the Budget.
-        locationID | Which Location this Budget belongs to.
 
         Query Parameters:
-        - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
-        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
-        - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
-        - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
+        - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
+        - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
+        - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
+        - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -1724,27 +1825,17 @@ purchaseRequests: When purchase requests are created from tasks, should this be 
 minPartQtyPOs: When a PO is automatically created due to part quantity threshold, should this be the default budget?
     """
 
-class BudgetsGet_budgetsNamespace(LimbleEndpoint):
+class BudgetsStepsNamespace(LimbleEndpoint):
     """
-    This request returns your Budgets in Limble.  
-    
-    Return data description
-
-    Property | Description
-    ----------------------
-    budgetID | The Budget's unique identifier.
-    name | The full name of the Budget.
-    locationID | Which Location this Budget belongs to.
 
     Query Parameters:
-    - cursor: This parameter is a cursor that selects what budgetID you want to start receiving results at. e.g. passing 137 here will only get you budgets with an ID greater than 137.
-    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
-    - locations: This parameter is used to only get budgets that are linked to a location. This parameter accepts a comma delimited list of location IDs.
-    - budgets: This parameter is used to only get specific budgets. This parameter accepts a comma delimited list of budget IDs.
+    - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
+    - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
+    - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
+    - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     """
-
-class BudgetsStepsNamespace(object):
     @property
     def new_step(self) -> BudgetsStepsNew_stepNamespace:
         """
@@ -1764,19 +1855,6 @@ class BudgetsStepsNamespace(object):
     def delete_step(self) -> BudgetsStepsDelete_stepNamespace:
         """
         This request deletes a step from a budget.
-        """
-        ...
-    @property
-    def get_steps(self) -> BudgetsStepsGet_stepsNamespace:
-        """
-
-        Query Parameters:
-        - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
-        - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
-        - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
-        - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
-        - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
-        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         """
         ...
     @property
@@ -1811,18 +1889,6 @@ class BudgetsStepsUpdate_stepNamespace(LimbleEndpoint):
     order | Int | Optional | For the order of steps in this step's budget, which position should this step be in?
     """
 
-class BudgetsStepsGet_stepsNamespace(LimbleEndpoint):
-    """
-
-    Query Parameters:
-    - name: This is a parameter used to string search for a name or partial name of a budget. This parameter expects a string with the wildcard %.
-    - steps: This parameter is used to only get specific steps. This parameter accepts a comma delimited list of step IDs.
-    - budgets: This parameter is used to only get steps that are linked to a budget. This parameter accepts a comma delimited list of budget IDs.
-    - locations: This parameter is used to only get steps that are linked to a budget at a specific location. This parameter accepts a comma delimited list of location IDs.
-    - cursor: This parameter is a cursor that selects what stepID you want to start receiving results at. e.g. passing 137 here will only get you steps with an ID greater than 137.
-    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-    """
-
 class BudgetsStepsDelete_stepNamespace(LimbleEndpoint):
     """
     This request deletes a step from a budget.
@@ -1842,33 +1908,30 @@ class BudgetsStepsNew_stepNamespace(LimbleEndpoint):
     allowPR | Boolean | Required | When POs belonging to this step's budget are in this step, can items be received?
     """
 
-class General_ledgersNamespace(object):
-    @property
-    def get_general_ledgers(self) -> General_ledgersGet_general_ledgersNamespace:
-        """
-        This request returns your GLs in Limble.  
-        
-        Return data description
+class General_ledgersNamespace(LimbleEndpoint):
+    """
+    This request returns your GLs in Limble.  
+    
+    Return data description
 
-        Property | Description
-        ----------------------
-        glID | The GL's unique identifier.
-        abbr | An abbreviation for the GL.
-        name | The full name of the GL.
-        locationID | Which Location this GL belongs to.
-        description | An optional bit of descriptive text for the GL.
-        assetID | Which Asset this GL belongs to.
+    Property | Description
+    ----------------------
+    glID | The GL's unique identifier.
+    abbr | An abbreviation for the GL.
+    name | The full name of the GL.
+    locationID | Which Location this GL belongs to.
+    description | An optional bit of descriptive text for the GL.
+    assetID | Which Asset this GL belongs to.
 
-        Query Parameters:
-        - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
-        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
-        - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
-        - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
-        - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
-        - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
-        """
-        ...
+    Query Parameters:
+    - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
+    - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
+    - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
+    - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
+    - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
+    """
     @property
     def new_general_ledger(self) -> General_ledgersNew_general_ledgerNamespace:
         """
@@ -1933,84 +1996,56 @@ class General_ledgersNew_general_ledgerNamespace(LimbleEndpoint):
     description | String | Optional | Any further needed description for this GL.
     """
 
-class General_ledgersGet_general_ledgersNamespace(LimbleEndpoint):
+class Purchase_ordersNamespace(LimbleEndpoint):
     """
-    This request returns your GLs in Limble.  
-    
-    Return data description
 
     Property | Description
     ----------------------
-    glID | The GL's unique identifier.
-    abbr | An abbreviation for the GL.
-    name | The full name of the GL.
-    locationID | Which Location this GL belongs to.
-    description | An optional bit of descriptive text for the GL.
-    assetID | Which Asset this GL belongs to.
+    meta | useful links relating to this Purchase order
+    poID | The unique ID of the Purchase Order.
+    poNumber | The user-set Purchase Order number.
+    budgetID | The unique ID of the budget associated with this Purchase Order.
+    vendorID | The unique ID of the vendor associated with this Purchase Order.
+    locationID | The unique ID of the location associated with this Purchase Order.
+    userIDStarted | The unique ID of the user that started this Purchase Order.
+    userID | The unique ID of the user this Purchase Order is currently assigned to.
+    teamID | The unique ID of the team the user of this Purchase Order is currently assigned to.
+    requestedByUserID | The userID of the user that request this Purchase Order. A value of 0 means this PO wasn't requested, but was manually started by the userIDStarted.
+    date | The date this PO was started as a UNIX timestamp, or the date the user inputted for the Purchase Order.
+    expectedDate | The date this PO is expected as a UNIX timestamp to receive items.
+    billTo | The address that should receive the bill for the PO.
+    shipTo | The address the PO's items should be delivered to.
+    notesToVendor | Any notes sent to the vendor, possibly containing handling, packaging, or delivery instructions.
+    customField1 | PO custom field, the customer chooses which custom fields are available on all POs.
+    customField2 | PO custom field, the customer chooses which custom fields are available on all POs.
+    customField3 | PO custom field, the customer chooses which custom fields are available on all POs.
+    customField4 | PO custom field, the customer chooses which custom fields are available on all POs.
+    customField5 | PO custom field, the customer chooses which custom fields are available on all POs.
+    customField6 | PO custom field, the customer chooses which custom fields are available on all POs.
+    poPrefix | If a PO prefix is configured, it will show up here.
+    lastEdited | Last time this PO was edited as a UNIX timestamp.
+    status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
+    stateDetails | JSON object containing details about the PO's current state, and available state transitions.
+    poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
 
     Query Parameters:
-    - cursor: This parameter is a cursor that selects what glID you want to start receiving results at. e.g. passing 137 here will only get you GLs with an ID greater than 137.
-    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-    - name: This is a parameter used to string search for a name or partial name of a GL. This parameter expects a string with the wildcard %.
-    - abbr: This is a parameter used to string search for an abbreviation or partial abbreviation of a GL. This parameter expects a string with the wildcard %.
-    - locations: This parameter is used to only get GLs that are linked to a location. This parameter accepts a comma delimited list of location IDs.
-    - gls: This parameter is used to only get specific GLs. This parameter accepts a comma delimited list of GL IDs.
-    - assets: This parameter is used to only get GLs that are linked to an asset. This parameter accepts a comma delimited list of asset IDs.
+    - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
+    - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
+    - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
+    - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
+    - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
+    - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
+    - status (disabled): This parameter is used to only get POs for a specific group of status.
+    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
-
-class Purchase_ordersNamespace(object):
     @property
     def items(self) -> Purchase_ordersItemsNamespace: ...
     @property
     def comments(self) -> Purchase_ordersCommentsNamespace: ...
     @property
     def state(self) -> Purchase_ordersStateNamespace: ...
-    @property
-    def get_purchase_orders(self) -> Purchase_ordersGet_purchase_ordersNamespace:
-        """
-
-        Property | Description
-        ----------------------
-        meta | useful links relating to this Purchase order
-        poID | The unique ID of the Purchase Order.
-        poNumber | The user-set Purchase Order number.
-        budgetID | The unique ID of the budget associated with this Purchase Order.
-        vendorID | The unique ID of the vendor associated with this Purchase Order.
-        locationID | The unique ID of the location associated with this Purchase Order.
-        userIDStarted | The unique ID of the user that started this Purchase Order.
-        userID | The unique ID of the user this Purchase Order is currently assigned to.
-        teamID | The unique ID of the team the user of this Purchase Order is currently assigned to.
-        requestedByUserID | The userID of the user that request this Purchase Order. A value of 0 means this PO wasn't requested, but was manually started by the userIDStarted.
-        date | The date this PO was started as a UNIX timestamp, or the date the user inputted for the Purchase Order.
-        expectedDate | The date this PO is expected as a UNIX timestamp to receive items.
-        billTo | The address that should receive the bill for the PO.
-        shipTo | The address the PO's items should be delivered to.
-        notesToVendor | Any notes sent to the vendor, possibly containing handling, packaging, or delivery instructions.
-        customField1 | PO custom field, the customer chooses which custom fields are available on all POs.
-        customField2 | PO custom field, the customer chooses which custom fields are available on all POs.
-        customField3 | PO custom field, the customer chooses which custom fields are available on all POs.
-        customField4 | PO custom field, the customer chooses which custom fields are available on all POs.
-        customField5 | PO custom field, the customer chooses which custom fields are available on all POs.
-        customField6 | PO custom field, the customer chooses which custom fields are available on all POs.
-        poPrefix | If a PO prefix is configured, it will show up here.
-        lastEdited | Last time this PO was edited as a UNIX timestamp.
-        status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
-        stateDetails | JSON object containing details about the PO's current state, and available state transitions.
-        poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
-
-        Query Parameters:
-        - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
-        - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
-        - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
-        - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
-        - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
-        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
-        - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
-        - status (disabled): This parameter is used to only get POs for a specific group of status.
-        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
-        """
-        ...
     @property
     def new_purchase_order(self) -> Purchase_ordersNew_purchase_orderNamespace:
         """
@@ -2109,51 +2144,6 @@ class Purchase_ordersNew_purchase_orderNamespace(LimbleEndpoint):
     customField4 | String | Optional | PO custom field, the customer chooses which custom fields are available on all POs.
     customField5 | String | Optional | PO custom field, the customer chooses which custom fields are available on all POs.
     customField6 | String | Optional | PO custom field, the customer chooses which custom fields are available on all POs.
-    """
-
-class Purchase_ordersGet_purchase_ordersNamespace(LimbleEndpoint):
-    """
-
-    Property | Description
-    ----------------------
-    meta | useful links relating to this Purchase order
-    poID | The unique ID of the Purchase Order.
-    poNumber | The user-set Purchase Order number.
-    budgetID | The unique ID of the budget associated with this Purchase Order.
-    vendorID | The unique ID of the vendor associated with this Purchase Order.
-    locationID | The unique ID of the location associated with this Purchase Order.
-    userIDStarted | The unique ID of the user that started this Purchase Order.
-    userID | The unique ID of the user this Purchase Order is currently assigned to.
-    teamID | The unique ID of the team the user of this Purchase Order is currently assigned to.
-    requestedByUserID | The userID of the user that request this Purchase Order. A value of 0 means this PO wasn't requested, but was manually started by the userIDStarted.
-    date | The date this PO was started as a UNIX timestamp, or the date the user inputted for the Purchase Order.
-    expectedDate | The date this PO is expected as a UNIX timestamp to receive items.
-    billTo | The address that should receive the bill for the PO.
-    shipTo | The address the PO's items should be delivered to.
-    notesToVendor | Any notes sent to the vendor, possibly containing handling, packaging, or delivery instructions.
-    customField1 | PO custom field, the customer chooses which custom fields are available on all POs.
-    customField2 | PO custom field, the customer chooses which custom fields are available on all POs.
-    customField3 | PO custom field, the customer chooses which custom fields are available on all POs.
-    customField4 | PO custom field, the customer chooses which custom fields are available on all POs.
-    customField5 | PO custom field, the customer chooses which custom fields are available on all POs.
-    customField6 | PO custom field, the customer chooses which custom fields are available on all POs.
-    poPrefix | If a PO prefix is configured, it will show up here.
-    lastEdited | Last time this PO was edited as a UNIX timestamp.
-    status | This is the current status of a PO. Status of PO can be as follows:0: the PO has only been setup. (Status: Setup)1-97: these are custom statuses based on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of the budgetStep it is on} )97: the PO is in the ready to receive step. This means items can be received for this PO. (Status: Ready to Receive)98 all budget steps have been completed, but not all items on the PO have been received. This means only some items or partial qty of items have been received. (Status: Partially Received)99: the PO is completed. This means all the items and their full qty on the PO have been received but not been paid for ( i.e. all the bills generated for this PO have not been marked as paid yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This means all the items on the PO have been received and have been paid for. (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)
-    stateDetails | JSON object containing details about the PO's current state, and available state transitions.
-    poNumberDisplay | Formatted display string with leading zeros and prefix. This is the PO Number the UI will display.
-
-    Query Parameters:
-    - pos (disabled): This parameter is used to only get specific POs. This parameter expects a comma delimited list of PO IDs.
-    - vendors (disabled): This parameter is used to only get specific Vendors. This parameter expects a comma delimited list of Vendor IDs.
-    - locations (disabled): This parameter is used to only get POs at a specific group of Locations. This parameter accepts a comma delimited list of Location IDs.
-    - numbers (disabled): This parameter is used to only get specific POs by Number. This parameter expects a comma delimited list of PO Numbers.
-    - cursor (disabled): This parameter is a cursor that selects what poID you want to start receiving results at. e.g. passing 137 here will only get you PO with an id greater than 137.
-    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-    - lastEditedStart (disabled): This parameter is used to only get POs that were last edited after the unix timestamp passed into the start parameter. For example, all POs that were last edited after April 18th, 2018.
-    - lastEditedEnd (disabled): This parameter is used to only get POs that were last edited *before* the unix timestamp passed in.
-    - status (disabled): This parameter is used to only get POs for a specific group of status.
-    - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
 
 class Purchase_ordersStateNamespace(object):
@@ -2660,21 +2650,18 @@ class Purchase_ordersItemsGet_purchase_order_itemsNamespace(LimbleEndpoint):
     - lastEditedEnd: This parameter is used to only get POs items that were last edited *before* the unix timestamp passed in.
     """
 
-class TeamsNamespace(object):
-    @property
-    def get_teams(self) -> TeamsGet_teamsNamespace:
-        """
-        This request returns a list of Teams.
+class TeamsNamespace(LimbleEndpoint):
+    """
+    This request returns a list of Teams.
 
-        Query Parameters:
-        - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
-        - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
-        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
-        - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
-        - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
-        """
-        ...
+    Query Parameters:
+    - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
+    - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
+    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+    - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
+    - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
+    - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
+    """
     @property
     def create_team(self) -> TeamsCreate_teamNamespace:
         """
@@ -2727,32 +2714,16 @@ class TeamsCreate_teamNamespace(LimbleEndpoint):
     locationID | string | Required | The locationID of the Location the Team will be available at.
     """
 
-class TeamsGet_teamsNamespace(LimbleEndpoint):
+class RolesNamespace(LimbleEndpoint):
     """
-    This request returns a list of Teams.
+    This request returns a list of Roles.
 
     Query Parameters:
-    - teams (disabled): This parameter expects a comma-separated list of teamIDs to filter teams by.
-    - name (disabled): This parameter is used to only get specific teams by name. This parameter expects a string full name of a team or partial name with the wildcard %.
-    - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-    - cursor (disabled): This parameter is a cursor that selects what teamID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
-    - automaticallyCreated (disabled): This parameter is used to only get specific teams by if they were automatically created by Limble or not. This parameter expects a bool true or false. Teams can get dynamically created if multiple users are assigned to the same task, for example.
-    - includeRoles (disabled): This parameter is used to determine whether role-based teams (Manager, Technician, etc) are included in the response.
+    - roles: 
+    - name: 
+    - cursor: 
+    - limit: 
     """
-
-class RolesNamespace(object):
-    @property
-    def get_roles(self) -> RolesGet_rolesNamespace:
-        """
-        This request returns a list of Roles.
-
-        Query Parameters:
-        - roles: 
-        - name: 
-        - cursor: 
-        - limit: 
-        """
-        ...
     @property
     def create_role(self) -> RolesCreate_roleNamespace:
         """
@@ -2801,17 +2772,6 @@ class RolesCreate_roleNamespace(LimbleEndpoint):
     Parameter | Type | Required? | Description
     ------------------------------------------
     name | String | Required | The name of the role.
-    """
-
-class RolesGet_rolesNamespace(LimbleEndpoint):
-    """
-    This request returns a list of Roles.
-
-    Query Parameters:
-    - roles: 
-    - name: 
-    - cursor: 
-    - limit: 
     """
 
 class VendorsNamespace(LimbleEndpoint):
@@ -4667,13 +4627,39 @@ class PartsNamespace(LimbleEndpoint):
     @property
     def images(self) -> PartsImagesNamespace: ...
     @property
-    def categories(self) -> PartsCategoriesNamespace: ...
+    def categories(self) -> PartsCategoriesNamespace:
+        """
+
+        Query Parameters:
+        - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
+        - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
+        """
+        ...
     @property
     def fields(self) -> PartsFieldsNamespace: ...
     @property
     def logs(self) -> PartsLogsNamespace: ...
     @property
-    def purchasables(self) -> PartsPurchasablesNamespace: ...
+    def purchasables(self) -> PartsPurchasablesNamespace:
+        """
+        This endpoint makes an HTTP GET request to retrieve a part's purchasable data. The response of this request is documented as a JSON schema.
+        
+        <p><b>Return data description</b></p>
+
+        **Property** | **Description**
+        ------------------------------
+        partID | The ID of the part the purchasable belongs to.
+        name | The name of the purchasable.
+        size | The size of the purchasable.
+        orderUnitCode | The unit that describes how this purchasable is ordered. E.g. "by the box", or "by the foot".
+        sizeUnitCode | The unit that qualifies the size value. E.g. this tells you whether this purchasable is 10 liters, or cans, or feet, etc.
+
+        Query Parameters:
+        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
+        - nameStartsWith (disabled): Filter purchasables that have a name which starts with this string.
+        """
+        ...
     @property
     def create_part(self) -> PartsCreate_partNamespace:
         """
@@ -4837,30 +4823,7 @@ class PartsCreate_partNamespace(LimbleEndpoint):
     assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies wether this task will be assigned to a 'user' or a 'team'. Those two strings are the only accepted input. If this parameter is set, the assignment parameter must also be set.
     """
 
-class PartsPurchasablesNamespace(object):
-    @property
-    def get_purchasables(self) -> PartsPurchasablesGet_purchasablesNamespace:
-        """
-        This endpoint makes an HTTP GET request to retrieve a part's purchasable data. The response of this request is documented as a JSON schema.
-        
-        <p><b>Return data description</b></p>
-
-        **Property** | **Description**
-        ------------------------------
-        partID | The ID of the part the purchasable belongs to.
-        name | The name of the purchasable.
-        size | The size of the purchasable.
-        orderUnitCode | The unit that describes how this purchasable is ordered. E.g. "by the box", or "by the foot".
-        sizeUnitCode | The unit that qualifies the size value. E.g. this tells you whether this purchasable is 10 liters, or cans, or feet, etc.
-
-        Query Parameters:
-        - page (disabled): This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
-        - limit (disabled): This parameter is a result limiter. The default is set to return no more than 100 results at one time.
-        - nameStartsWith (disabled): Filter purchasables that have a name which starts with this string.
-        """
-        ...
-
-class PartsPurchasablesGet_purchasablesNamespace(LimbleEndpoint):
+class PartsPurchasablesNamespace(LimbleEndpoint):
     """
     This endpoint makes an HTTP GET request to retrieve a part's purchasable data. The response of this request is documented as a JSON schema.
     
@@ -5187,7 +5150,13 @@ class PartsFieldsPart_fieldsNamespace(LimbleEndpoint):
     - page (disabled): 
     """
 
-class PartsCategoriesNamespace(object):
+class PartsCategoriesNamespace(LimbleEndpoint):
+    """
+
+    Query Parameters:
+    - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
+    - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
+    """
     @property
     def create_part_category(self) -> PartsCategoriesCreate_part_categoryNamespace:
         """
@@ -5196,15 +5165,6 @@ class PartsCategoriesNamespace(object):
         Parameter | Type | Required? | Description
         ------------------------------------------
         name | string | Required | The name of your new part category (i.e. "Lawn Mower Parts")
-        """
-        ...
-    @property
-    def get_categories(self) -> PartsCategoriesGet_categoriesNamespace:
-        """
-
-        Query Parameters:
-        - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
-        - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
         """
         ...
     @property
@@ -5236,14 +5196,6 @@ class PartsCategoriesUpdate_part_categoryNamespace(LimbleEndpoint):
     Parameter | Type | Required? | Description
     ------------------------------------------
     name | string | Required | The name of your new part category (i.e. "Filters")
-    """
-
-class PartsCategoriesGet_categoriesNamespace(LimbleEndpoint):
-    """
-
-    Query Parameters:
-    - categories (disabled): This parameter is used to only get specific part categories. This parameter accepts a comma delimited list of categoryIDs.
-    - name (disabled): This parameter is used to string search part categories names either partial or full name with the wildcard %.
     """
 
 class PartsCategoriesCreate_part_categoryNamespace(LimbleEndpoint):

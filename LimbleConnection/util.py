@@ -33,6 +33,19 @@ def encode_credentials(client_id: str, client_secret: str) -> str:
     """Turn client_id and client_secret into a base64 encoded string."""
     return base64.b64encode(f'{client_id}:{client_secret}'.encode('utf-8')).decode('utf-8')
 
+def collapse_redundant_path_parts(parts: list[str]) -> list[str]:
+    """Collapses path parts if the last part is a redundant retrieval name, such as a folder.
+    
+    e.g. ['assets', 'assets'] -> ['assets']
+    e.g. ['bills', 'get_bills'] -> ['bills']
+    """
+    if len(parts) > 1:
+        last = parts[-1]
+        parent = parts[-2]
+        if last == parent or last == f"get_{parent}":
+            return parts[:-1]
+    return parts
+
 task_type_dict = {
     1: "Preventative Maintenance (PM)",
     2: "Unplanned Work Order (WO)",

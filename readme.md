@@ -9,7 +9,7 @@ Currently targeting the API v2.
 ## Key Features
 
 - **Spec-Driven**: Endpoints are dynamically generated from `registry.yaml`, which is automatically translated from the official Postman collection.
-- **Fluent API**: Access endpoints using a clean, dotted notation (e.g., `lc.routes_assets_assets.list()`).
+- **Fluent API**: Access endpoints using a clean, dotted notation (e.g., `lc.assets.list()`).
 - **Auto-Pagination**: Large result sets are automatically fetched across multiple pages.
 - **Resilient**: Built-in exponential backoff and retries for transient errors (429, 502, 503).
 - **Type-Safe**: IDE support with generated `.pyi` stubs.

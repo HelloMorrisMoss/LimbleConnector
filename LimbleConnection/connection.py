@@ -6,7 +6,7 @@ import tzlocal
 import pandas as pd
 import pytz
 
-from LimbleConnection.util import logger
+from LimbleConnection.util import logger, collapse_redundant_path_parts
 from LimbleConnection.endpoint import LimbleEndpoint, RegistryLoader
 from LimbleConnection.curated.assets import AssetsCurated
 from LimbleConnection._documentation_placeholders import Users
@@ -91,11 +91,7 @@ class LimbleConnection:
             if not parts:
                 continue
                 
-            # Simple merging logic: if last part is same as second-to-last, skip last part
-            # e.g. assets.assets -> assets
-            # e.g. locations.locations -> locations
-            if len(parts) > 1 and parts[-1] == parts[-2]:
-                parts = parts[:-1]
+            parts = collapse_redundant_path_parts(parts)
                 
             current = self
             for part in parts[:-1]:

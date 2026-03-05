@@ -3,6 +3,17 @@ import yaml
 from typing import Dict, Any, List, Tuple
 from bs4 import BeautifulSoup
 
+try:
+    from LimbleConnection.util import collapse_redundant_path_parts
+except ImportError:
+    import sys
+    import os
+    # Add project root to sys.path to allow importing LimbleConnection.util
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if _root not in sys.path:
+        sys.path.append(_root)
+    from LimbleConnection.util import collapse_redundant_path_parts
+
 def clean_bs4_text(soup_fragment):
     """Clean <p> and <b> tags and return text with preserved line breaks."""
     for tag in soup_fragment.find_all(['b', 'strong']):
@@ -104,6 +115,9 @@ class TranslationEngine:
             name = item.get('name', '').lower().replace(' ', '_')
             current_path = path + [name]
             
+            collapsed_path = collapse_redundant_path_parts(current_path)
+            endpoint_key = '.'.join(collapsed_path)
+            
             description_obj = item.get('description', "")
             if isinstance(description_obj, dict):
                 description_text = description_obj.get('content', '')
@@ -112,7 +126,6 @@ class TranslationEngine:
             description_data = get_text_and_table(description_text)
             
             if 'item' in item: # It's a Folder
-                endpoint_key = '.'.join(current_path)
                 # Store folder description even if it's not a direct endpoint
                 endpoints[endpoint_key] = {
                     'is_folder': True,
@@ -120,7 +133,6 @@ class TranslationEngine:
                 }
                 self._process_items(item['item'], current_path, endpoints)
             elif 'request' in item: # It's a Request
-                endpoint_key = '.'.join(current_path)
                 request = item['request']
                 
                 # Get description from the request itself
@@ -184,9 +196,6 @@ class Generator:
             parts = name.split('.')
             if parts[0] == 'routes':
                 parts = parts[1:]
-            
-            if len(parts) > 1 and parts[-1] == parts[-2]:
-                parts = parts[:-1]
                 
             current = tree
             for i, part in enumerate(parts):

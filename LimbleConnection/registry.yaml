@@ -10,14 +10,6 @@ endpoints:
         that can be added, edited or removed for different Limble modules.
       non_table_after: ''
   routes.me:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: This endpoint can be used to test authentication to Limble's
-        API.
-      non_table_after: ''
-  routes.me.me:
     url: '{api_base_url}/me'
     method: GET
     description_data:
@@ -41,14 +33,112 @@ endpoints:
     is_folder: false
     query_params: []
   routes.assets:
-    is_folder: true
+    url: '{api_base_url}/assets/'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
-      non_table_before: Assets can be just about anything.  Limble customers often
-        use it to represent their equipment, but assets can be used to represent locations,
-        areas, buildings and even intangible items.
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - meta
+        - Requests to gather more information on an Asset such as Fields for the Asset
+          or what Tasks are assigned to the Asset
+      - - startedOn
+        - The date when this Asset was started on. This property is used to help determine
+          runtime which is used in MTBF.
+      - - lastEdited
+        - A UNIX timestamp of when this Asset was last edited.
+      - - parentAssetID
+        - The Asset that is the parent of this Asset. If the value is 0 that means
+          this Asset does not have a parent.
+      - - locationID
+        - The ID of the location this asset is located at.
+      - - hoursPerWeek
+        - The number of hours this Asset runs per week. This is used to determine
+          runtime which is used in MTBF. If the value is -1 then the Asset uses the
+          Location's hoursPerWeek setting.
+      - - workRequestPortal
+        - The url work requestors can use to submit problems with this Asset.
+      - - image
+        - Array of objects that have a file name and a link you can use to download
+          that image. All links are only valid for 15 minutes, a new call will generate
+          a new link.
+      - - geoLocation
+        - The location of an asset on a Map.
+      non_table_before: 'This request returns a list of Assets with top level information
+        such as name, last edited, etc.
+
+
+        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
+        section for more information.
+
+
+        Return data description'
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: assets
+      value: '1'
+      description: This parameter is used to only get specific Assets. This parameter
+        expects a comma delimited list of Asset IDs.
+      disabled: true
+    - key: name
+      value: '%test%'
+      description: This is a parameter used to string search for a name or partial
+        name of an asset this parameter expects a string with the wildcard %.
+      disabled: true
+    - key: locations
+      value: '73'
+      description: This parameter is used to only get Assets at a specific group of
+        Locations. This parameter accepts a comma delimited list of Location IDs.
+      disabled: true
+    - key: start
+      value: '1541796014'
+      description: This parameter is used to only get Assets that were last edited
+        after the unix timestamp passed into the start parameter. For example, all
+        Assets that were last edited after April 18th, 2018.
+      disabled: true
+    - key: end
+      value: '1541796014'
+      description: This parameter is used to only get Assets that were last edited
+        *before* the unix timestamp passed into the end parameter.
+      disabled: true
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what ID you want to start
+        receiving results at. Without ordering, this will return results with an ID
+        greater than the value of cursor. With ordering, this will return results
+        starting at the next item in the order, regardless of whether its ID is greater
+        than or lesser than the value of cursor.
+      disabled: true
+    - key: limit
+      value: '1'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+      disabled: true
+    - key: parentAssetID
+      value: '2317'
+      description: This parameter can be used to get asset(s) children using the Parent's
+        ID. This parameter accepts a comma delimited list of Asset IDs.
+      disabled: true
+    - key: orderBy
+      value: -lastEdited
+      description: This parameter is used to order results by their lastEdited property
+        instead of the default ordering by ascending assetID. CANNOT be provided alongside
+        the cursor parameter. to paginate in this ordering, use the start or end parameters.
+      disabled: true
+    - key: page
+      value: '1'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+      disabled: true
+    - key: geoLocation
+      value: 'true'
+      description: This parameter is used to filter results that contain a geoLocation
+        property. By default it is false and will return **all** assets with and without
+        geoLocation property. If true, it will only return assets with a geoLocation
+        property.
+      disabled: true
   routes.assets.image:
     is_folder: true
     description_data:
@@ -654,113 +744,6 @@ endpoints:
       description: This parameter is used to only get relations that were last edited
         *before* the unix timestamp passed into the end parameter.
       disabled: true
-  routes.assets.assets:
-    url: '{api_base_url}/assets/'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - meta
-        - Requests to gather more information on an Asset such as Fields for the Asset
-          or what Tasks are assigned to the Asset
-      - - startedOn
-        - The date when this Asset was started on. This property is used to help determine
-          runtime which is used in MTBF.
-      - - lastEdited
-        - A UNIX timestamp of when this Asset was last edited.
-      - - parentAssetID
-        - The Asset that is the parent of this Asset. If the value is 0 that means
-          this Asset does not have a parent.
-      - - locationID
-        - The ID of the location this asset is located at.
-      - - hoursPerWeek
-        - The number of hours this Asset runs per week. This is used to determine
-          runtime which is used in MTBF. If the value is -1 then the Asset uses the
-          Location's hoursPerWeek setting.
-      - - workRequestPortal
-        - The url work requestors can use to submit problems with this Asset.
-      - - image
-        - Array of objects that have a file name and a link you can use to download
-          that image. All links are only valid for 15 minutes, a new call will generate
-          a new link.
-      - - geoLocation
-        - The location of an asset on a Map.
-      non_table_before: 'This request returns a list of Assets with top level information
-        such as name, last edited, etc.
-
-
-        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
-        section for more information.
-
-
-        Return data description'
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: assets
-      value: '1'
-      description: This parameter is used to only get specific Assets. This parameter
-        expects a comma delimited list of Asset IDs.
-      disabled: true
-    - key: name
-      value: '%test%'
-      description: This is a parameter used to string search for a name or partial
-        name of an asset this parameter expects a string with the wildcard %.
-      disabled: true
-    - key: locations
-      value: '73'
-      description: This parameter is used to only get Assets at a specific group of
-        Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
-    - key: start
-      value: '1541796014'
-      description: This parameter is used to only get Assets that were last edited
-        after the unix timestamp passed into the start parameter. For example, all
-        Assets that were last edited after April 18th, 2018.
-      disabled: true
-    - key: end
-      value: '1541796014'
-      description: This parameter is used to only get Assets that were last edited
-        *before* the unix timestamp passed into the end parameter.
-      disabled: true
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what ID you want to start
-        receiving results at. Without ordering, this will return results with an ID
-        greater than the value of cursor. With ordering, this will return results
-        starting at the next item in the order, regardless of whether its ID is greater
-        than or lesser than the value of cursor.
-      disabled: true
-    - key: limit
-      value: '1'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      disabled: true
-    - key: parentAssetID
-      value: '2317'
-      description: This parameter can be used to get asset(s) children using the Parent's
-        ID. This parameter accepts a comma delimited list of Asset IDs.
-      disabled: true
-    - key: orderBy
-      value: -lastEdited
-      description: This parameter is used to order results by their lastEdited property
-        instead of the default ordering by ascending assetID. CANNOT be provided alongside
-        the cursor parameter. to paginate in this ordering, use the start or end parameters.
-      disabled: true
-    - key: page
-      value: '1'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-      disabled: true
-    - key: geoLocation
-      value: 'true'
-      description: This parameter is used to filter results that contain a geoLocation
-        property. By default it is false and will return **all** assets with and without
-        geoLocation property. If true, it will only return assets with a geoLocation
-        property.
-      disabled: true
   routes.assets.new_asset:
     url: '{api_base_url}/assets/'
     method: POST
@@ -877,13 +860,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.locations:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.locations.locations:
     url: '{api_base_url}/locations/'
     method: GET
     description_data:
@@ -1084,12 +1060,120 @@ endpoints:
     is_folder: false
     query_params: []
   routes.parts:
-    is_folder: true
+    url: '{api_base_url}/parts/'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - number
+        - The Part's Number. e.g. 25x25x1
+      - - name
+        - The Part's Name. e.g. Filter
+      - - generalStock
+        - How many of this Part you have in stock. Not including purchase orders.
+      - - unitCode
+        - The unit code displayed for the part. This represents the unit of measure
+          assigned to the part (e.g., "kg", "lb", "each", etc.). If no unit is assigned,
+          this field will be null.
+      - - generalPrice
+        - The default price of this part. Not considering purchase oder prices.
+      - - category
+        - The category this Part belongs to
+      - - location
+        - The Location of this Part. e.g. Shelf A
+      - - minQtyStatus
+        - Is the Part currently under the min quantity threshold. 0 = false, 1 = true.
+      - - minQtyThreshold
+        - The number at which reordering of this part is triggered. -1 means this
+          feature is turned off.
+      - - maxQtyThreshold
+        - The number to bring the parts quantity back to. For example, if my inventory
+          is at 4 and my maxQtyThreshold is 20 I will be reordering 16 parts to bring
+          my inventory back up to the max quantity.
+      - - staleThreshold
+        - This value is how many days will need to go without a User using this Part
+          by before this Part is considering stale.
+      - - staleStatus
+        - Is the Part stale or not. 0 = false, 1 = true.
+      - - userID
+        - The user that will receive threshold notifications and Tasks if thresholds
+          are hit.
+      - - team
+        - The team that will receive threshold notifications and Tasks if thresholds
+          are hit.
+      - - stockOnHand
+        - General Stock plus any unused, received PO Quantities for this part. This
+          matches the 'Qty' value seen in the CMMS Part Management page.
+      - - pos
+        - Array of purchase order objects. price and quantity do not effect generalStock
+          and generalPrice listed above.
+      - - image
+        - Array of objects that have a file name and a link you can use to download
+          that image. All links are only valid for 15 minutes, a new call will generate
+          a new link.
+      non_table_before: 'This request returns a list of Parts with top level information
+        such as name, last edited, etc.
+
+
+        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
+        section for more information.
+
+
+        Return data description'
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: parts
+      value: 1,2
+      description: This parameter is used to only get specific Parts. This parameter
+        accepts a comma delimited list of part IDs.
+      disabled: true
+    - key: locations
+      value: '73'
+      description: This parameter is used to only get Parts at a specific group of
+        Locations. This parameter accepts a comma delimited list of Location IDs.
+      disabled: true
+    - key: name
+      value: '%blade%'
+      description: This parameter is used to only get specific parts. This parameter
+        expects a string either a full name of a part or a partial name with the wildcard
+        %.
+      disabled: true
+    - key: start
+      value: '1564895015'
+      description: This parameter is used to only get Parts that were last edited
+        after the unix timestamp passed into the start parameter. For example, all
+        Parts that were last edited after April 18th, 2018.
+      disabled: true
+    - key: end
+      value: '1564895015'
+      description: This parameter is used to only get Parts that were last edited
+        *before* the unix timestamp passed into the end parameter.
+      disabled: true
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what partID you want to
+        start receiving results at. e.g. passing 137 here will only get you parts
+        with an id greater than 137.
+      disabled: true
+    - key: limit
+      value: '100'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+      disabled: true
+    - key: numbers
+      value: 25x25x1 - Vendor b - location 2
+      description: This parameter is used to only get parts with part numbers that
+        match the list provided. This parameter accepts a comma delimited list of
+        Part Numbers.
+      disabled: true
+    - key: page
+      value: '2'
+      description: 'This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information. '
+      disabled: true
   routes.parts.images:
     is_folder: true
     description_data:
@@ -1118,31 +1202,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.parts.categories:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.parts.categories.create_part_category:
-    url: '{api_base_url}/parts/categories/'
-    method: POST
-    description_data:
-      headers:
-      - Parameter
-      - Type
-      - Required?
-      - Description
-      data_rows:
-      - - name
-        - string
-        - Required
-        - The name of your new part category (i.e. "Lawn Mower Parts")
-      non_table_before: Creates a part category to help you organize your parts.
-      non_table_after: ''
-    is_folder: false
-    query_params: []
-  routes.parts.categories.get_categories:
     url: '{api_base_url}/parts/categories/'
     method: GET
     description_data:
@@ -1162,6 +1221,24 @@ endpoints:
       description: This parameter is used to string search part categories names either
         partial or full name with the wildcard %.
       disabled: true
+  routes.parts.categories.create_part_category:
+    url: '{api_base_url}/parts/categories/'
+    method: POST
+    description_data:
+      headers:
+      - Parameter
+      - Type
+      - Required?
+      - Description
+      data_rows:
+      - - name
+        - string
+        - Required
+        - The name of your new part category (i.e. "Lawn Mower Parts")
+      non_table_before: Creates a part category to help you organize your parts.
+      non_table_after: ''
+    is_folder: false
+    query_params: []
   routes.parts.categories.update_part_category:
     url: '{api_base_url}/parts/categories/:categoryID'
     method: PATCH
@@ -1590,13 +1667,6 @@ endpoints:
       value: ''
       disabled: true
   routes.parts.purchasables:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.parts.purchasables.get_purchasables:
     url: '{api_base_url}/parts/:partID/purchasables'
     method: GET
     description_data:
@@ -1637,121 +1707,6 @@ endpoints:
     - key: nameStartsWith
       value: Box of
       description: Filter purchasables that have a name which starts with this string.
-      disabled: true
-  routes.parts.parts:
-    url: '{api_base_url}/parts/'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - number
-        - The Part's Number. e.g. 25x25x1
-      - - name
-        - The Part's Name. e.g. Filter
-      - - generalStock
-        - How many of this Part you have in stock. Not including purchase orders.
-      - - unitCode
-        - The unit code displayed for the part. This represents the unit of measure
-          assigned to the part (e.g., "kg", "lb", "each", etc.). If no unit is assigned,
-          this field will be null.
-      - - generalPrice
-        - The default price of this part. Not considering purchase oder prices.
-      - - category
-        - The category this Part belongs to
-      - - location
-        - The Location of this Part. e.g. Shelf A
-      - - minQtyStatus
-        - Is the Part currently under the min quantity threshold. 0 = false, 1 = true.
-      - - minQtyThreshold
-        - The number at which reordering of this part is triggered. -1 means this
-          feature is turned off.
-      - - maxQtyThreshold
-        - The number to bring the parts quantity back to. For example, if my inventory
-          is at 4 and my maxQtyThreshold is 20 I will be reordering 16 parts to bring
-          my inventory back up to the max quantity.
-      - - staleThreshold
-        - This value is how many days will need to go without a User using this Part
-          by before this Part is considering stale.
-      - - staleStatus
-        - Is the Part stale or not. 0 = false, 1 = true.
-      - - userID
-        - The user that will receive threshold notifications and Tasks if thresholds
-          are hit.
-      - - team
-        - The team that will receive threshold notifications and Tasks if thresholds
-          are hit.
-      - - stockOnHand
-        - General Stock plus any unused, received PO Quantities for this part. This
-          matches the 'Qty' value seen in the CMMS Part Management page.
-      - - pos
-        - Array of purchase order objects. price and quantity do not effect generalStock
-          and generalPrice listed above.
-      - - image
-        - Array of objects that have a file name and a link you can use to download
-          that image. All links are only valid for 15 minutes, a new call will generate
-          a new link.
-      non_table_before: 'This request returns a list of Parts with top level information
-        such as name, last edited, etc.
-
-
-        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
-        section for more information.
-
-
-        Return data description'
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: parts
-      value: 1,2
-      description: This parameter is used to only get specific Parts. This parameter
-        accepts a comma delimited list of part IDs.
-      disabled: true
-    - key: locations
-      value: '73'
-      description: This parameter is used to only get Parts at a specific group of
-        Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
-    - key: name
-      value: '%blade%'
-      description: This parameter is used to only get specific parts. This parameter
-        expects a string either a full name of a part or a partial name with the wildcard
-        %.
-      disabled: true
-    - key: start
-      value: '1564895015'
-      description: This parameter is used to only get Parts that were last edited
-        after the unix timestamp passed into the start parameter. For example, all
-        Parts that were last edited after April 18th, 2018.
-      disabled: true
-    - key: end
-      value: '1564895015'
-      description: This parameter is used to only get Parts that were last edited
-        *before* the unix timestamp passed into the end parameter.
-      disabled: true
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what partID you want to
-        start receiving results at. e.g. passing 137 here will only get you parts
-        with an id greater than 137.
-      disabled: true
-    - key: limit
-      value: '100'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      disabled: true
-    - key: numbers
-      value: 25x25x1 - Vendor b - location 2
-      description: This parameter is used to only get parts with part numbers that
-        match the list provided. This parameter accepts a comma delimited list of
-        Part Numbers.
-      disabled: true
-    - key: page
-      value: '2'
-      description: 'This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information. '
       disabled: true
   routes.parts.create_part:
     url: '{api_base_url}/parts/'
@@ -2031,49 +1986,239 @@ endpoints:
         no more than 100 results at one time.
       disabled: true
   routes.tasks:
-    is_folder: true
+    url: '{api_base_url}/tasks/'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - meta
+        - This property has shortcuts to get other information related to the Task
+          such as the Task's invoices, labor parts usage and instructions.
+      - - name
+        - The Task's name.
+      - - userID
+        - The id of the user this Task is assigned to. A Task can not be assigned
+          to both a Team and a User at the same time.
+      - - teamID
+        - The id of the team this Task is assigned to. A Task can not be assigned
+          to both a Team and a User at the same time.
+      - - locationID
+        - The id of the Location in which this Task belongs to.
+      - - template
+        - This field indicates if the task is a 'template' that spawns other tasks
+          based on schedules or not.
+      - - createdDate
+        - The date this Task was created. This is a unix timestamp.
+      - - startDate
+        - By default this value is 0 as the startDate is usually the same as the createdDate.
+          Sometimes a task is created such that it is scheduled to start in the future
+          (i.e. after the createdDate). In such a case this value will be a unix timestamp
+          indicating the actual start date of the Task.
+      - - due
+        - The date this Task is due. This is a unix timestamp.
+      - - dateCompleted
+        - The date this Task was completed. This is a unix timestamp. A value of 0
+          means this Task is not completed.
+      - - lastEdited
+        - The date this Task was last edited. This is a unix timestamp.
+      - - description
+        - The decription of a task.
+      - - completedByUser
+        - The id of the User that completed this Task.
+      - - lastEditedByUser
+        - The id of the User that last edited the task.
+      - - assetID
+        - The id of the Asset that this Task belongs to.
+      - - completedUserWage
+        - The price per hour of the User's Wage at the point in time when the task
+          was completed.
+      - - priority
+        - The priority of the Task.
+      - - downtime
+        - The amount of downtime in seconds caused by this Task.
+      - - estimatedTime
+        - The estimated time of the task. This is the time it takes to complete the
+          task in minutes.
+      - - completionNotes
+        - Notes inputted by the user at the time of task completion.
+      - - requestorName
+        - The name of the person that requested this Task.
+      - - requestorEmail
+        - The email of the person that requested this Task.
+      - - requestorPhone
+        - The phone number of the person that requested this Task.
+      - - requestTile
+        - The title of the work request being submitted.
+      - - requestField1
+        - Work request portal custom field 1.
+      - - requestField2
+        - Work request portal custom field 2.
+      - - requestField3
+        - Work request portal custom field 3.
+      - - requestDropdown1
+        - Work request portal custom dropdown box 1.
+      - - requestDropdown2
+        - Work request portal custom dropdown box 2.
+      - - requestDropdown3
+        - Work request portal custom dropdown box 3.
+      - - requestorDescription
+        - The description of the request submitted via the Work Request portal.
+      - - type
+        - 1 = Preventative Maintanance (PM);2 = Unplanned Work Order (WO);4 = Planned
+          Work Order (WO);5 = Cycle Count;6 = Work Request (WR);7 = Min Part Threshold;8
+          = Materials Request;
+      - - status
+        - '1 - Complete0 - IncompleteNote: this property indicates a task status with
+          respect to task completion. For the custom task status refer to statusID'
+      - - statusID
+        - 'The current custom status assigned to this task.Note: this indicates the
+          current status of a task. Use GET Statuses to find the value of each statusID.'
+      - - associatedTaskID (deprecated)
+        - Please refer to associatedTask meta property on GET Task Instruction for
+          instruction type 14.
+      - - meta1
+        - Task meta data. This does not show in the web application, but can be used
+          to track items between integrated systems.
+      - - meta2
+        - Task meta data. This does not show in the web application, but can be used
+          to track items between integrated systems.
+      - - meta3
+        - Task meta data. This does not show in the web application, but can be used
+          to track items between integrated systems.
+      - - geoLocation
+        - The location of a task on a Map.
+      - - customTags
+        - An array of custom tags associated with the task.
+      non_table_before: 'This request gets top level information about Tasks such
+        as completed date, assignment, assetID, etc.
+
+
+        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
+        section for more information.
+
+
+        Return data description'
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: tasks
+      value: '9109'
+      description: This parameter is used to only get specific Tasks. This parameter
+        accepts a comma delimited list of task IDs.
+    - key: assets
+      value: '1'
+      description: This parameter is used to only get Tasks that are linked to an
+        asset. This parameter accepts a comma delimited list of asset IDs.
+    - key: locations
+      value: '73'
+      description: This parameter is used to only get Tasks at a specific group of
+        Locations. This parameter accepts a comma delimited list of Location IDs.
+    - key: type
+      value: '6'
+      description: This parameter is used to only get Tasks of a specific type. This
+        parameter accepts a comma delimited list of task types.
+    - key: name
+      value: '%test%'
+      description: This is a parameter used to string search for a name or partial
+        name of a task this parameter expects a string with the wildcard %.
+    - key: start
+      value: '1000000000'
+      description: This parameter is used to only get Tasks that were last edited
+        after the unix timestamp passed into the start parameter. For example, all
+        Tasks that were last edited after April 18th, 2018.
+    - key: end
+      value: '2500000000'
+      description: This parameter is used to only get Tasks that were last edited
+        *before* the unix timestamp passed into the end parameter.
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what taskID you want to
+        start receiving results at. e.g. passing 137 here will only get you tasks
+        with an id greater than 137.
+    - key: limit
+      value: '2'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+    - key: page
+      value: '2'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+    - key: completedStart
+      value: '0'
+      description: This parameter is used to only get Tasks that were completed after
+        the unix timestamp passed into this parameter. For example, all Assets that
+        were completed after April 18th, 2018.
+    - key: completedEnd
+      value: '2500000000'
+      description: This parameter is used to only get Tasks that were completed *before*
+        the unix timestamp passed into this parameter.
+    - key: scheduledStart
+      value: '0'
+      description: 'This parameter is used to only get Tasks whose scheduled start
+        is after the unix timestamp passed into this parameter. '
+    - key: scheduledEnd
+      value: '2500000000'
+      description: 'This parameter is used to only get Tasks whose scheduled end is
+        *before* the unix timestamp passed into this parameter. '
+    - key: orderBy
+      value: -createdDate
+      description: This parameter sorts based on the value you pass. I.e. passing
+        createdDate will order the results based on createdDate. Negative parameters
+        are used to reverse sort order. This supports sorting by due, createdDate,
+        dateCompleted and lastEdited.
+    - key: geoLocation
+      value: 'true'
+      description: This parameter is used to filter results that contain a geoLocation
+        property. By default it is false and will return **all** tasks with and without
+        geoLocation property. If true, it will only return tasks with a geoLocation
+        property.
+    - key: lastEditedByUsers
+      value: 0,340,341
+      description: This parameter is used to filter tasks by users that have completed
+        tasks.
+    - key: status
+      value: '1'
+      description: This parameter is used to filter tasks by completed status. 1 -
+        Complete  0 - Incomplete
+    - key: meta1
+      value: '1'
+      description: This parameter is used to filter tasks by task meta data. This
+        does not show in the web application, but can be used to track items between
+        integrated systems.
+    - key: meta2
+      value: '2'
+      description: This parameter is used to filter tasks by task meta data. This
+        does not show in the web application, but can be used to track items between
+        integrated systems.
+    - key: meta3
+      value: '3'
+      description: This parameter is used to filter tasks by task meta data. This
+        does not show in the web application, but can be used to track items between
+        integrated systems.
+    - key: statusIDs
+      value: 0,1,2
+      description: This parameter is used to filter tasks by their associated statusID.
+    - key: page
+      value: '2'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+    - key: geoLocation
+      value: 'true'
+      description: This parameter is used to filter results that contain a geoLocation
+        property. By default it is false and will return **all** tasks with and without
+        geoLocation property. If true, it will only return tasks with a geoLocation
+        property.
+    - key: tag
+      value: '@My Custom Tag;'
+      description: 'This parameter is used to filter results that contain a certain
+        custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom
+        Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom
+        Tag" but because custom tags are stored with an at sign ("@") at the beginning
+        and a semi-colon (";") colon at the end it is recommended that the param follows
+        the same format. '
   routes.tasks.invoices:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.tasks.invoices.files:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.tasks.invoices.files.attach_a_file_to_an_invoice:
-    url: '{api_base_url}/tasks/:taskID/invoices/:invoiceID/file'
-    method: PUT
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: This request will attach a text or image file to an invoice
-        on an **open** Task (i.e. task status=0).
-      non_table_after: ''
-    is_folder: false
-    query_params: []
-  routes.tasks.invoices.files.delete_file_from_invoice:
-    url: '{api_base_url}/tasks/:taskID/invoices/:invoiceID/file'
-    method: DELETE
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: This request removes a file attached to an invoice on an open
-        Task (i.e. task status = 0).
-      non_table_after: ''
-    is_folder: false
-    query_params: []
-  routes.tasks.invoices.invoices:
     url: '{api_base_url}/tasks/invoices/'
     method: GET
     description_data:
@@ -2115,6 +2260,35 @@ endpoints:
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
       disabled: true
+  routes.tasks.invoices.files:
+    is_folder: true
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: ''
+      non_table_after: ''
+  routes.tasks.invoices.files.attach_a_file_to_an_invoice:
+    url: '{api_base_url}/tasks/:taskID/invoices/:invoiceID/file'
+    method: PUT
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: This request will attach a text or image file to an invoice
+        on an **open** Task (i.e. task status=0).
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.tasks.invoices.files.delete_file_from_invoice:
+    url: '{api_base_url}/tasks/:taskID/invoices/:invoiceID/file'
+    method: DELETE
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: This request removes a file attached to an invoice on an open
+        Task (i.e. task status = 0).
+      non_table_after: ''
+    is_folder: false
+    query_params: []
   routes.tasks.invoices.attach_an_invoice_to_task:
     url: '{api_base_url}/tasks/:taskID/invoices/'
     method: PUT
@@ -2908,13 +3082,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.tasks.tags:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.tasks.tags.tags:
     url: '{api_base_url}/tasks/:taskID/tags'
     method: GET
     description_data:
@@ -3346,246 +3513,69 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
-  routes.tasks.tasks:
-    url: '{api_base_url}/tasks/'
+  routes.users:
+    url: '{api_base_url}/users'
     method: GET
     description_data:
       headers:
       - Property
       - Description
       data_rows:
-      - - meta
-        - This property has shortcuts to get other information related to the Task
-          such as the Task's invoices, labor parts usage and instructions.
-      - - name
-        - The Task's name.
-      - - userID
-        - The id of the user this Task is assigned to. A Task can not be assigned
-          to both a Team and a User at the same time.
-      - - teamID
-        - The id of the team this Task is assigned to. A Task can not be assigned
-          to both a Team and a User at the same time.
-      - - locationID
-        - The id of the Location in which this Task belongs to.
-      - - template
-        - This field indicates if the task is a 'template' that spawns other tasks
-          based on schedules or not.
-      - - createdDate
-        - The date this Task was created. This is a unix timestamp.
-      - - startDate
-        - By default this value is 0 as the startDate is usually the same as the createdDate.
-          Sometimes a task is created such that it is scheduled to start in the future
-          (i.e. after the createdDate). In such a case this value will be a unix timestamp
-          indicating the actual start date of the Task.
-      - - due
-        - The date this Task is due. This is a unix timestamp.
-      - - dateCompleted
-        - The date this Task was completed. This is a unix timestamp. A value of 0
-          means this Task is not completed.
-      - - lastEdited
-        - The date this Task was last edited. This is a unix timestamp.
-      - - description
-        - The decription of a task.
-      - - completedByUser
-        - The id of the User that completed this Task.
-      - - lastEditedByUser
-        - The id of the User that last edited the task.
-      - - assetID
-        - The id of the Asset that this Task belongs to.
-      - - completedUserWage
-        - The price per hour of the User's Wage at the point in time when the task
-          was completed.
-      - - priority
-        - The priority of the Task.
-      - - downtime
-        - The amount of downtime in seconds caused by this Task.
-      - - estimatedTime
-        - The estimated time of the task. This is the time it takes to complete the
-          task in minutes.
-      - - completionNotes
-        - Notes inputted by the user at the time of task completion.
-      - - requestorName
-        - The name of the person that requested this Task.
-      - - requestorEmail
-        - The email of the person that requested this Task.
-      - - requestorPhone
-        - The phone number of the person that requested this Task.
-      - - requestTile
-        - The title of the work request being submitted.
-      - - requestField1
-        - Work request portal custom field 1.
-      - - requestField2
-        - Work request portal custom field 2.
-      - - requestField3
-        - Work request portal custom field 3.
-      - - requestDropdown1
-        - Work request portal custom dropdown box 1.
-      - - requestDropdown2
-        - Work request portal custom dropdown box 2.
-      - - requestDropdown3
-        - Work request portal custom dropdown box 3.
-      - - requestorDescription
-        - The description of the request submitted via the Work Request portal.
-      - - type
-        - 1 = Preventative Maintanance (PM);2 = Unplanned Work Order (WO);4 = Planned
-          Work Order (WO);5 = Cycle Count;6 = Work Request (WR);7 = Min Part Threshold;8
-          = Materials Request;
-      - - status
-        - '1 - Complete0 - IncompleteNote: this property indicates a task status with
-          respect to task completion. For the custom task status refer to statusID'
-      - - statusID
-        - 'The current custom status assigned to this task.Note: this indicates the
-          current status of a task. Use GET Statuses to find the value of each statusID.'
-      - - associatedTaskID (deprecated)
-        - Please refer to associatedTask meta property on GET Task Instruction for
-          instruction type 14.
-      - - meta1
-        - Task meta data. This does not show in the web application, but can be used
-          to track items between integrated systems.
-      - - meta2
-        - Task meta data. This does not show in the web application, but can be used
-          to track items between integrated systems.
-      - - meta3
-        - Task meta data. This does not show in the web application, but can be used
-          to track items between integrated systems.
-      - - geoLocation
-        - The location of a task on a Map.
-      - - customTags
-        - An array of custom tags associated with the task.
-      non_table_before: 'This request gets top level information about Tasks such
-        as completed date, assignment, assetID, etc.
-
-
-        **Note:** this endpoint supports pagination. Please refer to the [Pagination](#pagination)
-        section for more information.
+      - - username
+        - What a User uses to login.
+      - - wage
+        - The hourly rate of an employee.
+      - - active
+        - Determines if a user can log into Limble or not.
+      - - emailNotificationActive
+        - Determines if a User gets Email Notifications From Limble.
+      - - pushNotificationActive
+        - Determines if a User gets Push Notifications From Limble.
+      - - workdayHours
+        - The number of hours a day this employee works.
+      - - dateAdded
+        - The date a user was added to Limble.  This is a unix timestamp.
+      - - teams
+        - What Teams a User has at specific Locations.
+      non_table_before: 'This request gets information about Users such as User Login,
+        User Email etc.
 
 
         Return data description'
       non_table_after: ''
     is_folder: false
     query_params:
-    - key: tasks
-      value: '9109'
-      description: This parameter is used to only get specific Tasks. This parameter
-        accepts a comma delimited list of task IDs.
-    - key: assets
-      value: '1'
-      description: This parameter is used to only get Tasks that are linked to an
-        asset. This parameter accepts a comma delimited list of asset IDs.
-    - key: locations
-      value: '73'
-      description: This parameter is used to only get Tasks at a specific group of
-        Locations. This parameter accepts a comma delimited list of Location IDs.
-    - key: type
-      value: '6'
-      description: This parameter is used to only get Tasks of a specific type. This
-        parameter accepts a comma delimited list of task types.
+    - key: users
+      value: '342'
+      description: This parameter expects a comma-separated list of users to get by
+        id
     - key: name
-      value: '%test%'
-      description: This is a parameter used to string search for a name or partial
-        name of a task this parameter expects a string with the wildcard %.
-    - key: start
-      value: '1000000000'
-      description: This parameter is used to only get Tasks that were last edited
-        after the unix timestamp passed into the start parameter. For example, all
-        Tasks that were last edited after April 18th, 2018.
-    - key: end
-      value: '2500000000'
-      description: This parameter is used to only get Tasks that were last edited
-        *before* the unix timestamp passed into the end parameter.
+      value: '%jeff%'
+      description: This parameter is used to only get specific user by name. This
+        parameter expects a string full name of a user or partial name with the wildcard
+        %.
+      disabled: true
+    - key: roles
+      value: '320'
+      description: This parameter expects a comma-separated list of users to get by
+        roleID
+      disabled: true
+    - key: teams
+      value: 436,437
+      description: This parameter expects a comma-separated list of users to get by
+        teamID
+      disabled: true
     - key: cursor
       value: '0'
-      description: This parameter is a cursor that selects what taskID you want to
+      description: This parameter is a cursor that selects what userID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
+      disabled: true
     - key: limit
-      value: '2'
+      value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-    - key: page
-      value: '2'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-    - key: completedStart
-      value: '0'
-      description: This parameter is used to only get Tasks that were completed after
-        the unix timestamp passed into this parameter. For example, all Assets that
-        were completed after April 18th, 2018.
-    - key: completedEnd
-      value: '2500000000'
-      description: This parameter is used to only get Tasks that were completed *before*
-        the unix timestamp passed into this parameter.
-    - key: scheduledStart
-      value: '0'
-      description: 'This parameter is used to only get Tasks whose scheduled start
-        is after the unix timestamp passed into this parameter. '
-    - key: scheduledEnd
-      value: '2500000000'
-      description: 'This parameter is used to only get Tasks whose scheduled end is
-        *before* the unix timestamp passed into this parameter. '
-    - key: orderBy
-      value: -createdDate
-      description: This parameter sorts based on the value you pass. I.e. passing
-        createdDate will order the results based on createdDate. Negative parameters
-        are used to reverse sort order. This supports sorting by due, createdDate,
-        dateCompleted and lastEdited.
-    - key: geoLocation
-      value: 'true'
-      description: This parameter is used to filter results that contain a geoLocation
-        property. By default it is false and will return **all** tasks with and without
-        geoLocation property. If true, it will only return tasks with a geoLocation
-        property.
-    - key: lastEditedByUsers
-      value: 0,340,341
-      description: This parameter is used to filter tasks by users that have completed
-        tasks.
-    - key: status
-      value: '1'
-      description: This parameter is used to filter tasks by completed status. 1 -
-        Complete  0 - Incomplete
-    - key: meta1
-      value: '1'
-      description: This parameter is used to filter tasks by task meta data. This
-        does not show in the web application, but can be used to track items between
-        integrated systems.
-    - key: meta2
-      value: '2'
-      description: This parameter is used to filter tasks by task meta data. This
-        does not show in the web application, but can be used to track items between
-        integrated systems.
-    - key: meta3
-      value: '3'
-      description: This parameter is used to filter tasks by task meta data. This
-        does not show in the web application, but can be used to track items between
-        integrated systems.
-    - key: statusIDs
-      value: 0,1,2
-      description: This parameter is used to filter tasks by their associated statusID.
-    - key: page
-      value: '2'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-    - key: geoLocation
-      value: 'true'
-      description: This parameter is used to filter results that contain a geoLocation
-        property. By default it is false and will return **all** tasks with and without
-        geoLocation property. If true, it will only return tasks with a geoLocation
-        property.
-    - key: tag
-      value: '@My Custom Tag;'
-      description: 'This parameter is used to filter results that contain a certain
-        custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom
-        Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom
-        Tag" but because custom tags are stored with an at sign ("@") at the beginning
-        and a semi-colon (";") colon at the end it is recommended that the param follows
-        the same format. '
-  routes.users:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
+      disabled: true
   routes.users.roles:
     is_folder: true
     description_data:
@@ -3711,69 +3701,6 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
-  routes.users.users:
-    url: '{api_base_url}/users'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - username
-        - What a User uses to login.
-      - - wage
-        - The hourly rate of an employee.
-      - - active
-        - Determines if a user can log into Limble or not.
-      - - emailNotificationActive
-        - Determines if a User gets Email Notifications From Limble.
-      - - pushNotificationActive
-        - Determines if a User gets Push Notifications From Limble.
-      - - workdayHours
-        - The number of hours a day this employee works.
-      - - dateAdded
-        - The date a user was added to Limble.  This is a unix timestamp.
-      - - teams
-        - What Teams a User has at specific Locations.
-      non_table_before: 'This request gets information about Users such as User Login,
-        User Email etc.
-
-
-        Return data description'
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: users
-      value: '342'
-      description: This parameter expects a comma-separated list of users to get by
-        id
-    - key: name
-      value: '%jeff%'
-      description: This parameter is used to only get specific user by name. This
-        parameter expects a string full name of a user or partial name with the wildcard
-        %.
-      disabled: true
-    - key: roles
-      value: '320'
-      description: This parameter expects a comma-separated list of users to get by
-        roleID
-      disabled: true
-    - key: teams
-      value: 436,437
-      description: This parameter expects a comma-separated list of users to get by
-        teamID
-      disabled: true
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what userID you want to
-        start receiving results at. e.g. passing 137 here will only get you tasks
-        with an id greater than 137.
-      disabled: true
-    - key: limit
-      value: '100'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      disabled: true
   routes.users.new_user:
     url: '{api_base_url}/users/'
     method: POST
@@ -3910,12 +3837,72 @@ endpoints:
     is_folder: false
     query_params: []
   routes.vendors:
-    is_folder: true
+    url: '{api_base_url}/vendors'
+    method: GET
     description_data:
       headers: []
       data_rows: []
-      non_table_before: ''
+      non_table_before: 'This request gets information such as VendorIDs, Vendor Names,
+        etc.
+
+
+        This call returns a "meta" object containing URLs that can be used to get
+        data related to a vendor.
+
+
+        This call will also return an image array of objects that have a file name
+        and a link you can use to download that image. All links are only valid for
+        15 minutes, a new call will generate a new link.
+
+
+        **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination)
+        section for more information.'
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: vendors
+      value: '9'
+      description: This parameter is used to only get specific Vendors. This parameter
+        expects a comma delimited list of Vendor IDs.
+      disabled: true
+    - key: locations
+      value: '163'
+      description: This parameter is used to only get Vendors at a specific group
+        of Locations. This parameter accepts a comma delimited list of Location IDs.
+      disabled: true
+    - key: name
+      value: '%test%'
+      description: This parameter is used to only get specific vendor by name. This
+        parameter expects a string full name of a vendor or partial name with the
+        wildcard %.
+      disabled: true
+    - key: start
+      value: '1560233040'
+      description: This parameter is used to only get Vendors that were last edited
+        after the unix timestamp passed into the start parameter. For example, all
+        Vendors that were last edited after April 18th, 2018.
+      disabled: true
+    - key: end
+      value: '1613665140'
+      description: This parameter is used to only get Vendors that were last edited
+        *before* the unix timestamp passed into the end parameter.
+      disabled: true
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what vendorID you want
+        to start receiving results at. e.g. passing 137 here will only get you vendors
+        with an id greater than 137.
+      disabled: true
+    - key: limit
+      value: '2'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+      disabled: true
+    - key: page
+      value: '1'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+      disabled: true
   routes.vendors.fields:
     is_folder: true
     description_data:
@@ -4275,73 +4262,6 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
-  routes.vendors.vendors:
-    url: '{api_base_url}/vendors'
-    method: GET
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: 'This request gets information such as VendorIDs, Vendor Names,
-        etc.
-
-
-        This call returns a "meta" object containing URLs that can be used to get
-        data related to a vendor.
-
-
-        This call will also return an image array of objects that have a file name
-        and a link you can use to download that image. All links are only valid for
-        15 minutes, a new call will generate a new link.
-
-
-        **Note:** this endpoint supports pagination. Please refer to the [**Pagination**](#pagination)
-        section for more information.'
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: vendors
-      value: '9'
-      description: This parameter is used to only get specific Vendors. This parameter
-        expects a comma delimited list of Vendor IDs.
-      disabled: true
-    - key: locations
-      value: '163'
-      description: This parameter is used to only get Vendors at a specific group
-        of Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
-    - key: name
-      value: '%test%'
-      description: This parameter is used to only get specific vendor by name. This
-        parameter expects a string full name of a vendor or partial name with the
-        wildcard %.
-      disabled: true
-    - key: start
-      value: '1560233040'
-      description: This parameter is used to only get Vendors that were last edited
-        after the unix timestamp passed into the start parameter. For example, all
-        Vendors that were last edited after April 18th, 2018.
-      disabled: true
-    - key: end
-      value: '1613665140'
-      description: This parameter is used to only get Vendors that were last edited
-        *before* the unix timestamp passed into the end parameter.
-      disabled: true
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what vendorID you want
-        to start receiving results at. e.g. passing 137 here will only get you vendors
-        with an id greater than 137.
-      disabled: true
-    - key: limit
-      value: '2'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      disabled: true
-    - key: page
-      value: '1'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-      disabled: true
   routes.vendors.new_vendor:
     url: '{api_base_url}/vendors'
     method: POST
@@ -4430,13 +4350,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.roles:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.roles.get_roles:
     url: '{api_base_url}/roles/'
     method: GET
     description_data:
@@ -4507,13 +4420,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.teams:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.teams.get_teams:
     url: '{api_base_url}/teams/'
     method: GET
     description_data:
@@ -4609,12 +4515,145 @@ endpoints:
     is_folder: false
     query_params: []
   routes.purchase_orders:
-    is_folder: true
+    url: '{api_base_url}/po'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - meta
+        - useful links relating to this Purchase order
+      - - poID
+        - The unique ID of the Purchase Order.
+      - - poNumber
+        - The user-set Purchase Order number.
+      - - budgetID
+        - The unique ID of the budget associated with this Purchase Order.
+      - - vendorID
+        - The unique ID of the vendor associated with this Purchase Order.
+      - - locationID
+        - The unique ID of the location associated with this Purchase Order.
+      - - userIDStarted
+        - The unique ID of the user that started this Purchase Order.
+      - - userID
+        - The unique ID of the user this Purchase Order is currently assigned to.
+      - - teamID
+        - The unique ID of the team the user of this Purchase Order is currently assigned
+          to.
+      - - requestedByUserID
+        - The userID of the user that request this Purchase Order. A value of 0 means
+          this PO wasn't requested, but was manually started by the userIDStarted.
+      - - date
+        - The date this PO was started as a UNIX timestamp, or the date the user inputted
+          for the Purchase Order.
+      - - expectedDate
+        - The date this PO is expected as a UNIX timestamp to receive items.
+      - - billTo
+        - The address that should receive the bill for the PO.
+      - - shipTo
+        - The address the PO's items should be delivered to.
+      - - notesToVendor
+        - Any notes sent to the vendor, possibly containing handling, packaging, or
+          delivery instructions.
+      - - customField1
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - customField2
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - customField3
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - customField4
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - customField5
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - customField6
+        - PO custom field, the customer chooses which custom fields are available
+          on all POs.
+      - - poPrefix
+        - If a PO prefix is configured, it will show up here.
+      - - lastEdited
+        - Last time this PO was edited as a UNIX timestamp.
+      - - status
+        - 'This is the current status of a PO. Status of PO can be as follows:0: the
+          PO has only been setup. (Status: Setup)1-97: these are custom statuses based
+          on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of
+          the budgetStep it is on} )97: the PO is in the ready to receive step. This
+          means items can be received for this PO. (Status: Ready to Receive)98 all
+          budget steps have been completed, but not all items on the PO have been
+          received. This means only some items or partial qty of items have been received.
+          (Status: Partially Received)99: the PO is completed. This means all the
+          items and their full qty on the PO have been received but not been paid
+          for ( i.e. all the bills generated for this PO have not been marked as paid
+          yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This
+          means all the items on the PO have been received and have been paid for.
+          (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)'
+      - - stateDetails
+        - JSON object containing details about the PO's current state, and available
+          state transitions.
+      - - poNumberDisplay
+        - Formatted display string with leading zeros and prefix. This is the PO Number
+          the UI will display.
       non_table_before: ''
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: pos
+      value: '1'
+      description: This parameter is used to only get specific POs. This parameter
+        expects a comma delimited list of PO IDs.
+      disabled: true
+    - key: vendors
+      value: '9'
+      description: This parameter is used to only get specific Vendors. This parameter
+        expects a comma delimited list of Vendor IDs.
+      disabled: true
+    - key: locations
+      value: '73'
+      description: This parameter is used to only get POs at a specific group of Locations.
+        This parameter accepts a comma delimited list of Location IDs.
+      disabled: true
+    - key: numbers
+      value: '1'
+      description: This parameter is used to only get specific POs by Number. This
+        parameter expects a comma delimited list of PO Numbers.
+      disabled: true
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what poID you want to start
+        receiving results at. e.g. passing 137 here will only get you PO with an id
+        greater than 137.
+      disabled: true
+    - key: limit
+      value: '2'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+      disabled: true
+    - key: lastEditedStart
+      value: '1629737835'
+      description: This parameter is used to only get POs that were last edited after
+        the unix timestamp passed into the start parameter. For example, all POs that
+        were last edited after April 18th, 2018.
+      disabled: true
+    - key: lastEditedEnd
+      value: '1630121871'
+      description: This parameter is used to only get POs that were last edited *before*
+        the unix timestamp passed in.
+      disabled: true
+    - key: status
+      value: 97,99
+      description: This parameter is used to only get POs for a specific group of
+        status.
+      disabled: true
+    - key: page
+      value: '3'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+      disabled: true
   routes.purchase_orders.items:
     is_folder: true
     description_data:
@@ -5176,146 +5215,6 @@ endpoints:
         \ next state transitions for the selected PO."
     is_folder: false
     query_params: []
-  routes.purchase_orders.get_purchase_orders:
-    url: '{api_base_url}/po'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - meta
-        - useful links relating to this Purchase order
-      - - poID
-        - The unique ID of the Purchase Order.
-      - - poNumber
-        - The user-set Purchase Order number.
-      - - budgetID
-        - The unique ID of the budget associated with this Purchase Order.
-      - - vendorID
-        - The unique ID of the vendor associated with this Purchase Order.
-      - - locationID
-        - The unique ID of the location associated with this Purchase Order.
-      - - userIDStarted
-        - The unique ID of the user that started this Purchase Order.
-      - - userID
-        - The unique ID of the user this Purchase Order is currently assigned to.
-      - - teamID
-        - The unique ID of the team the user of this Purchase Order is currently assigned
-          to.
-      - - requestedByUserID
-        - The userID of the user that request this Purchase Order. A value of 0 means
-          this PO wasn't requested, but was manually started by the userIDStarted.
-      - - date
-        - The date this PO was started as a UNIX timestamp, or the date the user inputted
-          for the Purchase Order.
-      - - expectedDate
-        - The date this PO is expected as a UNIX timestamp to receive items.
-      - - billTo
-        - The address that should receive the bill for the PO.
-      - - shipTo
-        - The address the PO's items should be delivered to.
-      - - notesToVendor
-        - Any notes sent to the vendor, possibly containing handling, packaging, or
-          delivery instructions.
-      - - customField1
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - customField2
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - customField3
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - customField4
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - customField5
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - customField6
-        - PO custom field, the customer chooses which custom fields are available
-          on all POs.
-      - - poPrefix
-        - If a PO prefix is configured, it will show up here.
-      - - lastEdited
-        - Last time this PO was edited as a UNIX timestamp.
-      - - status
-        - 'This is the current status of a PO. Status of PO can be as follows:0: the
-          PO has only been setup. (Status: Setup)1-97: these are custom statuses based
-          on the budget steps. Refer to "budgetSteps" in meta. (Status : {Name of
-          the budgetStep it is on} )97: the PO is in the ready to receive step. This
-          means items can be received for this PO. (Status: Ready to Receive)98 all
-          budget steps have been completed, but not all items on the PO have been
-          received. This means only some items or partial qty of items have been received.
-          (Status: Partially Received)99: the PO is completed. This means all the
-          items and their full qty on the PO have been received but not been paid
-          for ( i.e. all the bills generated for this PO have not been marked as paid
-          yet.) (Status: Fully Received - Pending Payment)100: the PO is closed. This
-          means all the items on the PO have been received and have been paid for.
-          (i.e. all the bills for this PO have been marked as paid.) (Status: Closed)'
-      - - stateDetails
-        - JSON object containing details about the PO's current state, and available
-          state transitions.
-      - - poNumberDisplay
-        - Formatted display string with leading zeros and prefix. This is the PO Number
-          the UI will display.
-      non_table_before: ''
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: pos
-      value: '1'
-      description: This parameter is used to only get specific POs. This parameter
-        expects a comma delimited list of PO IDs.
-      disabled: true
-    - key: vendors
-      value: '9'
-      description: This parameter is used to only get specific Vendors. This parameter
-        expects a comma delimited list of Vendor IDs.
-      disabled: true
-    - key: locations
-      value: '73'
-      description: This parameter is used to only get POs at a specific group of Locations.
-        This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
-    - key: numbers
-      value: '1'
-      description: This parameter is used to only get specific POs by Number. This
-        parameter expects a comma delimited list of PO Numbers.
-      disabled: true
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what poID you want to start
-        receiving results at. e.g. passing 137 here will only get you PO with an id
-        greater than 137.
-      disabled: true
-    - key: limit
-      value: '2'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      disabled: true
-    - key: lastEditedStart
-      value: '1629737835'
-      description: This parameter is used to only get POs that were last edited after
-        the unix timestamp passed into the start parameter. For example, all POs that
-        were last edited after April 18th, 2018.
-      disabled: true
-    - key: lastEditedEnd
-      value: '1630121871'
-      description: This parameter is used to only get POs that were last edited *before*
-        the unix timestamp passed in.
-      disabled: true
-    - key: status
-      value: 97,99
-      description: This parameter is used to only get POs for a specific group of
-        status.
-      disabled: true
-    - key: page
-      value: '3'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-      disabled: true
   routes.purchase_orders.new_purchase_order:
     url: '{api_base_url}/po'
     method: POST
@@ -5484,13 +5383,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.general_ledgers:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.general_ledgers.get_general_ledgers:
     url: '{api_base_url}/gl'
     method: GET
     description_data:
@@ -5628,19 +5520,86 @@ endpoints:
     is_folder: false
     query_params: []
   routes.budgets:
-    is_folder: true
+    url: '{api_base_url}/budgets'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - budgetID
+        - The Budget's unique identifier.
+      - - name
+        - The full name of the Budget.
+      - - locationID
+        - Which Location this Budget belongs to.
+      non_table_before: "This request returns your Budgets in Limble.  \n\nReturn\
+        \ data description"
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what budgetID you want
+        to start receiving results at. e.g. passing 137 here will only get you budgets
+        with an ID greater than 137.
+    - key: limit
+      value: '1'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+    - key: name
+      value: '%General%'
+      description: This is a parameter used to string search for a name or partial
+        name of a budget. This parameter expects a string with the wildcard %.
+    - key: locations
+      value: 1,2,3
+      description: This parameter is used to only get budgets that are linked to a
+        location. This parameter accepts a comma delimited list of location IDs.
+    - key: budgets
+      value: 1,2,3
+      description: This parameter is used to only get specific budgets. This parameter
+        accepts a comma delimited list of budget IDs.
   routes.budgets.steps:
-    is_folder: true
+    url: '{api_base_url}/budgets/steps'
+    method: GET
     description_data:
       headers: []
       data_rows: []
       non_table_before: ''
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: name
+      value: '%test%'
+      description: This is a parameter used to string search for a name or partial
+        name of a budget. This parameter expects a string with the wildcard %.
+      type: text
+    - key: steps
+      value: 1,2,3
+      description: This parameter is used to only get specific steps. This parameter
+        accepts a comma delimited list of step IDs.
+      type: text
+    - key: budgets
+      value: '158'
+      description: This parameter is used to only get steps that are linked to a budget.
+        This parameter accepts a comma delimited list of budget IDs.
+    - key: locations
+      value: 1,2,3
+      description: This parameter is used to only get steps that are linked to a budget
+        at a specific location. This parameter accepts a comma delimited list of location
+        IDs.
+      type: text
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what stepID you want to
+        start receiving results at. e.g. passing 137 here will only get you steps
+        with an ID greater than 137.
+      type: text
+    - key: limit
+      value: '100'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+      type: text
   routes.budgets.steps.new_step:
     url: '{api_base_url}/budgets/:budgetID/steps'
     method: POST
@@ -5694,47 +5653,6 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
-  routes.budgets.steps.get_steps:
-    url: '{api_base_url}/budgets/steps'
-    method: GET
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: name
-      value: '%test%'
-      description: This is a parameter used to string search for a name or partial
-        name of a budget. This parameter expects a string with the wildcard %.
-      type: text
-    - key: steps
-      value: 1,2,3
-      description: This parameter is used to only get specific steps. This parameter
-        accepts a comma delimited list of step IDs.
-      type: text
-    - key: budgets
-      value: '158'
-      description: This parameter is used to only get steps that are linked to a budget.
-        This parameter accepts a comma delimited list of budget IDs.
-    - key: locations
-      value: 1,2,3
-      description: This parameter is used to only get steps that are linked to a budget
-        at a specific location. This parameter accepts a comma delimited list of location
-        IDs.
-      type: text
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what stepID you want to
-        start receiving results at. e.g. passing 137 here will only get you steps
-        with an ID greater than 137.
-      type: text
-    - key: limit
-      value: '100'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-      type: text
   routes.budgets.steps.update_step:
     url: '{api_base_url}/budgets/:budgetID/steps/:stepID'
     method: PATCH
@@ -5785,46 +5703,6 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
-  routes.budgets.get_budgets:
-    url: '{api_base_url}/budgets'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - budgetID
-        - The Budget's unique identifier.
-      - - name
-        - The full name of the Budget.
-      - - locationID
-        - Which Location this Budget belongs to.
-      non_table_before: "This request returns your Budgets in Limble.  \n\nReturn\
-        \ data description"
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what budgetID you want
-        to start receiving results at. e.g. passing 137 here will only get you budgets
-        with an ID greater than 137.
-    - key: limit
-      value: '1'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-    - key: name
-      value: '%General%'
-      description: This is a parameter used to string search for a name or partial
-        name of a budget. This parameter expects a string with the wildcard %.
-    - key: locations
-      value: 1,2,3
-      description: This parameter is used to only get budgets that are linked to a
-        location. This parameter accepts a comma delimited list of location IDs.
-    - key: budgets
-      value: 1,2,3
-      description: This parameter is used to only get specific budgets. This parameter
-        accepts a comma delimited list of budget IDs.
   routes.budgets.new_budget:
     url: '{api_base_url}/budgets'
     method: POST
@@ -5974,13 +5852,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.priorities:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.priorities.get_priorities:
     url: '{api_base_url}/priorities'
     method: GET
     description_data:
@@ -6103,13 +5974,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.tags:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.tags.get_tags:
     url: '{api_base_url}/tags'
     method: GET
     description_data:
@@ -6228,13 +6092,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.statuses:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.statuses.statuses:
     url: '{api_base_url}/statuses'
     method: GET
     description_data:
@@ -6325,12 +6182,94 @@ endpoints:
       value: '1'
       description: ID of the status to reassign tasks to (required)
   routes.bills:
-    is_folder: true
+    url: '{api_base_url}/bills'
+    method: GET
     description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - meta
+        - useful links relating to this Bill
+      - - billID
+        - The unique ID of the Bill.
+      - - billNumber
+        - The bill number assigned to the Bill.
+      - - poID
+        - The poID of which the Bill was made.
+      - - locationID
+        - The unique ID of the location associated with this Bill.
+      - - date
+        - The date this Bill was created as a UNIX timestamp.
+      - - status
+        - "The status of this Bill.\n            The status can be as follows:\n \
+          \           0: The bill is setup.\n            1: The bill is submitted.\n\
+          \            2: The bill is closed i.e. Marked as Paid"
+      - - userID
+        - The Id of the user this Bill was assigned to.
+      - - userIDStarted
+        - The ID of the user this Bill was created by.
+      - - userIDMarkPaid
+        - The ID of the user this Bill was marked paid by.
+      non_table_before: 'This request gets information such as Bill IDs, Bill Numbers,
+        etc.
+
+
+        This call returns a "meta" object containing URLs that can be used to get
+        data related to the Bill.
+
+
+        Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination)
+        section for more information.
+
+
+        Return data description'
       non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: bills
+      value: '1'
+      description: This parameter is used to only get specific Bills. This parameter
+        expects a comma delimited list of billIDs.
+    - key: numbers
+      value: '1'
+      description: This parameter is used to only get specific Bills by Number. This
+        parameter expects a comma delimited list of billNumbers.
+    - key: status
+      value: 0,1
+      description: 'This parameter is used to only get specific Bills by their status.
+        The bill status could be 0,1 or 2
+
+        '
+    - key: end
+      value: '1697443800'
+      description: 'This parameter is used to only get Bills that were created before
+        or on the unix timestamp passed into it. '
+    - key: limit
+      value: '2'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time.
+    - key: pos
+      value: '5'
+      description: This parameter is used to only get specific Bills by POs. This
+        parameter expects a comma delimited list of PO IDs.
+    - key: start
+      value: '1597443703'
+      description: 'This parameter is used to only get Bills that were created after
+        or on the unix timestamp passed into it. '
+    - key: locations
+      value: '163'
+      description: This parameter is used to only get Bills at a specific group of
+        Locations. This parameter accepts a comma delimited list of Location IDs.
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what billID you want to
+        start receiving results at. e.g. passing 130 here will only get you bills
+        with an id greater than 130.
+    - key: page
+      value: '2'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
   routes.bills.transactions:
     is_folder: true
     description_data:
@@ -6622,95 +6561,6 @@ endpoints:
         - 404 Not Found: Comment not found.'
     is_folder: false
     query_params: []
-  routes.bills.get_bills:
-    url: '{api_base_url}/bills'
-    method: GET
-    description_data:
-      headers:
-      - Property
-      - Description
-      data_rows:
-      - - meta
-        - useful links relating to this Bill
-      - - billID
-        - The unique ID of the Bill.
-      - - billNumber
-        - The bill number assigned to the Bill.
-      - - poID
-        - The poID of which the Bill was made.
-      - - locationID
-        - The unique ID of the location associated with this Bill.
-      - - date
-        - The date this Bill was created as a UNIX timestamp.
-      - - status
-        - "The status of this Bill.\n            The status can be as follows:\n \
-          \           0: The bill is setup.\n            1: The bill is submitted.\n\
-          \            2: The bill is closed i.e. Marked as Paid"
-      - - userID
-        - The Id of the user this Bill was assigned to.
-      - - userIDStarted
-        - The ID of the user this Bill was created by.
-      - - userIDMarkPaid
-        - The ID of the user this Bill was marked paid by.
-      non_table_before: 'This request gets information such as Bill IDs, Bill Numbers,
-        etc.
-
-
-        This call returns a "meta" object containing URLs that can be used to get
-        data related to the Bill.
-
-
-        Note: this endpoint supports pagination. Please refer to the [**Pagination**](#pagination)
-        section for more information.
-
-
-        Return data description'
-      non_table_after: ''
-    is_folder: false
-    query_params:
-    - key: bills
-      value: '1'
-      description: This parameter is used to only get specific Bills. This parameter
-        expects a comma delimited list of billIDs.
-    - key: numbers
-      value: '1'
-      description: This parameter is used to only get specific Bills by Number. This
-        parameter expects a comma delimited list of billNumbers.
-    - key: status
-      value: 0,1
-      description: 'This parameter is used to only get specific Bills by their status.
-        The bill status could be 0,1 or 2
-
-        '
-    - key: end
-      value: '1697443800'
-      description: 'This parameter is used to only get Bills that were created before
-        or on the unix timestamp passed into it. '
-    - key: limit
-      value: '2'
-      description: This parameter is a result limiter. The default is set to return
-        no more than 100 results at one time.
-    - key: pos
-      value: '5'
-      description: This parameter is used to only get specific Bills by POs. This
-        parameter expects a comma delimited list of PO IDs.
-    - key: start
-      value: '1597443703'
-      description: 'This parameter is used to only get Bills that were created after
-        or on the unix timestamp passed into it. '
-    - key: locations
-      value: '163'
-      description: This parameter is used to only get Bills at a specific group of
-        Locations. This parameter accepts a comma delimited list of Location IDs.
-    - key: cursor
-      value: '0'
-      description: This parameter is a cursor that selects what billID you want to
-        start receiving results at. e.g. passing 130 here will only get you bills
-        with an id greater than 130.
-    - key: page
-      value: '2'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
   routes.bills.new_bill:
     url: '{api_base_url}/bills/'
     method: POST
@@ -6769,13 +6619,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.regions:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.regions.regions:
     url: '{api_base_url}/regions/'
     method: GET
     description_data:
@@ -6912,13 +6755,6 @@ endpoints:
     is_folder: false
     query_params: []
   routes.webhooks:
-    is_folder: true
-    description_data:
-      headers: []
-      data_rows: []
-      non_table_before: ''
-      non_table_after: ''
-  routes.webhooks.get_webhooks:
     url: '{api_base_url}/webhooks/'
     method: GET
     description_data:
