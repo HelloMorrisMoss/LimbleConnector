@@ -59,6 +59,13 @@ class LimbleEndpoint:
         # Placeholder for more complex paginator setup from config
         return DefaultPaginator()
 
+    def supports_query_param(self, param_name: str) -> bool:
+        """Check if the endpoint supports a specific query parameter (FR-015)."""
+        if 'query_params' not in self.config:
+            return True  # Fallback if no query_params info is available
+        
+        return any(p.get('key') == param_name for p in self.config.get('query_params', []))
+
     def _get_headers(self) -> Dict[str, str]:
         headers = self.connection.authentication_header.copy()
         if self.config.get('headers'):
@@ -127,8 +134,8 @@ class LimbleEndpoint:
     def list(self, auto_paginate: bool = True, **kwargs) -> List[Dict[str, Any]]:
         """LIST resources with optional auto-pagination (FR-014)."""
         params = kwargs.copy()
-        if 'limit' not in params:
-            params['limit'] = 100
+        if 'limit' not in params and self.supports_query_param('limit'):
+            params['limit'] = self.connection.page_limit
 
         if not auto_paginate:
             logger.debug(f"Auto-pagination disabled for {self.name}")

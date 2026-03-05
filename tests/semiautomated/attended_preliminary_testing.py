@@ -134,13 +134,14 @@ class LimbleEndpointChecker:
                 # TODO: this *should* ultimately be coming from the Postman Collection - but in any event there needs
                 #  to be tracking of where this can be used. right now it's going through 3 retries on a deeper level
                 #  also, maybe the retry shouldn't retry on this kind of error
-                query_params['limit'] = 3
+                if endpoint.supports_query_param('limit'):
+                    query_params['limit'] = 3
                 try:
                     response = endpoint.get(path_params=path_params, query_params=query_params)
                 except ConnectionError as e:
                     if ''''message': '`limit` is not allowed''''' in str(e):
-                        _ = path_params.pop('limit', None)
-                        response = endpoint.get(path_params=path_params)
+                        _ = query_params.pop('limit', None)
+                        response = endpoint.get(path_params=path_params, query_params=query_params)
 
                 if is_dependent:
                     val_name = self.dependent_values[name]['required_value_name']

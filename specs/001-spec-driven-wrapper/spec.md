@@ -85,9 +85,10 @@ As an SDK user, I want my code to continue working without modification even whe
 
 - FR-010: Unknown Response Handling: If an endpoint lacks a defined response schema in Postman, the system MUST default its return type to a generic dictionary (`dict[str, Any]`) and emit a warning during the generation phase to ensure SC-001 is met.
 - FR-011: Unified Pagination: The system MUST provide a standard `Paginator` interface for generic endpoints, with specific field mapping (e.g., `next_token` vs `page`) defined in the internal spec file to ensure consistency.
-- FR-014: Auto-Pagination by Default: The `list()` method on generic endpoints MUST auto-paginate until the end of the result set and return a full list of items, abstracting away individual page requests.
 - FR-012: Auth Strategy Overrides: The system MUST support an auth strategy registry in the internal spec, defaulting to the collection-level auth but allowing per-endpoint overrides.
 - FR-013: Committed Typing Stubs: The system MUST generate and commit IDE-visible typing stubs (`.pyi` files) for all Postman-derived generic endpoints to the repository to ensure SC-002 is met across all developer environments.
+- FR-014: Auto-Pagination by Default: The `list()` method on generic endpoints MUST auto-paginate until the end of the result set and return a full list of items, abstracting away individual page requests.
+- FR-015: Parameter Support Validation: The system MUST provide a mechanism to check if a specific query parameter is supported by an endpoint (e.g., via `supports_query_param()`) based on the internal spec to prevent invalid requests.
 
 ### Key Entities
 
