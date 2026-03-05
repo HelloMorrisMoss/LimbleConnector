@@ -1,10 +1,10 @@
 import json
 import os
 import pickle
-from pprint import pprint
+from pprint import pprint, pformat
 from typing import Optional, Dict, Any, List, Union
 from LimbleConnection import LimbleConnection
-from LimbleConnection.util import encode_credentials
+from LimbleConnection.util import encode_credentials, logger, logging
 from LimbleConnection.endpoint import RegistryLoader, LimbleEndpoint
 
 
@@ -41,10 +41,15 @@ class LimbleEndpointChecker:
 
         # Dependent values tracking (to provide path parameters for subsequent requests)
         self.dependent_values = {
-            'routes.assets.assets': {'required_value_name': 'assetID', 'returned_values': []},
-            'routes.parts.parts': {'required_value_name': 'partID', 'returned_values': []},
-            'routes.tasks.tasks': {'required_value_name': 'taskID', 'returned_values': []},
-            'routes.tasks.instructions.task_instructions': {'required_value_name': 'instructionID', 'returned_values': []},
+            'routes.locations': {'required_value_name': 'locationID', 'returned_values': []},
+            'routes.assets': {'required_value_name': 'assetID', 'returned_values': []},
+            'routes.parts': {'required_value_name': 'partID', 'returned_values': []},
+            'routes.tasks': {'required_value_name': 'taskID', 'returned_values': []},
+            'routes.tasks.instructions': {'required_value_name': 'instructionID', 'returned_values': [],},
+            'routes.users': {'required_value_name': 'userID', 'returned_values': []},
+            'routes.vendors': {'required_value_name': 'vendorID', 'returned_values': []},
+            'routes.purchase_orders': {'required_value_name': 'poID', 'returned_values': []},
+            'routes.bills': {'required_value_name': 'billID', 'returned_values': []},
         }
 
     def _load_progress(self):
@@ -83,7 +88,8 @@ class LimbleEndpointChecker:
         count = 0
         # Priority for dependent endpoints to ensure values are available
         ordered_names = list(self.dependent_values.keys()) + [k for k in self.reg_endpoints if k not in self.dependent_values]
-        run_this_many_endpoints_now = run_this_many_endpoints_now or len(ordered_names)
+        run_this_many_endpoints_now = min((run_this_many_endpoints_now or len(ordered_names)), len(ordered_names))
+        logger.debug(f'Ordered names to test now {run_this_many_endpoints_now}/{len(ordered_names)}: {pformat(ordered_names[:run_this_many_endpoints_now])}')
 
         for name in ordered_names:
             if count >= run_this_many_endpoints_now:
@@ -98,6 +104,7 @@ class LimbleEndpointChecker:
             
             # Skip if already tested and not needed for values
             if is_tested and not is_dependent:
+                logger.debug(f"Skipping {name} because it's already been tested and values are not needed.")
                 continue
 
             print(f"\n[GET] Testing: {name}")
@@ -149,6 +156,8 @@ class LimbleEndpointChecker:
                         item.get(val_name) for item in response
                         if isinstance(item, dict) and item.get(val_name)
                     ]
+                    if name == 'routes.locations.locations':
+                        self.lc.location_id = response['locationID']
 
                 if not is_tested:
                     pprint(response)
@@ -275,3 +284,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    pass
