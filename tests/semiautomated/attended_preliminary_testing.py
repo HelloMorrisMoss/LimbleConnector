@@ -21,11 +21,15 @@ class LimbleEndpointChecker:
     Successful tests are saved to a pickle file so that not all endpoints need to be tested if a single endpoint fails.
     """
 
-    def __init__(self, registry_path: str, client_id: str = "client_id", client_secret: str = "client_secret", proxies: Optional[Dict[str, str]] = None):
+    def __init__(self, registry_path: str, client_id: str = "client_id", client_secret: str = "client_secret", proxies: Optional[Dict[str, str]] = None, lc: LimbleConnection = None):
         """Initializes the playground with Limble connection and registry."""
+        logger.level = logging.DEBUG
         self.registry_path = registry_path
-        self.encred = encode_credentials(client_id, client_secret)
-        self.lc = LimbleConnection(b64_credentials=self.encred, proxies=proxies)
+        if lc is not None:
+            self.lc = lc
+        else:
+            self.encred = encode_credentials(client_id, client_secret)
+            self.lc = LimbleConnection(b64_credentials=self.encred, proxies=proxies)
 
         # Load Registry
         print(f"Loading endpoints from {registry_path}")
@@ -256,8 +260,11 @@ def main():
     
     # Initialize playground
     # Change client_id and client_secret if needed
-    cid, csecret, proxies = json.loads(input("Enter client_id and client_secret: "))
-    playground = LimbleEndpointChecker(registry_path, client_id=cid, client_secret=csecret, proxies=proxies)
+    client_id, client_secret, proxies = json.loads(input("Enter `['client_id', 'client_secret', {'http': '', 'https': ''}]` as a string: "))
+    encred = encode_credentials(client_id, client_secret)
+    lc = LimbleConnection(b64_credentials=encred, proxies=proxies)
+    playground = LimbleEndpointChecker(registry_path, client_id=client_id, client_secret=client_secret, proxies=proxies,
+                                       lc=lc)
 
     # 1. Run GET tests (Batch)
     print("\n--- Running GET Tests ---")
