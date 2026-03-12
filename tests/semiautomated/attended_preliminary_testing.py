@@ -271,22 +271,25 @@ def main():
     test_limit = input("Enter number of GET endpoints to test (default 4): ")
     playground.run_get_tests(run_this_many_endpoints_now=int(test_limit) if test_limit.isdigit() else 4)
 
-    # 2. Prepared Lifecycle Tests
+    # 2. Prepared Lifecycle Tests - CREATE, UPDATE, DELETE "Playground" objects for endpoints
     # These are not run automatically. Uncomment to enable.
-    
-    # Example Asset Lifecycle Test
-    # playground.run_lifecycle_test(
-    #     resource_type='asset',
-    #     create_payload={'name': 'Playground Test Asset', 'locationID': 1},
-    #     update_payload={'name': 'Playground Test Asset UPDATED'}
-    # )
 
-    # Example Part Lifecycle Test
-    # playground.run_lifecycle_test(
-    #     resource_type='part',
-    #     create_payload={'name': 'Playground Test Part', 'locationID': 1},
-    #     update_payload={'name': 'Playground Test Part UPDATED'}
-    # )
+    playground_location_id = playground.dependent_values.get('routes.locations')['returned_values'][0]
+
+    if input("Run prepared lifecycle tests on ASSETS? (y/n): ").lower() == 'y':
+        # Example Asset Lifecycle Test
+        playground.run_lifecycle_test(
+            resource_type='asset',
+            create_payload={'name': 'Playground Test Asset', 'locationID': playground_location_id},
+            update_payload={'name': 'Playground Test Asset UPDATED'}
+        )
+    if input("Run prepared lifecycle tests on PARTS? (y/n): ").lower() == 'y':
+        # Example Part Lifecycle Test
+        playground.run_lifecycle_test(
+            resource_type='part',
+            create_payload={'name': 'Playground Test Part', 'locationID': playground_location_id},
+            update_payload={'name': 'Playground Test Part UPDATED', 'locationID': playground_location_id}
+        )
     pass
 
 if __name__ == "__main__":

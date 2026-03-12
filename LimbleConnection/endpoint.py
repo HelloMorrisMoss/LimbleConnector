@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pprint import pprint
 from traceback import format_exc
 from typing import TYPE_CHECKING, Any, Optional, Union, List, Dict
@@ -76,6 +77,13 @@ class LimbleEndpoint:
         """Execute a raw request to this endpoint."""
         url = self.route_url
 
+        # this is a hackish way to cover for a typo in their Postman collection; in the one place we're looking for the
+        # url to generate the registry they have "{{protocol}}://{{server}}:{{port}}/v2/assets/1?assetID={{assetID}}"
+        # which is wrong, even according to the rest of the documentation for that endpoint
+        if self.name == 'routes.assets.delete_asset':
+            if method == 'DELETE' and self.route_url.endswith('1'):
+                url = self.route_url[:-1] + ':assetID'
+
         # _ = kwargs.pop('limit', None)  # don't pass this to the request
         path_params = kwargs.pop('path_params', {})
         for k, v in path_params.items():
@@ -100,13 +108,22 @@ class LimbleEndpoint:
         if 'headers' in kwargs:
             headers.update(kwargs.pop('headers'))
 
+        jsonify_params = False  # default to False
+        if method in ('POST', 'PATCH', 'DELETE'):
+            headers['Content-Type'] = 'application/json'
+            additional_params = {'data': json.dumps(kwargs['data'])} if 'data' in kwargs else {}
+        elif method == 'GET':
+            additional_params = {'params': kwargs}
+        else:
+            additional_params = {}
+        pass
         def _make_request():
             response = requests.request(
                 method=method,
                 url=url,
                 headers=headers,
                 proxies=self.connection.proxy,
-                params=kwargs,
+                **additional_params
             )
             self._normalize_error(response)
             return response
@@ -180,13 +197,13 @@ class LimbleEndpoint:
 
     def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """CREATE a new resource."""
-        response = self.raw('POST', json=data)
+        response = self.raw('POST', data=data)
         return response.json()
 
     def update(self, data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """UPDATE an existing resource."""
         # Note: kwargs should contain path_params if required by the URL
-        response = self.raw('PATCH', json=data, **kwargs)
+        response = self.raw('PATCH', data=data, **kwargs)
         return response.json()
 
     def delete(self, **kwargs) -> bool:
