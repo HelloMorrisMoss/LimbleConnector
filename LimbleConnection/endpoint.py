@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from LimbleConnection.connection import LimbleConnection
 
 
-url_still_contains_path_params_pattern = re.compile(r':[a-zA-Z]+')
+path_param_pattern = re.compile(':([a-zA-Z]+)')
 
 class Paginator:
     """Interface for handling different pagination strategies (FR-011)."""
@@ -47,7 +47,7 @@ class Namespace:
 
 class LimbleEndpoint:
     """Base class for all dynamic endpoints (FR-004)."""
-
+    # TODO: add prettier __str__/__repr__
     def __init__(self, connection: 'LimbleConnection', endpoint_name: str, route_url: str, config: Dict[str, Any]):
         self.connection = connection
         self.name = endpoint_name
@@ -75,6 +75,7 @@ class LimbleEndpoint:
 
     def raw(self, method: str, **kwargs) -> Any:
         """Execute a raw request to this endpoint."""
+        logger.debug(f"Raw request to {self.name} with kwargs: {kwargs}")
         url = self.route_url
 
         # this is a hackish way to cover for a typo in their Postman collection; in the one place we're looking for the
@@ -88,13 +89,15 @@ class LimbleEndpoint:
         path_params = kwargs.pop('path_params', {})
         for k, v in path_params.items():
             url = url.replace(f':{k}', str(v))
-        
-        # Also try to replace any remaining path params from kwargs if they match the :name pattern
-        remaining_params = re.findall(r':(\w+)', url)
+        # Also try to replace any remaining path params from kwargs if they match the ':name' pattern
+        # this is in case they're passed in the wrong place - todo: is this an anti-pattern?
+        remaining_params = re.findall(path_param_pattern, url)
         for param in remaining_params:
             if param in kwargs:
+                logger.warning(f"Replacing path param {param} with value {kwargs[param]=} - path params should be "
+                               f"passed in the path_params argument, not in the kwargs.")
                 url = url.replace(f':{param}', str(kwargs.pop(param)))
-        if url_still_contains_path_params_pattern.search(url):
+        if path_param_pattern.search(url):
             raise ValueError(f"Path params not all replaced in URL: {url}")
 
         # add any params to url in the 'base_url?key1=value1&key2=value2' format
