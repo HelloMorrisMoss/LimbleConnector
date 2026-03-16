@@ -163,6 +163,12 @@ class TranslationEngine:
                 
                 # Strip query parameters from the URL as they should not be part of the endpoint definition (FR-001)
                 url = url.split('?')[0]
+
+                # Typo in the Postman collection for the DELETE assets endpoint (FR-001 typo)
+                # It currently is assets/1?assetID={{assetID}} but it should be assets/:assetID and no query param.
+                if endpoint_key == 'routes.assets.delete_asset' and request.get('method') == 'DELETE':
+                    url = url.replace('/assets/1', '/assets/:assetID')
+                    query_params = []
                 
                 # Update folder entry if it exists (some items are both folder and request? unlikely in this structure but possible)
                 endpoints[endpoint_key] = {
