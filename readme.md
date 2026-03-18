@@ -1,7 +1,50 @@
 # LimbleConnection
+
+A Python SDK for the Limble CMMS API V2, now featuring a **Spec-Driven Architecture**.
+
 ## Goal
 This project seeks to provide a streamlined Python interface for common interactions with the Limble CMMS API.
 Currently targeting the API v2.
+
+## Key Features
+
+- **Spec-Driven**: Endpoints are dynamically generated from `registry.yaml`, which is automatically translated from the official Postman collection.
+- **Fluent API**: Access endpoints using a clean, dotted notation (e.g., `lc.assets.list()`).
+- **Auto-Pagination**: Large result sets are automatically fetched across multiple pages.
+- **Resilient**: Built-in exponential backoff and retries for transient errors (429, 502, 503).
+- **Type-Safe**: IDE support with generated `.pyi` stubs.
+- **Curated Operations**: High-level methods for common workflows (e.g., `lc.curated_assets.search_assets()`).
+- **Stability Shielding**: Internal field mapping to prevent upstream API changes from breaking user code.
+
+## Quickstart
+
+```python
+from LimbleConnection import LimbleConnection
+
+# Initialize connection
+lc = LimbleConnection(b64_credentials="YOUR_BASE64_CREDENTIALS")
+
+# List assets (auto-paginated, fluent API)
+assets = lc.assets.list()
+
+# Access nested endpoints
+fields = lc.assets.fields.asset_fields.list()
+
+# Search assets (curated operation)
+found = lc.curated_assets.search_assets("Forklift")
+```
+
+## Developer Guide: Adding Endpoints
+
+Instead of manual coding, simply update the Postman collection and run the generator:
+
+```bash
+python LimbleConnection/_generate_classes_automatically/generator.py
+```
+
+This will update `registry.yaml` and `connection.pyi` automatically.
+
+## Old Documentation (to be reviewed)
 
 ## What is here?
 The most significant thing in the project is the LimbleConnection class. This provides convenient dot notation access to

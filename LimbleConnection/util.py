@@ -13,18 +13,38 @@ import base64
 import datetime
 import math
 import re
+import logging
 import time
+from typing import Callable, Any
+
+# Configure standard logger (NFR-001)
+logger = logging.getLogger("LimbleConnector")
+logging.basicConfig(level=logging.INFO)
 from pprint import pprint, pformat
 
 import pandas as pd
 from pandas import DatetimeTZDtype
 
-from LimbleConnection.untracked_config.timezones import local_tz
+# from LimbleConnection.untracked_config.timezones import local_tz
+local_tz = None
 
 
 def encode_credentials(client_id: str, client_secret: str) -> str:
     """Turn client_id and client_secret into a base64 encoded string."""
     return base64.b64encode(f'{client_id}:{client_secret}'.encode('utf-8')).decode('utf-8')
+
+def collapse_redundant_path_parts(parts: list[str]) -> list[str]:
+    """Collapses path parts if the last part is a redundant retrieval name, such as a folder.
+    
+    e.g. ['assets', 'assets'] -> ['assets']
+    e.g. ['bills', 'get_bills'] -> ['bills']
+    """
+    if len(parts) > 1:
+        last = parts[-1]
+        parent = parts[-2]
+        if last == parent or last == f"get_{parent}":
+            return parts[:-1]
+    return parts
 
 task_type_dict = {
     1: "Preventative Maintenance (PM)",
@@ -87,7 +107,7 @@ def escape_xlsx_char(ch):
 def escape_xlsx_string(st):
     escaped_text = ''.join([escape_xlsx_char(ch) for ch in st])
     if escaped_text != st:
-        print(f"Original text: {st}\nescaped text: {escaped_text}")
+        logger.debug(f"Original text: {st}\nescaped text: {escaped_text}")
     return escaped_text
 
 def clean_text(text: str) -> str:
@@ -105,10 +125,10 @@ def clean_html_from_text(text: str) -> str:
     try:
         fixed_text = remove_html_pattern.sub("", text)
         if fixed_text != text:
-            print(f"Original text: {text}\nCleaned text: {fixed_text}")
+            logger.debug(f"Original text: {text}\nCleaned text: {fixed_text}")
         return fixed_text
     except TypeError as te:
-        print(f"Error cleaning text: {te}")
+        logger.error(f"Error cleaning text: {te}")
         return ""
 
 def fix_br_newlines(text: str) -> str:
@@ -137,16 +157,16 @@ def clean_column_text(df: pd.DataFrame, columns: list[str] = None, in_place: boo
 
     if not columns:
         columns = [col for col in df.columns if is_string_series(df[col])]
-    print(f'cleaning these columns: {columns}')
+    logger.info(f'Cleaning these columns: {columns}')
     for col in columns:
-        print(f'cleaning column {col}')
+        logger.debug(f'Cleaning column {col}')
         if in_place:
             df.loc[:, col] = df.loc[:, col].apply(clean_text)
         else:
             df.loc[:, f'{col}_clean'] = df.loc[:, col].copy().apply(clean_text)
     if not in_place:
         # print([(col, 'is changed?', any(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns])
-        print('changed: ', [(col, sum(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns if any(df.loc[:, f'{col}_clean'] != df.loc[:, col])])
+        logger.info(f"Changed: {[(col, sum(df.loc[:, f'{col}_clean'] != df.loc[:, col])) for col in columns if any(df.loc[:, f'{col}_clean'] != df.loc[:, col])]}")
     return df
 
 
@@ -173,6 +193,45 @@ class RateLimit:
     def next_live_time(self):
         return datetime.timedelta(seconds=self.ttls) + self.first_call
 
+
+
+
+class ResilienceHandler:
+    """Handles automatic retries for transient errors (NFR-002)."""
+
+    def __init__(self, max_retries: int = 3, backoff_factor: float = 0.5):
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
+
+    def execute(self, func: Callable[..., Any], *args, **kwargs) -> Any:
+        """Executes a function with exponential backoff for 429, 502, 503 errors."""
+        retries = 0
+        while retries <= self.max_retries:
+            try:
+                response = func(*args, **kwargs)
+                if response.status_code in [429, 502, 503]:
+                    if retries == self.max_retries:
+                        response.raise_for_status()
+                    
+                    wait_time = self.backoff_factor * (2 ** retries)
+                    if response.status_code == 429:
+                        # Try to use X-RateLimit-TTL if available
+                        ttl_ms = response.headers.get("X-RateLimit-TTL") or response.headers.get("X-RateLimit-Minute-TTL")
+                        if ttl_ms:
+                            wait_time = int(ttl_ms) / 1000.0 + 0.1 # Add a small buffer
+
+                    logger.warning(f"Transient error {response.status_code}. Retrying in {wait_time:.2f}s... ({retries+1}/{self.max_retries})")
+                    time.sleep(wait_time)
+                    retries += 1
+                    continue
+                return response
+            except Exception as e:
+                if retries == self.max_retries:
+                    raise e
+                wait_time = self.backoff_factor * (2 ** retries)
+                logger.warning(f"Exception {type(e).__name__} occurred. Retrying in {wait_time:.2f}s... ({retries+1}/{self.max_retries})")
+                time.sleep(wait_time)
+                retries += 1
 
 
 class RateLimitHandler:

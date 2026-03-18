@@ -6,7 +6,9 @@ import tzlocal
 import pandas as pd
 import pytz
 
-from LimbleConnection.LimbleEndpoint import LimbleEndpoint
+from LimbleConnection.util import logger, collapse_redundant_path_parts
+from LimbleConnection.endpoint import LimbleEndpoint, RegistryLoader
+from LimbleConnection.curated.assets import AssetsCurated
 from LimbleConnection._documentation_placeholders import Users
 
 api_cache_lifetime_seconds = 5
@@ -53,60 +55,60 @@ class LimbleConnection:
         self.convert_datetimes = convert_datetimes
         self._location = location
         self._location_id = location_id  # todo: handle default location being multiple locations
+        self.__endpoints__ = {}
 
-        # placeholders
-        self.assets: Optional[LimbleEndpoint] = None
-        self.locations: Optional[LimbleEndpoint] = None
-        self.parts: Optional[LimbleEndpoint] = None
-        self.tasks: Optional[LimbleEndpoint] = None
-        # self.users: Optional[LimbleEndpoint] = None
-        # self.users = property(self.users, self)
-        self.users = Users
-        self.statuses: Optional[LimbleEndpoint] = None
+        # Load spec-driven endpoints (FR-003)
+        self._load_endpoints()
+        
+        # Initialize curated operations (US2)
+        self.curated_assets = AssetsCurated(self)
 
-        # design decision: add the slash when it is needed not before (so no trailing or leading slashes here)
-        # design decision: keep the name and path seperate to allow flexibility; ex: synonyms
-        self.__endpoints__ = {'assets': 'assets',
-                              'assets.fields': 'assets/fields',
-                              'assets.fields.suggested': 'assets/fields/suggested',
-                              'assets.fields.history': 'assets/fields/history',
+    def _load_endpoints(self):
+        """Dynamically attach endpoints from registry.yaml as a nested fluent API."""
+        import os
+        from LimbleConnection.endpoint import RegistryLoader, LimbleEndpoint, Namespace
+        
+        registry_path = os.path.join(os.path.dirname(__file__), 'registry.yaml')
+        if not os.path.exists(registry_path):
+            return
 
-                              'locations': 'locations',
-
-                              'parts': 'parts',
-                              'parts.categories': 'parts/categories',
-                              'parts.fields': 'parts/fields',
-                              'parts.logs': 'parts/logs',
-
-                              'tasks': 'tasks',
-                              'tasks.labor': 'tasks/labor',
-                              'tasks.labor.categories': 'tasks/labor/categories',
-
-                              'teams': 'teams',
-
-                              'users': 'users',
-                              'users.teams': 'users/{path_param}/teams',
-                              'priorities': 'priorities',
-                              'statuses': 'statuses',
-
-                              # todo: create
-                              #  assets/:assetID/logs
-                              #  tasks/:taskID/instructions
-                              #  tasks/:taskID/instructions/:instructionID/options
-                              #  tasks/labor
-                              #  tasks/labor/categories
-                              }
-
-        to_add_properties_list = list(self.__endpoints__.items())
-        while to_add_properties_list:
-            epn, epaddr = to_add_properties_list.pop(0)
-            print(epn)
-            if '.' in epn:
-                # propertish, epn = self.__set_sub_property(epaddr, epn, to_add_properties_list)
-                self.__set_sub_property(epaddr, epn, to_add_properties_list)
-            else:
-                propertish, epn = self.__create_endpoint(epn, epaddr)
-                setattr(self, epn, propertish)
+        loader = RegistryLoader(registry_path, "")
+        registry = loader.load()
+        logger.info(f"Loading endpoints from {registry_path}")
+        
+        for name, config in registry.get('endpoints', {}).items():
+            if config.get('is_folder') or 'url' not in config:
+                continue
+            
+            route_url = config['url'].replace('{api_base_url}', self.apiv_addrs)
+            endpoint = LimbleEndpoint(self, name, route_url, config)
+            self.__endpoints__[name] = endpoint
+            
+            parts = name.split('.')
+            if parts[0] == 'routes':
+                parts = parts[1:]
+            
+            if not parts:
+                continue
+                
+            parts = collapse_redundant_path_parts(parts)
+                
+            current = self
+            for part in parts[:-1]:
+                if not hasattr(current, part):
+                    setattr(current, part, Namespace())
+                current = getattr(current, part)
+                # Ensure we can add sub-attributes even if it's already an endpoint
+            
+            # If replacing a Namespace with a LimbleEndpoint, preserve sub-attributes
+            existing = getattr(current, parts[-1], None)
+            if isinstance(existing, Namespace):
+                for k, v in existing.__dict__.items():
+                    setattr(endpoint, k, v)
+            
+            setattr(current, parts[-1], endpoint)
+        
+        logger.info(f"Loaded {len(self.__endpoints__)} endpoints from registry.")
 
     def get_from_path(self, path_route:str, **kwargs) -> Any:
         """Send a GET request to a route provided as a string. Intended for development purposes.
@@ -143,8 +145,8 @@ class LimbleConnection:
         raw = kwargs.pop('raw', False)
 
         if raw:
-            print(f'Processing path as-is, convenience features will not be available,'
-                  f' except for authentication and proxy. {path_route=}')
+            logger.warning(f'Processing path as-is, convenience features will not be available,'
+                           f' except for authentication and proxy. {path_route=}')
             value = LimbleEndpoint(self, '_', rt_addr='_')._get_request(kwargs, path_route)
         else:
             ep_keys = {key: kwargs.pop(key, None) for key in ('auto_page_all', 'path_param', 'rq_params')}
@@ -155,8 +157,8 @@ class LimbleConnection:
             route_name = path_route.replace('/', '.')
 
             if not route_name in self.__endpoints__.keys():
-                print(f'Custom route {route_name} is not implemented in LimbleConnector yet, some convenience features may'
-                      f' not be available.')
+                logger.warning(f'Custom route {route_name} is not implemented in LimbleConnector yet, some convenience features may'
+                               f' not be available.')
 
             if as_df:
                 value = LimbleEndpoint(self, route_name, rt_addr=this_address).df_params(
