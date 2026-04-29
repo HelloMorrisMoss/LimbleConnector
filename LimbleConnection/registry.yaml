@@ -32,6 +32,20 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        customerName:
+          description: The name of the customer that your API keys are valid for.
+          inferred_type: str
+          type: str
+        customerPlan:
+          description: The Limble plan the customer is currently subscribed to. The
+            customerPlan can have one of following values:starterprofessionalbusinessenterpriselegacy
+            - The plan the customer is currently subscribed to has been deprecated.For
+            more information about various plans please visit the Limble website.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.assets:
     url: '{api_base_url}/assets/'
     method: GET
@@ -81,28 +95,33 @@ endpoints:
       value: '1'
       description: This parameter is used to only get specific Assets. This parameter
         expects a comma delimited list of Asset IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%test%'
       description: This is a parameter used to string search for a name or partial
         name of an asset this parameter expects a string with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: locations
       value: '73'
       description: This parameter is used to only get Assets at a specific group of
         Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: start
       value: '1541796014'
       description: This parameter is used to only get Assets that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         Assets that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1541796014'
       description: This parameter is used to only get Assets that were last edited
         *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what ID you want to start
@@ -110,35 +129,88 @@ endpoints:
         greater than the value of cursor. With ordering, this will return results
         starting at the next item in the order, regardless of whether its ID is greater
         than or lesser than the value of cursor.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: parentAssetID
       value: '2317'
       description: This parameter can be used to get asset(s) children using the Parent's
         ID. This parameter accepts a comma delimited list of Asset IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: orderBy
       value: -lastEdited
       description: This parameter is used to order results by their lastEdited property
         instead of the default ordering by ascending assetID. CANNOT be provided alongside
         the cursor parameter. to paginate in this ordering, use the start or end parameters.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: geoLocation
       value: 'true'
       description: This parameter is used to filter results that contain a geoLocation
         property. By default it is false and will return **all** assets with and without
         geoLocation property. If true, it will only return assets with a geoLocation
         property.
-      disabled: true
+      inferred_type: bool
+      type: bool
+    response:
+      fields:
+        meta:
+          description: Requests to gather more information on an Asset such as Fields
+            for the Asset or what Tasks are assigned to the Asset
+          inferred_type: str
+          type: str
+        startedOn:
+          description: The date when this Asset was started on. This property is used
+            to help determine runtime which is used in MTBF.
+          inferred_type: str
+          type: str
+        lastEdited:
+          description: A UNIX timestamp of when this Asset was last edited.
+          inferred_type: str
+          type: str
+        parentAssetID:
+          description: The Asset that is the parent of this Asset. If the value is
+            0 that means this Asset does not have a parent.
+          inferred_type: int
+          type: int
+        locationID:
+          description: The ID of the location this asset is located at.
+          inferred_type: int
+          type: int
+        hoursPerWeek:
+          description: The number of hours this Asset runs per week. This is used
+            to determine runtime which is used in MTBF. If the value is -1 then the
+            Asset uses the Location's hoursPerWeek setting.
+          inferred_type: str
+          type: str
+        workRequestPortal:
+          description: The url work requestors can use to submit problems with this
+            Asset.
+          inferred_type: str
+          type: str
+        image:
+          description: Array of objects that have a file name and a link you can use
+            to download that image. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: str
+          type: str
+        geoLocation:
+          description: The location of an asset on a Map.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.assets.image:
     is_folder: true
     description_data:
@@ -201,77 +273,92 @@ endpoints:
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: fields
       value: '107'
       description: This parameter can be used to get a single Asset Fields or a list
         of Asset Fields in a comma-separated list.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: start
       value: '1555105636'
       description: This parameter is used to only get Asset Fields for Assets that
         were last edited after the unix timestamp passed into the start parameter.
         For example, all Assets that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1555105636'
       description: This parameter is used to only get Asset Fields for Assets that
         were last edited *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what id you want to start
         receiving results at. e.g. passing 137 here will only get you asset fields
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: locations
       value: '163'
       description: This parameter can be used to get a group of asset fields in a
         location in a comma-separated list.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: value
       value: F250
       description: This parameter is used to only get specific field by value. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: assetName
       value: '%fork%'
       description: This parameter is used to only get specific fields by asset name.
         This parameter expects a string full name of a field or partial name with
         the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: fieldType[0]
       value: Text
       description: This parameter is used to only get specific fields by type. This
         parameter expects an array of strings "Text, Date, Pictures, Documents, Number,
         Currency, Dropdown"
-      disabled: true
+      inferred_type: str
+      type: str
     - key: fieldType[1]
       value: Documents
       description: This parameter is used to only get specific fields by type. This
         parameter expects an array of strings "Text, Date, Pictures, Documents, Number,
         Currency, Dropdown"
-      disabled: true
+      inferred_type: str
+      type: str
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: values
       value: ''
       description: This parameter is used to get asset fields by their valueID. This
         parameter expects a comma delimited list of Value IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: assets
       value: '171'
       description: This parameter can be used to get a group of asset fields for a
         specific set of asset ids in a comma-separated list.
+      inferred_type: int
+      type: int
   routes.assets.fields.asset_suggested_fields:
     url: '{api_base_url}/assets/fields/suggested'
     method: GET
@@ -294,29 +381,34 @@ endpoints:
       value: '16'
       description: This parameter can be used to get a single Asset Fields or a list
         of Asset Fields in a comma-separated list.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%S%'
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what id you want to start
         receiving results at. e.g. passing 137 here will only get you asset fields
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: locations
       value: '163'
       description: This parameter is used to only get fields at a specific group of
         Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.assets.fields.asset_field_history:
     url: '{api_base_url}/assets/fields/history'
     method: GET
@@ -333,34 +425,40 @@ endpoints:
       value: 4864, 4865
       description: This parameter can be used to get a single Asset or a list of Assets
         in a comma-separated list.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: fields
       value: 321, 202
       description: This parameter can be used to get a single Asset Fields or a list
         of Asset Fields in a comma-separated list.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: start
       value: '1555105636'
       description: This parameter is used to only get Asset Fields for Assets that
         were last edited after the unix timestamp passed into the start parameter.
         For example, all Assets that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1555105636'
       description: This parameter is used to only get Asset Fields for Assets that
         were last edited *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a cursor that selects what id you want to start
         receiving results at. e.g. passing 137 here will only get you asset fields
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.assets.fields.new_asset_suggested_field:
     url: '{api_base_url}/assets/fields/'
     method: POST
@@ -417,7 +515,9 @@ endpoints:
     query_params:
     - key: ''
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
   routes.assets.fields.attach_field_to_asset:
     url: '{api_base_url}/assets/:assetID/fields'
     method: PUT
@@ -499,6 +599,13 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        fileID:
+          description: The ID of the file attached to the log.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.assets.logs.asset_logs:
     url: '{api_base_url}/assets/:assetID/logs'
     method: GET
@@ -538,42 +645,79 @@ endpoints:
       value: '16'
       description: This parameter is used to only get specific logs. This parameter
         accepts a comma delimited list of logIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: users
       value: '341'
       description: This parameter is used to only get logs created by specific users.
         This parameter accepts a comma delimited list of userIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: logEntry
       value: '%bro%'
       description: This is a parameter used to string search for manual log entry.
         This parameter expects a string with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: start
       value: '1506274400'
       description: 'This parameter is used to only get logs that were last edited
         after the unix timestamp passed into the start parameter. '
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1506274900'
       description: This parameter is used to only get logs that were last edited before
         the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: ''
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: ''
       description: 'This parameter is a cursor that selects what ID you want to start
         receiving results at. '
-      disabled: true
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        logID:
+          description: The unique logID of the log.
+          inferred_type: int
+          type: int
+        dateCreated:
+          description: The date the log was created as a UNIX timestamp.
+          inferred_type: int
+          type: int
+        assetD:
+          description: The ID of the asset the log belongs to.
+          inferred_type: str
+          type: str
+        logEntry:
+          description: The log entry for the asset.
+          inferred_type: str
+          type: str
+        userID:
+          description: The ID of the user that created the log.
+          inferred_type: int
+          type: int
+        logFiles:
+          description: An array of objects that have a fileID, fileName and a link
+            that can used to download the files attached to the log. All links are
+            only valid for 15 minutes, a new call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.assets.logs.new_asset_log:
     url: '{api_base_url}/assets/:assetID/logs'
     method: POST
@@ -704,17 +848,20 @@ endpoints:
       value: 172,253
       description: This parameter is used to only get specific Assets. This parameter
         expects a comma delimited list of Asset IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: limit
       value: '3'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '3'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '49'
       description: This parameter is a cursor that selects what ID you want to start
@@ -722,28 +869,65 @@ endpoints:
         greater than the value of cursor. With ordering, this will return results
         starting at the next item in the order, regardless of whether its ID is greater
         than or lesser than the value of cursor.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: parts
       value: 46,172
       description: This parameter is used to only get specific Parts. This parameter
         accepts a comma delimited list of part IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: relations
       value: 1,10
       description: This parameter is used to only get specific relations. This parameter
         expects a comma delimited list of relation IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: start
       value: '1334570141'
       description: This parameter is used to only get relations that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         relations that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1784570141'
       description: This parameter is used to only get relations that were last edited
         *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        relationID:
+          description: The Relations ID. e.g. 1
+          inferred_type: int
+          type: int
+        partID:
+          description: The ID of the Part in this Relation
+          inferred_type: int
+          type: int
+        assetID:
+          description: The ID of the Asset in this Relation
+          inferred_type: int
+          type: int
+        qty:
+          description: The qty of the Part related to this Asset
+          inferred_type: str
+          type: str
+        createdAt:
+          description: The unix timestamp at which this Relation was created
+          inferred_type: str
+          type: str
+        lastEdited:
+          description: The unix timestamp at which this Relation last saw a change
+          inferred_type: str
+          type: str
+        associationType:
+          description: The method used to create this Relation. At this time, only
+            "manual" is supported
+          inferred_type: str
+          type: str
+      container_type: list
   routes.assets.new_asset:
     url: '{api_base_url}/assets/'
     method: POST
@@ -818,7 +1002,7 @@ endpoints:
     is_folder: false
     query_params: []
   routes.assets.delete_asset:
-    url: '{api_base_url}/assets/1'
+    url: '{api_base_url}/assets/:assetID'
     method: DELETE
     description_data:
       headers: []
@@ -826,10 +1010,7 @@ endpoints:
       non_table_before: This request removes an Asset from your Limble account.
       non_table_after: ''
     is_folder: false
-    query_params:
-    - key: assetID
-      value: '{{assetID}}'
-      description: assetID of the asset you are removing.
+    query_params: []
   routes.assets.move_asset_to_another_location:
     url: '{api_base_url}/assets/:assetID/move'
     method: PATCH
@@ -905,40 +1086,81 @@ endpoints:
       value: '73'
       description: This parameter is used to only get locations in the list provided.
         This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%NY%'
       description: This parameter is used to only get specific locations by name.
         This parameter expects a string full name of a location or partial name with
         the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what locationID you want
         to start receiving results at. e.g. passing 137 here will only get you locations
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: regions
       value: '0'
       description: 'This parameter is used to get locations that belong to a region.
 
         This parameter expects a regionID a location may belong to.'
-      disabled: true
+      inferred_type: int
+      type: int
     - key: geoLocation
       value: 'true'
       description: This parameter is used to filter results that contain a geoLocation
         property. By default it is false and will return **all** locations with and
         without geoLocation property. If true, it will only return locations with
         a geoLocation property.
-      disabled: true
+      inferred_type: bool
+      type: bool
     - key: page
       value: '1'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        name:
+          description: The name of the Location
+          inferred_type: str
+          type: str
+        regionID:
+          description: The ID of the region the Location is part of. A regionID of
+            0 means the location is not a part of any region.
+          inferred_type: int
+          type: int
+        timezone:
+          description: The Timezone the location is set at.List of Timezones
+          inferred_type: int
+          type: int
+        weeklyOperationHours:
+          description: The number of hours your Assets run at this location per week.
+            This is used to help calculate MTBF.
+          inferred_type: list[str]
+          type: list[str]
+        workRequestPortal:
+          description: This is a URL you can use to submit Work Requests to this Location.
+          inferred_type: str
+          type: str
+        geoLocation:
+          description: The location of a Limble location on a Map.
+          inferred_type: str
+          type: str
+        currencyCode:
+          description: The ISO code for the currency at this location.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.locations.new_location:
     url: '{api_base_url}/locations'
     method: POST
@@ -1129,51 +1351,146 @@ endpoints:
       value: 1,2
       description: This parameter is used to only get specific Parts. This parameter
         accepts a comma delimited list of part IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: locations
       value: '73'
       description: This parameter is used to only get Parts at a specific group of
         Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%blade%'
       description: This parameter is used to only get specific parts. This parameter
         expects a string either a full name of a part or a partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: start
       value: '1564895015'
       description: This parameter is used to only get Parts that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         Parts that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1564895015'
       description: This parameter is used to only get Parts that were last edited
         *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what partID you want to
         start receiving results at. e.g. passing 137 here will only get you parts
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: numbers
       value: 25x25x1 - Vendor b - location 2
       description: This parameter is used to only get parts with part numbers that
         match the list provided. This parameter accepts a comma delimited list of
         Part Numbers.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: page
       value: '2'
       description: 'This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information. '
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        number:
+          description: The Part's Number. e.g. 25x25x1
+          inferred_type: str
+          type: str
+        name:
+          description: The Part's Name. e.g. Filter
+          inferred_type: str
+          type: str
+        generalStock:
+          description: How many of this Part you have in stock. Not including purchase
+            orders.
+          inferred_type: str
+          type: str
+        unitCode:
+          description: The unit code displayed for the part. This represents the unit
+            of measure assigned to the part (e.g., "kg", "lb", "each", etc.). If no
+            unit is assigned, this field will be null.
+          inferred_type: str
+          type: str
+        generalPrice:
+          description: The default price of this part. Not considering purchase oder
+            prices.
+          inferred_type: str
+          type: str
+        category:
+          description: The category this Part belongs to
+          inferred_type: str
+          type: str
+        location:
+          description: The Location of this Part. e.g. Shelf A
+          inferred_type: str
+          type: str
+        minQtyStatus:
+          description: Is the Part currently under the min quantity threshold. 0 =
+            false, 1 = true.
+          inferred_type: list[str]
+          type: list[str]
+        minQtyThreshold:
+          description: The number at which reordering of this part is triggered. -1
+            means this feature is turned off.
+          inferred_type: str
+          type: str
+        maxQtyThreshold:
+          description: The number to bring the parts quantity back to. For example,
+            if my inventory is at 4 and my maxQtyThreshold is 20 I will be reordering
+            16 parts to bring my inventory back up to the max quantity.
+          inferred_type: str
+          type: str
+        staleThreshold:
+          description: This value is how many days will need to go without a User
+            using this Part by before this Part is considering stale.
+          inferred_type: str
+          type: str
+        staleStatus:
+          description: Is the Part stale or not. 0 = false, 1 = true.
+          inferred_type: list[str]
+          type: list[str]
+        userID:
+          description: The user that will receive threshold notifications and Tasks
+            if thresholds are hit.
+          inferred_type: int
+          type: int
+        team:
+          description: The team that will receive threshold notifications and Tasks
+            if thresholds are hit.
+          inferred_type: str
+          type: str
+        stockOnHand:
+          description: General Stock plus any unused, received PO Quantities for this
+            part. This matches the 'Qty' value seen in the CMMS Part Management page.
+          inferred_type: str
+          type: str
+        pos:
+          description: Array of purchase order objects. price and quantity do not
+            effect generalStock and generalPrice listed above.
+          inferred_type: list[str]
+          type: list[str]
+        image:
+          description: Array of objects that have a file name and a link you can use
+            to download that image. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.parts.images:
     is_folder: true
     description_data:
@@ -1215,12 +1532,14 @@ endpoints:
       value: '1'
       description: This parameter is used to only get specific part categories. This
         parameter accepts a comma delimited list of categoryIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: Electronics
       description: This parameter is used to string search part categories names either
         partial or full name with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
   routes.parts.categories.create_part_category:
     url: '{api_base_url}/parts/categories/'
     method: POST
@@ -1299,58 +1618,70 @@ endpoints:
       value: 1,2
       description: This parameter is used to only get specific fields by ID. This
         parameter expects a comma delimited list of fieldIDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%text%'
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: parts
       value: '2992'
       description: This parameter is used to only get part fields for a specific Part.
         This parameter expects a partID.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: start
       value: '1580016200'
       description: This parameter is used to only get part fields for parts that were
         last edited after the unix timestamp passed into the start parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1610602900'
       description: This parameter is used to only get parts fields for part fields
         that were last edited *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what fieldID you want to
         start receiving results at. e.g. passing 137 here will only get you vendor
         fields with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '5'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: value
       value: '%3%'
       description: This parameter is used to only get specific field by value. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: locations
       value: 38469,38472
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: values
       value: '27'
       description: This parameter is used to get part fields by their valueID. This
         parameter expects a comma delimited list of Value IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
   routes.parts.fields.part_suggested_fields:
     url: '{api_base_url}/parts/fields/suggested'
     method: GET
@@ -1366,24 +1697,28 @@ endpoints:
       value: 1,2
       description: This parameter can be used to get a single Part Fields or a list
         of Part Fields in a comma-separated list.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%text%'
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what fieldID you want to
         start receiving results at. e.g. passing 137 here will only get you vendor
         fields with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.parts.fields.update_part_field_value:
     url: '{api_base_url}/parts/fields/:valueID'
     method: PATCH
@@ -1506,47 +1841,97 @@ endpoints:
       value: '21524'
       description: This parameter is used to only get specific logs. This parameter
         accepts a comma delimited list of logIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: sources
       value: '4'
       description: This parameter is used to only get logs for a specific sourceID.
         This parameter accepts a comma delimited list of sourceIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: users
       value: '340'
       description: This parameter is used to only get logs created by specific users.
         This parameter accepts a comma delimited list of userIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: logEntry
       value: '%new%'
       description: 'This is a parameter used to string search for manual log entry
         (sourceID: 4). This parameter expects a string with the wildcard %.'
-      disabled: true
+      inferred_type: str
+      type: str
     - key: start
       value: '1663018000'
       description: 'This parameter is used to only get logs that were last edited
         after the unix timestamp passed into the start parameter. '
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1663018900'
       description: This parameter is used to only get logs that were last edited before
         the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '10'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: ''
       description: 'This parameter is a cursor that selects what ID you want to start
         receiving results at. '
-      disabled: true
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        logID:
+          description: The unique logID of the log.
+          inferred_type: int
+          type: int
+        dateCreated:
+          description: The date the log was created as a UNIX timestamp.
+          inferred_type: int
+          type: int
+        partID:
+          description: The partID the log belongs to.
+          inferred_type: int
+          type: int
+        sourceID:
+          description: 'The sourceID of the source of the log. The sourceID can be
+            as follows:1: Part name was changed.2: Part Number was changed.3: Parts
+            were added/removed.4: Manual log entry.5: Parts were used on a Task.6:
+            Part Price was changed.7: Stale threshold was manually changed.8: Part
+            Qty threshold was manually changed.11: Part Qty threshold status was changed.13:
+            Part Location was changed.14: Part Vendor was changed.15: Part Image was
+            changed.18: Parts were received on a Bill.19: Part Maximum Part Qty was
+            manually changed.20: Some of a PO Item Received Qty was used during manual
+            Part Qty adjustment'
+          inferred_type: int
+          type: int
+        logEntry:
+          description: The log entry for the part.
+          inferred_type: str
+          type: str
+        userID:
+          description: The ID of the user that created the log.
+          inferred_type: int
+          type: int
+        associatedID:
+          description: 'The ID of the item associated with this log, if any. Current
+            examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID
+            type: BillsourceID: 20, associatedID type: Bill'
+          inferred_type: int
+          type: int
+      container_type: list
   routes.parts.logs.new_part_log:
     url: '{api_base_url}/parts/:partID/logs'
     method: POST
@@ -1638,34 +2023,95 @@ endpoints:
     query_params:
     - key: logs
       value: '1'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: sources
       value: '20'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: users
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: list[str]
+      type: list[str]
     - key: logEntry
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
     - key: start
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
     - key: end
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
     - key: page
       value: '1'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: parts
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: list[str]
+      type: list[str]
     - key: limit
       value: '5'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: cursor
       value: ''
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        logID:
+          description: The unique logID of the log.
+          inferred_type: int
+          type: int
+        dateCreated:
+          description: The date the log was created as a UNIX timestamp.
+          inferred_type: int
+          type: int
+        partID:
+          description: The partID the log belongs to.
+          inferred_type: int
+          type: int
+        sourceID:
+          description: 'The sourceID of the source of the log. The sourceID can be
+            as follows:1: Part name was changed.2: Part Number was changed.3: Parts
+            were added/removed.4: Manual log entry.5: Parts were used on a Task.6:
+            Part Price was changed.7: Stale threshold was manually changed.8: Part
+            Qty threshold was manually changed.11: Part Qty threshold status was changed.13:
+            Part Location was changed.14: Part Vendor was changed.15: Part Image was
+            changed.18: Parts were received on a Bill.19: Part Maximum Part Qty was
+            manually changed.20. Some of a PO Item Received Qty was used during manual
+            Part Qty adjustment'
+          inferred_type: int
+          type: int
+        logEntry:
+          description: The log entry for the part.
+          inferred_type: str
+          type: str
+        userID:
+          description: The ID of the user that created the log.
+          inferred_type: int
+          type: int
+        associatedID:
+          description: 'The ID of the item associated with this log, if any. Current
+            examples include:sourceID: 5, associatedID type: TasksourceID: 18, associatedID
+            type: BillsourceID: 20, associatedID type: Bill'
+          inferred_type: int
+          type: int
+      container_type: list
   routes.parts.purchasables:
     url: '{api_base_url}/parts/:partID/purchasables'
     method: GET
@@ -1698,16 +2144,44 @@ endpoints:
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '2'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: nameStartsWith
       value: Box of
       description: Filter purchasables that have a name which starts with this string.
-      disabled: true
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        partID:
+          description: The ID of the part the purchasable belongs to.
+          inferred_type: int
+          type: int
+        name:
+          description: The name of the purchasable.
+          inferred_type: str
+          type: str
+        size:
+          description: The size of the purchasable.
+          inferred_type: int
+          type: int
+        orderUnitCode:
+          description: The unit that describes how this purchasable is ordered. E.g.
+            "by the box", or "by the foot".
+          inferred_type: str
+          type: str
+        sizeUnitCode:
+          description: The unit that qualifies the size value. E.g. this tells you
+            whether this purchasable is 10 liters, or cans, or feet, etc.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.parts.create_part:
     url: '{api_base_url}/parts/'
     method: POST
@@ -1952,39 +2426,78 @@ endpoints:
       value: '2'
       description: This parameter is used to only get specific Parts. This parameter
         accepts a comma delimited list of part IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: tasks
       value: 8,10
       description: This parameter is used to only get Parts at a specific group of
         Tasks. This parameter accepts a comma delimited list of Task IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: start
       value: '1457663400'
       description: This parameter is used to only get Parts that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         Assets that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1457663400'
       description: This parameter is used to only get Parts that were last edited
         *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%Pro%'
       description: This parameter is used to string search part names either partial
         or full name with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what partID you want to
         start receiving results at. e.g. passing 137 here will only get you part usage
         records with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        meta:
+          description: A call which can be used to quickly look up the Task that this
+            part's usage was recorded on.
+          inferred_type: str
+          type: str
+        name:
+          description: The name of the part used.
+          inferred_type: str
+          type: str
+        taskID:
+          description: The associated Task where this part was used.
+          inferred_type: int
+          type: int
+        usedCount:
+          description: The number of parts that were used.
+          inferred_type: str
+          type: str
+        usedPrice:
+          description: The price per 1 part.
+          inferred_type: str
+          type: str
+        usedOn:
+          description: The date when the part was used.  This is a unix timestamp.
+          inferred_type: str
+          type: str
+        poItemID:
+          description: The unique ID of the PO item associated with this usage record.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.tasks:
     url: '{api_base_url}/tasks/'
     method: GET
@@ -2107,109 +2620,157 @@ endpoints:
       value: '9109'
       description: This parameter is used to only get specific Tasks. This parameter
         accepts a comma delimited list of task IDs.
+      inferred_type: int
+      type: int
     - key: assets
       value: '1'
       description: This parameter is used to only get Tasks that are linked to an
         asset. This parameter accepts a comma delimited list of asset IDs.
+      inferred_type: int
+      type: int
     - key: locations
       value: '73'
       description: This parameter is used to only get Tasks at a specific group of
         Locations. This parameter accepts a comma delimited list of Location IDs.
+      inferred_type: int
+      type: int
     - key: type
       value: '6'
       description: This parameter is used to only get Tasks of a specific type. This
         parameter accepts a comma delimited list of task types.
+      inferred_type: int
+      type: int
     - key: name
       value: '%test%'
       description: This is a parameter used to string search for a name or partial
         name of a task this parameter expects a string with the wildcard %.
+      inferred_type: str
+      type: str
     - key: start
       value: '1000000000'
       description: This parameter is used to only get Tasks that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         Tasks that were last edited after April 18th, 2018.
+      inferred_type: int
+      type: int
     - key: end
       value: '2500000000'
       description: This parameter is used to only get Tasks that were last edited
         *before* the unix timestamp passed into the end parameter.
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what taskID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '2'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: page
       value: '2'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
+      inferred_type: int
+      type: int
     - key: completedStart
       value: '0'
       description: This parameter is used to only get Tasks that were completed after
         the unix timestamp passed into this parameter. For example, all Assets that
         were completed after April 18th, 2018.
+      inferred_type: int
+      type: int
     - key: completedEnd
       value: '2500000000'
       description: This parameter is used to only get Tasks that were completed *before*
         the unix timestamp passed into this parameter.
+      inferred_type: int
+      type: int
     - key: scheduledStart
       value: '0'
       description: 'This parameter is used to only get Tasks whose scheduled start
         is after the unix timestamp passed into this parameter. '
+      inferred_type: int
+      type: int
     - key: scheduledEnd
       value: '2500000000'
       description: 'This parameter is used to only get Tasks whose scheduled end is
         *before* the unix timestamp passed into this parameter. '
+      inferred_type: int
+      type: int
     - key: orderBy
       value: -createdDate
       description: This parameter sorts based on the value you pass. I.e. passing
         createdDate will order the results based on createdDate. Negative parameters
         are used to reverse sort order. This supports sorting by due, createdDate,
         dateCompleted and lastEdited.
+      inferred_type: str
+      type: str
     - key: geoLocation
       value: 'true'
       description: This parameter is used to filter results that contain a geoLocation
         property. By default it is false and will return **all** tasks with and without
         geoLocation property. If true, it will only return tasks with a geoLocation
         property.
+      inferred_type: bool
+      type: bool
     - key: lastEditedByUsers
       value: 0,340,341
       description: This parameter is used to filter tasks by users that have completed
         tasks.
+      inferred_type: list[str]
+      type: list[str]
     - key: status
       value: '1'
       description: This parameter is used to filter tasks by completed status. 1 -
         Complete  0 - Incomplete
+      inferred_type: int
+      type: int
     - key: meta1
       value: '1'
       description: This parameter is used to filter tasks by task meta data. This
         does not show in the web application, but can be used to track items between
         integrated systems.
+      inferred_type: int
+      type: int
     - key: meta2
       value: '2'
       description: This parameter is used to filter tasks by task meta data. This
         does not show in the web application, but can be used to track items between
         integrated systems.
+      inferred_type: int
+      type: int
     - key: meta3
       value: '3'
       description: This parameter is used to filter tasks by task meta data. This
         does not show in the web application, but can be used to track items between
         integrated systems.
+      inferred_type: int
+      type: int
     - key: statusIDs
       value: 0,1,2
       description: This parameter is used to filter tasks by their associated statusID.
+      inferred_type: list[str]
+      type: list[str]
     - key: page
       value: '2'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
+      inferred_type: int
+      type: int
     - key: geoLocation
       value: 'true'
       description: This parameter is used to filter results that contain a geoLocation
         property. By default it is false and will return **all** tasks with and without
         geoLocation property. If true, it will only return tasks with a geoLocation
         property.
+      inferred_type: bool
+      type: bool
     - key: tag
       value: '@My Custom Tag;'
       description: 'This parameter is used to filter results that contain a certain
@@ -2218,6 +2779,193 @@ endpoints:
         Tag" but because custom tags are stored with an at sign ("@") at the beginning
         and a semi-colon (";") colon at the end it is recommended that the param follows
         the same format. '
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        meta:
+          description: This property has shortcuts to get other information related
+            to the Task such as the Task's invoices, labor parts usage and instructions.
+          inferred_type: str
+          type: str
+        name:
+          description: The Task's name.
+          inferred_type: str
+          type: str
+        userID:
+          description: The id of the user this Task is assigned to. A Task can not
+            be assigned to both a Team and a User at the same time.
+          inferred_type: int
+          type: int
+        teamID:
+          description: The id of the team this Task is assigned to. A Task can not
+            be assigned to both a Team and a User at the same time.
+          inferred_type: int
+          type: int
+        locationID:
+          description: The id of the Location in which this Task belongs to.
+          inferred_type: int
+          type: int
+        template:
+          description: This field indicates if the task is a 'template' that spawns
+            other tasks based on schedules or not.
+          inferred_type: str
+          type: str
+        createdDate:
+          description: The date this Task was created. This is a unix timestamp.
+          inferred_type: int
+          type: int
+        startDate:
+          description: By default this value is 0 as the startDate is usually the
+            same as the createdDate. Sometimes a task is created such that it is scheduled
+            to start in the future (i.e. after the createdDate). In such a case this
+            value will be a unix timestamp indicating the actual start date of the
+            Task.
+          inferred_type: int
+          type: int
+        due:
+          description: The date this Task is due. This is a unix timestamp.
+          inferred_type: str
+          type: str
+        dateCompleted:
+          description: The date this Task was completed. This is a unix timestamp.
+            A value of 0 means this Task is not completed.
+          inferred_type: int
+          type: int
+        lastEdited:
+          description: The date this Task was last edited. This is a unix timestamp.
+          inferred_type: str
+          type: str
+        description:
+          description: The decription of a task.
+          inferred_type: str
+          type: str
+        completedByUser:
+          description: The id of the User that completed this Task.
+          inferred_type: str
+          type: str
+        lastEditedByUser:
+          description: The id of the User that last edited the task.
+          inferred_type: str
+          type: str
+        assetID:
+          description: The id of the Asset that this Task belongs to.
+          inferred_type: int
+          type: int
+        completedUserWage:
+          description: The price per hour of the User's Wage at the point in time
+            when the task was completed.
+          inferred_type: str
+          type: str
+        priority:
+          description: The priority of the Task.
+          inferred_type: str
+          type: str
+        downtime:
+          description: The amount of downtime in seconds caused by this Task.
+          inferred_type: int
+          type: int
+        estimatedTime:
+          description: The estimated time of the task. This is the time it takes to
+            complete the task in minutes.
+          inferred_type: int
+          type: int
+        completionNotes:
+          description: Notes inputted by the user at the time of task completion.
+          inferred_type: list[str]
+          type: list[str]
+        requestorName:
+          description: The name of the person that requested this Task.
+          inferred_type: str
+          type: str
+        requestorEmail:
+          description: The email of the person that requested this Task.
+          inferred_type: str
+          type: str
+        requestorPhone:
+          description: The phone number of the person that requested this Task.
+          inferred_type: str
+          type: str
+        requestTile:
+          description: The title of the work request being submitted.
+          inferred_type: str
+          type: str
+        requestField1:
+          description: Work request portal custom field 1.
+          inferred_type: str
+          type: str
+        requestField2:
+          description: Work request portal custom field 2.
+          inferred_type: str
+          type: str
+        requestField3:
+          description: Work request portal custom field 3.
+          inferred_type: str
+          type: str
+        requestDropdown1:
+          description: Work request portal custom dropdown box 1.
+          inferred_type: str
+          type: str
+        requestDropdown2:
+          description: Work request portal custom dropdown box 2.
+          inferred_type: str
+          type: str
+        requestDropdown3:
+          description: Work request portal custom dropdown box 3.
+          inferred_type: str
+          type: str
+        requestorDescription:
+          description: The description of the request submitted via the Work Request
+            portal.
+          inferred_type: str
+          type: str
+        type:
+          description: 1 = Preventative Maintanance (PM);2 = Unplanned Work Order
+            (WO);4 = Planned Work Order (WO);5 = Cycle Count;6 = Work Request (WR);7
+            = Min Part Threshold;8 = Materials Request;
+          inferred_type: str
+          type: str
+        status:
+          description: '1 - Complete0 - IncompleteNote: this property indicates a
+            task status with respect to task completion. For the custom task status
+            refer to statusID'
+          inferred_type: list[str]
+          type: list[str]
+        statusID:
+          description: 'The current custom status assigned to this task.Note: this
+            indicates the current status of a task. Use GET Statuses to find the value
+            of each statusID.'
+          inferred_type: int
+          type: int
+        associatedTaskID (deprecated):
+          description: Please refer to associatedTask meta property on GET Task Instruction
+            for instruction type 14.
+          inferred_type: str
+          type: str
+        meta1:
+          description: Task meta data. This does not show in the web application,
+            but can be used to track items between integrated systems.
+          inferred_type: str
+          type: str
+        meta2:
+          description: Task meta data. This does not show in the web application,
+            but can be used to track items between integrated systems.
+          inferred_type: str
+          type: str
+        meta3:
+          description: Task meta data. This does not show in the web application,
+            but can be used to track items between integrated systems.
+          inferred_type: str
+          type: str
+        geoLocation:
+          description: The location of a task on a Map.
+          inferred_type: str
+          type: str
+        customTags:
+          description: An array of custom tags associated with the task.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.tasks.invoices:
     url: '{api_base_url}/tasks/invoices/'
     method: GET
@@ -2232,34 +2980,40 @@ endpoints:
       value: '1'
       description: This parameter is used to only get specific invoices or invoices.
         This parameter accepts a comma delimited list of invoice IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: tasks
       value: '8250'
       description: This parameter is used to only get invoices on a task or tasks.
         This parameter accepts a comma delimited list of task IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: start
       value: '1459391400'
       description: This parameter is used to only get invoices that were logged after
         the unix timestamp passed into the start parameter. For example, all Invoices
         that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1518826313'
       description: This parameter is used to only get invoices that were logged *before*
         the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what invoiceID you want
         to start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.tasks.invoices.files:
     is_folder: true
     description_data:
@@ -2484,14 +3238,82 @@ endpoints:
     query_params:
     - key: limit
       value: '2'
+      description: ''
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
+      description: ''
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what partID you want to
         start receiving results at. e.g. passing 137 here will only get you parts
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        parentInstructionID:
+          description: This is the instructionID of the Instruction's parent. If this
+            value is 0 then this Instruction does not have a parent.
+          inferred_type: int
+          type: int
+        instruction:
+          description: The text that guides a User on what to do on this Instruction.
+          inferred_type: str
+          type: str
+        type:
+          description: The type of the Instruction. See the request Post New Task
+            Instruction to see a list of possible types and their meaning.
+          inferred_type: str
+          type: str
+        instructionFiles:
+          description: Array of objects that have a file name and a link you can use
+            to download that file. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+        options:
+          description: Array of objects that have an itemOptionID, itemOptionOrder,
+            and itemOptionText.
+          inferred_type: list[str]
+          type: list[str]
+        response:
+          description: This field is the "response" of an instruction i.e. what a
+            user filled out when doing this instruction. The return value changes
+            based on the instruction type:1 Check Box - true/false2 Radio List - if
+            no option is selected, this will be 0. If an option is selected, this
+            will be a number that maps to the itemOptionID of one of the members of
+            the options array.3 Text Box - string4 Dropdown Box - if no option is
+            selected, this will be 0. If an option is selected, this will be a number
+            that maps to the itemOptionID of one of the members of the options array.5
+            Date Picker - unix time stamp7 Label - labels will never have a user response9
+            File or Picture Attachment - Array of objects that have a file name and
+            a link you can use to download that image. All links are only valid for
+            15 minutes, a new call will generate a new link.10 Assign PM - not supported
+            yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature
+            - Array of objects that have a file name and a link you can use to download
+            that image. All links are only valid for 15 minutes, a new call will generate
+            a new link.16 Request Approval - Array of objects that have a file name
+            and a link you can use to download that image. All links are only valid
+            for 15 minutes, a new call will generate a new link.
+          inferred_type: str
+          type: str
+        meta:
+          description: This property is useful to get more information related to
+            the Task Instructions. Different instruction types may have different
+            properties in the meta section.Instruction Type:14 Start WO - If this
+            instruction is completed on the task, the meta property would have an
+            "associatedTask" property on it. The associatedTask gives the route for
+            the task created by this instruction. For example, if task 2 was created
+            by a "Start WO" instruction on task 1. In GET Task Instruction for task
+            1, this instruction would have a meta associatedTask property pointing
+            to task 2.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.instructions.new_task_instruction:
     url: '{api_base_url}/tasks/:taskID/instructions/'
     method: POST
@@ -2626,12 +3448,79 @@ endpoints:
     - key: tasks
       value: 1,2,3,4,5,6,7
       description: 'CSV of task IDs '
+      inferred_type: list[str]
+      type: list[str]
     - key: limit
       value: '100'
       description: Page size (1..1000)
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: Page-based pagination (mutually exclusive with cursor)
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        parentInstructionID:
+          description: This is the instructionID of the Instruction's parent. If this
+            value is 0 then this Instruction does not have a parent.
+          inferred_type: int
+          type: int
+        instruction:
+          description: The text that guides a User on what to do on this Instruction.
+          inferred_type: str
+          type: str
+        type:
+          description: The type of the Instruction. See the request Post New Task
+            Instruction to see a list of possible types and their meaning.
+          inferred_type: str
+          type: str
+        instructionFiles:
+          description: Array of objects that have a file name and a link you can use
+            to download that file. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+        options:
+          description: Array of objects that have an itemOptionID, itemOptionOrder,
+            and itemOptionText.
+          inferred_type: list[str]
+          type: list[str]
+        response:
+          description: This field is the "response" of an instruction i.e. what a
+            user filled out when doing this instruction. The return value changes
+            based on the instruction type:1 Check Box - true/false2 Radio List - if
+            no option is selected, this will be 0. If an option is selected, this
+            will be a number that maps to the itemOptionID of one of the members of
+            the options array.3 Text Box - string4 Dropdown Box - if no option is
+            selected, this will be 0. If an option is selected, this will be a number
+            that maps to the itemOptionID of one of the members of the options array.5
+            Date Picker - unix time stamp7 Label - labels will never have a user response9
+            File or Picture Attachment - Array of objects that have a file name and
+            a link you can use to download that image. All links are only valid for
+            15 minutes, a new call will generate a new link.10 Assign PM - not supported
+            yet.13 Number - integer14 Start WO - not supported yet.15 Capture Signature
+            - Array of objects that have a file name and a link you can use to download
+            that image. All links are only valid for 15 minutes, a new call will generate
+            a new link.16 Request Approval - Array of objects that have a file name
+            and a link you can use to download that image. All links are only valid
+            for 15 minutes, a new call will generate a new link.
+          inferred_type: str
+          type: str
+        meta:
+          description: This property is useful to get more information related to
+            the Task Instructions. Different instruction types may have different
+            properties in the meta section.Instruction Type:14 Start WO - If this
+            instruction is completed on the task, the meta property would have an
+            "associatedTask" property on it. The associatedTask gives the route for
+            the task created by this instruction. For example, if task 2 was created
+            by a "Start WO" instruction on task 1. In GET Task Instruction for task
+            1, this instruction would have a meta associatedTask property pointing
+            to task 2.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.instructions.get_task_instruction_by_id:
     url: '{api_base_url}/tasks/instructions/:instructionID'
     method: GET
@@ -2676,6 +3565,42 @@ endpoints:
         - 404: Instruction not found'
     is_folder: false
     query_params: []
+    response:
+      fields:
+        instructionID:
+          description: The unique identifier for this instruction
+          inferred_type: int
+          type: int
+        taskID:
+          description: The ID of the task this instruction belongs to
+          inferred_type: int
+          type: int
+        parentInstructionID:
+          description: This is the instructionID of the Instruction's parent. If this
+            value is 0 then this Instruction does not have a parent.
+          inferred_type: int
+          type: int
+        instruction:
+          description: The text that guides a User on what to do on this Instruction.
+          inferred_type: str
+          type: str
+        type:
+          description: The type of the Instruction. See the request Post New Task
+            Instruction to see a list of possible types and their meaning.
+          inferred_type: str
+          type: str
+        instructionFiles:
+          description: Array of objects that have a file name and a link you can use
+            to download that file. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+        response:
+          description: This field is the 'response' of an instruction i.e. what a
+            user filled out when completing this instruction.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.images:
     is_folder: true
     description_data:
@@ -2700,6 +3625,13 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        filename:
+          description: The name of the file after being uploaded to Limble.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.images.delete_task_instruction_image:
     url: '{api_base_url}/tasks/instructions/:instructionID/image'
     method: DELETE
@@ -2715,7 +3647,8 @@ endpoints:
       description: The name of the instruction file that needs to be deleted. This
         is an optional parameter. If not given, **all** the files attached to an instruction
         will be deleted.
-      disabled: true
+      inferred_type: str
+      type: str
   routes.tasks.images.upload_task_main_image:
     url: '{api_base_url}/tasks/:taskID/image'
     method: PUT
@@ -2743,7 +3676,7 @@ endpoints:
         - file
         - 'yes'
         - ''
-        - "Image file (\u2264 50MB). Types: JPEG, PNG, JPG, GIF"
+        - 'Image file (≤ 50MB). Types: JPEG, PNG, JPG, GIF'
       non_table_after: ''
     is_folder: false
     query_params: []
@@ -2829,37 +3762,108 @@ endpoints:
       value: 6,11
       description: This parameter is used to only get specific Tasks. This parameter
         accepts a comma delimited list of task IDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: users
       value: '0'
       description: This parameter is used to only get labor records for a specific
         user or set of users in a comma delimited list.
+      inferred_type: int
+      type: int
     - key: start
       value: '1564895015'
       description: This parameter is used to only get labor that was logged after
         the unix timestamp passed into the start parameter. For example, all Assets
         that were last edited after April 18th, 2018.
+      inferred_type: int
+      type: int
     - key: end
       value: '1564895015'
       description: This parameter is used to only get labor that was logged *before*
         the unix timestamp passed into the end parameter.
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what taskID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: locations
       value: '0'
       description: This parameter is used to retrieve labor entries for particular
         locations. This parameter accepts a comma delimited list of location IDs.
+      inferred_type: int
+      type: int
     - key: orderBy
       value: -dateLogged
       description: This parameter is used to order results by their dateLogged property
         instead of the default ordering. CANNOT be provided alongside the cursor parameter.
         to paginate in this ordering, use the start or end parameters.
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        meta:
+          description: This property contains shortcuts to other requests that can
+            be used to get more information regarding the Task the labor was logged
+            on and the user who logged the time.
+          inferred_type: str
+          type: str
+        taskID:
+          description: The Task ID associated with this labor entry.
+          inferred_type: int
+          type: int
+        timeSpent:
+          description: The amount of time measure in seconds.
+          inferred_type: int
+          type: int
+        userWage:
+          description: The wage per hour.
+          inferred_type: str
+          type: str
+        description:
+          description: A description of the labor entry.
+          inferred_type: str
+          type: str
+        dateLogged:
+          description: The date that this time was logged on the Task.
+          inferred_type: int
+          type: int
+        billableTime:
+          description: The amount of time that is billable for this Task.
+          inferred_type: int
+          type: int
+        billableRate:
+          description: The rate at which this labor entry is billed at.
+          inferred_type: str
+          type: str
+        categoryID:
+          description: The labor category this entry is associated with.
+          inferred_type: int
+          type: int
+        taskName:
+          description: The name of the task associated with this labor entry.
+          inferred_type: str
+          type: str
+        taskPriorityID:
+          description: The Priority ID of the task this labor entry is associated
+            with.
+          inferred_type: int
+          type: int
+        taskPriorityLevel:
+          description: The Priority value of the task this labor entry is associated
+            with.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.labor.get_labor_categories:
     url: '{api_base_url}/tasks/labor/categories'
     method: GET
@@ -2885,18 +3889,36 @@ endpoints:
       value: '%tech%'
       description: This is a parameter used to string search for a name or partial
         name of a category this parameter expects a string with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what taskID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        categoryID:
+          description: The unique ID for this billing category.
+          inferred_type: int
+          type: int
+        categoryName:
+          description: The name of this billing category.
+          inferred_type: str
+          type: str
+        categoryRate:
+          description: The rate per hour of this billing category.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.parts:
     is_folder: true
     description_data:
@@ -2933,6 +3955,29 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        partID:
+          description: The partID of the part associated to this task.
+          inferred_type: int
+          type: int
+        quantity:
+          description: The quantity of this part associated to this task.
+          inferred_type: str
+          type: str
+        usedPrice:
+          description: The price of the part at the time of use.
+          inferred_type: str
+          type: str
+        partName:
+          description: The name of the part.
+          inferred_type: str
+          type: str
+        poItemID:
+          description: The unique ID of the PO item associated with this record.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.tasks.parts.get_all_attached_parts:
     url: '{api_base_url}/tasks/parts'
     method: GET
@@ -2972,22 +4017,62 @@ endpoints:
       value: 5,10,12
       description: This parameter is used to get parts attached to a list of tasks.
         This parameter accepts a comma delimited list of task IDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: parts
       value: 121,112,553
       description: This parameter is used to get only certain. This parameter accepts
         a comma delimited list of task IDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: cursor
       value: '137'
       description: This parameter is a cursor that selects what id you want to start
         receiving results at. e.g. passing 137 here will only get you assets with
         an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        relationID:
+          description: The identifier that associates parts to tasks.
+          inferred_type: int
+          type: int
+        partID:
+          description: The partID of the part associated to this task.
+          inferred_type: int
+          type: int
+        taskID:
+          description: The taskID this part is assoicated with.
+          inferred_type: int
+          type: int
+        quantity:
+          description: The quantity of this part associated to this task.
+          inferred_type: str
+          type: str
+        lastEdited:
+          description: The unix timestamp date of the last time this record was edited.
+          inferred_type: str
+          type: str
+        usedPrice:
+          description: The price of the part at the time of use.
+          inferred_type: str
+          type: str
+        partName:
+          description: The name of the part.
+          inferred_type: str
+          type: str
+        poItemID:
+          description: The unique ID of the PO item associated with this record.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.tasks.parts.attach_part_to_task:
     url: '{api_base_url}/tasks/:taskID/parts'
     method: PUT
@@ -3053,12 +4138,50 @@ endpoints:
       description: This parameter is a cursor that selects what commentID you want
         to start receiving results at. e.g. passing 137 here will only get you parts
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        commentID:
+          description: This is the commentID of comment.
+          inferred_type: int
+          type: int
+        comment:
+          description: The text comment that was entered by the user.
+          inferred_type: str
+          type: str
+        timestamp:
+          description: The date this comment was created. This is a unix timestamp.
+          inferred_type: int
+          type: int
+        userID:
+          description: The ID of the user that made the comment.
+          inferred_type: int
+          type: int
+        commentEmailAddress:
+          description: The email address of the external user that made this comment.
+            This is only populated if the comment was made by an external user via
+            the comment reply system.
+          inferred_type: list[str]
+          type: list[str]
+        showExternalUsers:
+          description: 'The comment can be seen by external users or not.default value
+            : true'
+          inferred_type: list[str]
+          type: list[str]
+        commentFiles:
+          description: Array of objects that have a file name and a link you can use
+            to download that file. All links are only valid for 15 minutes, a new
+            call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.tasks.comments.add_task_comments:
     url: '{api_base_url}/tasks/:taskID/comments'
     method: POST
@@ -3098,29 +4221,70 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        tags:
+          description: An array of custom tags associated with the task.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.tasks.tags.put_apply_task_tags:
     url: '{api_base_url}/tasks/:taskID/tags'
     method: PUT
     description_data:
       headers: []
       data_rows: []
-      non_table_before: "Applies one or more existing custom tags to a task. Tags\
-        \ must already exist at the account level (see POST /v2/tags to create new\
-        \ tags).\n\nBody:\n- tags: string[] \u2014 List of tags, or\n- tag: string\
-        \ \u2014 Single tag.\n\nSuccess Response (200):\n- created: true\n- name?:\
-        \ string \u2014 Present when a single tag was added; canonical without trailing\
-        \ ';'.\n- sanitizations?: string[] \u2014 Applied normalizations.\n- note?:\
-        \ string \u2014 Present when input had multiple '@' characters.\n- tags: string[]\
-        \ \u2014 Updated canonical tags with trailing ';'.\n\nConflicts (409):\n-\
-        \ Single: { created: false, message: 'Tag already exists', name, tags }\n\
-        - Multiple: { created: false, message: 'No new tags to add', tags }\n\nErrors:\n\
-        - 404: { created: false, message, invalidTag(s), tags, availableTags } \u2014\
-        \ Tag(s) don't exist at account level.\n- 400: { added: [], message: string\
-        \ } \u2014 Invalid input (semicolons, empty tags, etc.).\n\nNotes:\n- Tags\
-        \ MUST exist in the account's tag definitions before they can be applied to\
-        \ tasks.\n- Validation is case-insensitive (e.g., '@urgent' matches '@Urgent').\n\
-        - Semicolons in input are rejected.\n- The availableTags field in 404 responses\
-        \ shows which tags can be used."
+      non_table_before: 'Applies one or more existing custom tags to a task. Tags
+        must already exist at the account level (see POST /v2/tags to create new tags).
+
+
+        Body:
+
+        - tags: string[] — List of tags, or
+
+        - tag: string — Single tag.
+
+
+        Success Response (200):
+
+        - created: true
+
+        - name?: string — Present when a single tag was added; canonical without trailing
+        '';''.
+
+        - sanitizations?: string[] — Applied normalizations.
+
+        - note?: string — Present when input had multiple ''@'' characters.
+
+        - tags: string[] — Updated canonical tags with trailing '';''.
+
+
+        Conflicts (409):
+
+        - Single: { created: false, message: ''Tag already exists'', name, tags }
+
+        - Multiple: { created: false, message: ''No new tags to add'', tags }
+
+
+        Errors:
+
+        - 404: { created: false, message, invalidTag(s), tags, availableTags } — Tag(s)
+        don''t exist at account level.
+
+        - 400: { added: [], message: string } — Invalid input (semicolons, empty tags,
+        etc.).
+
+
+        Notes:
+
+        - Tags MUST exist in the account''s tag definitions before they can be applied
+        to tasks.
+
+        - Validation is case-insensitive (e.g., ''@urgent'' matches ''@Urgent'').
+
+        - Semicolons in input are rejected.
+
+        - The availableTags field in 404 responses shows which tags can be used.'
       non_table_after: ''
     is_folder: false
     query_params: []
@@ -3130,12 +4294,28 @@ endpoints:
     description_data:
       headers: []
       data_rows: []
-      non_table_before: "Removes a single custom tag from a task.\n\nPath:\n- tag:\
-        \ string \u2014 Tag to remove; may be raw or canonical; server normalizes.\n\
-        \nSuccess Response (200):\n- deleted: true\n- name: string \u2014 Canonical\
-        \ tag (includes trailing ';').\n- tags: string[] \u2014 Updated canonical\
-        \ tags.\n\nErrors:\n- 404: { message: 'Tag not found' }\n- 400: { removed:\
-        \ null, message: string } \u2014 Invalid input."
+      non_table_before: 'Removes a single custom tag from a task.
+
+
+        Path:
+
+        - tag: string — Tag to remove; may be raw or canonical; server normalizes.
+
+
+        Success Response (200):
+
+        - deleted: true
+
+        - name: string — Canonical tag (includes trailing '';'').
+
+        - tags: string[] — Updated canonical tags.
+
+
+        Errors:
+
+        - 404: { message: ''Tag not found'' }
+
+        - 400: { removed: null, message: string } — Invalid input.'
       non_table_after: ''
     is_folder: false
     query_params: []
@@ -3191,8 +4371,8 @@ endpoints:
       - - priorityId
         - The unique identifier of the priority of the submission.
       - - dueDateUnit
-        - "The unit of measure used to communicate when the task will be due. Can\
-          \ be \u201Cdays\u201D or \u201Chours\u201D."
+        - The unit of measure used to communicate when the task will be due. Can be
+          “days” or “hours”.
       - - requestInformation
         - The information filled out in the Work Request Portal. Includes any of the
           following fields in JSON format. customerCode requesterName requesterEmail
@@ -3224,40 +4404,169 @@ endpoints:
         requestTitle, workRequestSubmissionID, and location property instead of the
         default ordering. each property can be flipped reverse by putting a minus
         before the property e.g. "-createdAt".
+      inferred_type: str
+      type: str
     - key: search
       value: pump
       description: Free-text search
-      disabled: true
+      inferred_type: str
+      type: str
     - key: locationIDs
       value: '1'
       description: This parameter is used to only get work requests at a specific
         group of Locations. This parameter accepts a comma delimited list of Location
         IDs.
+      inferred_type: int
+      type: int
     - key: statuses
       value: open
       description: CSV of statuses
+      inferred_type: str
+      type: str
     - key: limit
       value: '100'
       description: Max rows
+      inferred_type: int
+      type: int
     - key: columns
       value: ''
       description: CSV of field names (letters only); forwarded upstream as array
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: createdDateStart
       value: '2025-06-20T20:51:13.000Z'
       description: ISO 8601 start
+      inferred_type: str
+      type: str
     - key: createdDateEnd
       value: '2025-06-20T20:51:13.000Z'
-      description: "ISO 8601 end (\u2265 start)"
+      description: ISO 8601 end (≥ start)
+      inferred_type: str
+      type: str
     - key: workRequestIDs
       value: 1,2,3
       description: CSV of WR IDs
+      inferred_type: list[str]
+      type: list[str]
     - key: page
       value: '1'
       description: Page-based pagination (mutually exclusive with cursor)
+      inferred_type: int
+      type: int
     - key: cursor
       value: '1'
       description: Cursor for pagination (forbidden with page)
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        workRequestSubmissionId:
+          description: The unique identifier of the work request submission.
+          inferred_type: int
+          type: int
+        status:
+          description: Pending, Approved or Rejected.
+          inferred_type: list[str]
+          type: list[str]
+        createdByUserId:
+          description: The unique identifier of the user who created the work request
+            submission.
+          inferred_type: int
+          type: int
+        createdAt:
+          description: 'The date the work request submission was created. The timestamp
+            is in the following format: YYYY-MM-DD (2025-07-02) HH:MM:SS (21:36:31)'
+          inferred_type: str
+          type: str
+        updatedAt:
+          description: 'The date the work request submission was last updated. The
+            timestamp is in the following format: YYYY-MM-DD (2025-07-02) HH:MM:SS
+            (21:36:31)'
+          inferred_type: int
+          type: int
+        deletedAt:
+          description: 'The date the work request submission was deleted. The timestamp
+            is in the following format: YYYY-MM-DD (2025-07-02) HH:MM:SS (21:36:31)
+            Will be NULL if the submission is not deleted.'
+          inferred_type: str
+          type: str
+        reviewedByUserId:
+          description: The unique identifier of the user who reviewed the submission.
+          inferred_type: int
+          type: int
+        reviewedAt:
+          description: 'The date the work request submission was reviewed. The timestamp
+            is in the following format: YYYY-MM-DD (2025-07-02) HH:MM:SS (21:36:31)
+            Will be NULL if the submission has not yet been reviewed'
+          inferred_type: str
+          type: str
+        reviewedReason:
+          description: The predefined reason the work request was declined.
+          inferred_type: str
+          type: str
+        additionalNotes:
+          description: Any additional notes the person who declined the submission
+            wishes to leave.
+          inferred_type: list[str]
+          type: list[str]
+        locationId:
+          description: The unique identifier of the location the submission belongs
+            to.
+          inferred_type: int
+          type: int
+        assetId:
+          description: The unique identifier of the asset associated with the submission.
+          inferred_type: int
+          type: int
+        priorityId:
+          description: The unique identifier of the priority of the submission.
+          inferred_type: int
+          type: int
+        dueDateUnit:
+          description: The unit of measure used to communicate when the task will
+            be due. Can be “days” or “hours”.
+          inferred_type: int
+          type: int
+        requestInformation:
+          description: The information filled out in the Work Request Portal. Includes
+            any of the following fields in JSON format. customerCode requesterName
+            requesterEmail requesterPhone timeUnix customTag customFieldOne customFieldTwo
+            customFieldThree customFieldOneTitle customFieldTwoTitle customFieldThreeTitle
+            customFieldDropdownAnswerOne customFieldDropdownAnswerTwo customFieldDropdownAnswerThree
+            customDropdownTitleOne customDropdownTitleTwo customDropdownTitleThree
+            customDropdownOptionsOne customDropdownOptionsTwo customDropdownOptionsThree
+            geoLocation
+          inferred_type: str
+          type: str
+        customerID:
+          description: The unique identifier of the customer account.
+          inferred_type: int
+          type: int
+        requestTitle:
+          description: The title of the submission.
+          inferred_type: str
+          type: str
+        assignedToProfileId:
+          description: The Limble profile the submission is assigned to. This is used
+            to determine what team or individual is assigned to review the submission.
+          inferred_type: int
+          type: int
+        requestDescription:
+          description: The description of the problem filled out in the Work Request
+            Portal.
+          inferred_type: str
+          type: str
+        checklistID:
+          description: The unique identifier of the task generated from the submission
+            when it is approved. Will be NULL if submission status is declined or
+            pending.
+          inferred_type: int
+          type: int
+        requesterName:
+          description: The name of the person who submitted the work request submission.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tasks.new_task:
     url: '{api_base_url}/tasks'
     method: POST
@@ -3374,19 +4683,29 @@ endpoints:
     query_params:
     - key: name
       value: '"Priority Test"'
-      disabled: true
+      description: ''
+      inferred_type: str
+      type: str
     - key: locationID
       value: '34190'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: due
       value: '1749680211'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: type
       value: '2'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
     - key: templateID
       value: '9'
-      disabled: true
+      description: ''
+      inferred_type: int
+      type: int
   routes.tasks.update_task:
     url: '{api_base_url}/tasks/:taskID'
     method: PATCH
@@ -3549,33 +4868,75 @@ endpoints:
       value: '342'
       description: This parameter expects a comma-separated list of users to get by
         id
+      inferred_type: int
+      type: int
     - key: name
       value: '%jeff%'
       description: This parameter is used to only get specific user by name. This
         parameter expects a string full name of a user or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: roles
       value: '320'
       description: This parameter expects a comma-separated list of users to get by
         roleID
-      disabled: true
+      inferred_type: int
+      type: int
     - key: teams
       value: 436,437
       description: This parameter expects a comma-separated list of users to get by
         teamID
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what userID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        username:
+          description: What a User uses to login.
+          inferred_type: str
+          type: str
+        wage:
+          description: The hourly rate of an employee.
+          inferred_type: str
+          type: str
+        active:
+          description: Determines if a user can log into Limble or not.
+          inferred_type: str
+          type: str
+        emailNotificationActive:
+          description: Determines if a User gets Email Notifications From Limble.
+          inferred_type: str
+          type: str
+        pushNotificationActive:
+          description: Determines if a User gets Push Notifications From Limble.
+          inferred_type: str
+          type: str
+        workdayHours:
+          description: The number of hours a day this employee works.
+          inferred_type: list[str]
+          type: list[str]
+        dateAdded:
+          description: The date a user was added to Limble.  This is a unix timestamp.
+          inferred_type: int
+          type: int
+        teams:
+          description: What Teams a User has at specific Locations.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.users.roles:
     is_folder: true
     description_data:
@@ -3598,29 +4959,34 @@ endpoints:
       value: 1,2
       description: This parameter expects a comma-separated list of roleIDs to filter
         teams by
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: locations
       value: 163,202
       description: This parameter expects a comma-separated list of locationIDs to
         filter roles by
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%Manager%'
       description: This parameter is used to only get specific role by name. This
         parameter expects a string full name of a user or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what teamID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.users.roles.add_user_to_role:
     url: '{api_base_url}/users/:userID/roles'
     method: PUT
@@ -3663,24 +5029,34 @@ endpoints:
       value: 436,437
       description: This parameter expects a comma-separated list of teamIDs to filter
         teams by
+      inferred_type: list[str]
+      type: list[str]
     - key: locations
       value: 163,74
       description: This parameter expects a comma-separated list of locationIDs to
         filter teams by
+      inferred_type: list[str]
+      type: list[str]
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what teamID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: name
       value: '%Manager%'
       description: This parameter is used to only get specific team by name. This
         parameter expects a string full name of a user or partial name with the wildcard
         %.
+      inferred_type: str
+      type: str
   routes.users.teams.add_user_to_team:
     url: '{api_base_url}/users/:userID/teams'
     method: PUT
@@ -3864,45 +5240,53 @@ endpoints:
       value: '9'
       description: This parameter is used to only get specific Vendors. This parameter
         expects a comma delimited list of Vendor IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: locations
       value: '163'
       description: This parameter is used to only get Vendors at a specific group
         of Locations. This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: name
       value: '%test%'
       description: This parameter is used to only get specific vendor by name. This
         parameter expects a string full name of a vendor or partial name with the
         wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: start
       value: '1560233040'
       description: This parameter is used to only get Vendors that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         Vendors that were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1613665140'
       description: This parameter is used to only get Vendors that were last edited
         *before* the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what vendorID you want
         to start receiving results at. e.g. passing 137 here will only get you vendors
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '2'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
   routes.vendors.fields:
     is_folder: true
     description_data:
@@ -3934,48 +5318,67 @@ endpoints:
       value: 1,2
       description: This parameter is used to only get specific fields by ID. This
         parameter expects a comma delimited list of fieldIDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%pic%'
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
+      inferred_type: str
+      type: str
     - key: vendors
       value: '1'
       description: This parameter is used to only get specific Vendors. This parameter
         expects a comma delimited list of Vendor IDs.
+      inferred_type: int
+      type: int
     - key: start
       value: '1555105636'
       description: This parameter is used to only get vendor fields for vendors that
         were last edited after the unix timestamp passed into the start parameter.
         For example, all Vendors that were last edited after April 18th, 2018.
+      inferred_type: int
+      type: int
     - key: end
       value: '1555105636'
       description: This parameter is used to only get vendor fields for vendors that
         were last edited *before* the unix timestamp passed into the end parameter.
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what fieldID you want to
         start receiving results at. e.g. passing 137 here will only get you vendor
         fields with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: value
       value: '355'
       description: This parameter is used to only get specific field by value. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
+      inferred_type: int
+      type: int
     - key: values
       value: 1,2
       description: This parameter is used to get vendor fields by their valueID. This
         parameter expects a comma delimited list of Value IDs.
+      inferred_type: list[str]
       type: text
-      disabled: true
+      origin_type: text
   routes.vendors.fields.vendor_suggested_fields:
     url: '{api_base_url}/vendors/fields/suggested'
     method: GET
@@ -3991,20 +5394,28 @@ endpoints:
       value: 1,2
       description: This parameter can be used to get a single Vendor Fields or a list
         of Vendor Fields in a comma-separated list.
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%pic%'
       description: This parameter is used to only get specific field by name. This
         parameter expects a string full name of a field or partial name with the wildcard
         %.
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what fieldID you want to
         start receiving results at. e.g. passing 137 here will only get you vendor
         fields with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
   routes.vendors.fields.update_vendor_field_value:
     url: '{api_base_url}/vendors/fields/:valueID'
     method: PATCH
@@ -4143,6 +5554,13 @@ endpoints:
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        fileID:
+          description: The ID of the file attached to the log.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.vendors.logs.vendor_logs:
     url: '{api_base_url}/vendors/:vendorID/logs'
     method: GET
@@ -4184,42 +5602,79 @@ endpoints:
       value: 2,3
       description: This parameter is used to only get specific logs. This parameter
         accepts a comma delimited list of logIDs.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: users
       value: '340'
       description: This parameter is used to only get logs created by specific users.
         This parameter accepts a comma delimited list of userIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: logEntry
       value: '%test%'
       description: This is a parameter used to string search for manual log entry.
         This parameter expects a string with the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: start
       value: '1555085800'
       description: 'This parameter is used to only get logs that were last edited
         after the unix timestamp passed into the start parameter. '
-      disabled: true
+      inferred_type: int
+      type: int
     - key: end
       value: '1555087900'
       description: This parameter is used to only get logs that were last edited before
         the unix timestamp passed into the end parameter.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '1'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: ''
       description: 'This parameter is a cursor that selects what ID you want to start
         receiving results at. '
-      disabled: true
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        logID:
+          description: The unique logID of the log.
+          inferred_type: int
+          type: int
+        dateCreated:
+          description: The date the log was created as a UNIX timestamp.
+          inferred_type: int
+          type: int
+        vendorD:
+          description: The ID of the vendor the log belongs to.
+          inferred_type: str
+          type: str
+        logEntry:
+          description: The log entry for the vendor.
+          inferred_type: str
+          type: str
+        userID:
+          description: The ID of the user that created the log.
+          inferred_type: int
+          type: int
+        logFiles:
+          description: An array of objects that have a fileID, fileName and a link
+            that can used to download the files attached to the log. All links are
+            only valid for 15 minutes, a new call will generate a new link.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.vendors.logs.new_vendor_log:
     url: '{api_base_url}/vendors/:vendorID/logs'
     method: POST
@@ -4361,14 +5816,26 @@ endpoints:
     query_params:
     - key: roles
       value: '1032'
+      description: ''
+      inferred_type: int
+      type: int
     - key: name
       value: '%view%'
+      description: ''
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
+      description: ''
+      inferred_type: int
       type: text
+      origin_type: text
     - key: limit
       value: '100'
+      description: ''
+      inferred_type: int
       type: text
+      origin_type: text
   routes.roles.create_role:
     url: '{api_base_url}/roles/'
     method: POST
@@ -4433,36 +5900,42 @@ endpoints:
       value: 1778, 1771
       description: This parameter expects a comma-separated list of teamIDs to filter
         teams by.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: name
       value: '%Lawn%'
       description: This parameter is used to only get specific teams by name. This
         parameter expects a string full name of a team or partial name with the wildcard
         %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what teamID you want to
         start receiving results at. e.g. passing 137 here will only get you tasks
         with an id greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: automaticallyCreated
       value: 'false'
       description: This parameter is used to only get specific teams by if they were
         automatically created by Limble or not. This parameter expects a bool true
         or false. Teams can get dynamically created if multiple users are assigned
         to the same task, for example.
-      disabled: true
+      inferred_type: bool
+      type: bool
     - key: includeRoles
       value: 'false'
       description: This parameter is used to determine whether role-based teams (Manager,
         Technician, etc) are included in the response.
-      disabled: true
+      inferred_type: bool
+      type: bool
   routes.teams.create_team:
     url: '{api_base_url}/teams/'
     method: POST
@@ -4606,54 +6079,200 @@ endpoints:
       value: '1'
       description: This parameter is used to only get specific POs. This parameter
         expects a comma delimited list of PO IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: vendors
       value: '9'
       description: This parameter is used to only get specific Vendors. This parameter
         expects a comma delimited list of Vendor IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: locations
       value: '73'
       description: This parameter is used to only get POs at a specific group of Locations.
         This parameter accepts a comma delimited list of Location IDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: numbers
       value: '1'
       description: This parameter is used to only get specific POs by Number. This
         parameter expects a comma delimited list of PO Numbers.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what poID you want to start
         receiving results at. e.g. passing 137 here will only get you PO with an id
         greater than 137.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '2'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: lastEditedStart
       value: '1629737835'
       description: This parameter is used to only get POs that were last edited after
         the unix timestamp passed into the start parameter. For example, all POs that
         were last edited after April 18th, 2018.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: lastEditedEnd
       value: '1630121871'
       description: This parameter is used to only get POs that were last edited *before*
         the unix timestamp passed in.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: status
       value: 97,99
       description: This parameter is used to only get POs for a specific group of
         status.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: page
       value: '3'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        meta:
+          description: useful links relating to this Purchase order
+          inferred_type: str
+          type: str
+        poID:
+          description: The unique ID of the Purchase Order.
+          inferred_type: int
+          type: int
+        poNumber:
+          description: The user-set Purchase Order number.
+          inferred_type: str
+          type: str
+        budgetID:
+          description: The unique ID of the budget associated with this Purchase Order.
+          inferred_type: int
+          type: int
+        vendorID:
+          description: The unique ID of the vendor associated with this Purchase Order.
+          inferred_type: int
+          type: int
+        locationID:
+          description: The unique ID of the location associated with this Purchase
+            Order.
+          inferred_type: int
+          type: int
+        userIDStarted:
+          description: The unique ID of the user that started this Purchase Order.
+          inferred_type: list[str]
+          type: list[str]
+        userID:
+          description: The unique ID of the user this Purchase Order is currently
+            assigned to.
+          inferred_type: int
+          type: int
+        teamID:
+          description: The unique ID of the team the user of this Purchase Order is
+            currently assigned to.
+          inferred_type: int
+          type: int
+        requestedByUserID:
+          description: The userID of the user that request this Purchase Order. A
+            value of 0 means this PO wasn't requested, but was manually started by
+            the userIDStarted.
+          inferred_type: int
+          type: int
+        date:
+          description: The date this PO was started as a UNIX timestamp, or the date
+            the user inputted for the Purchase Order.
+          inferred_type: int
+          type: int
+        expectedDate:
+          description: The date this PO is expected as a UNIX timestamp to receive
+            items.
+          inferred_type: int
+          type: int
+        billTo:
+          description: The address that should receive the bill for the PO.
+          inferred_type: str
+          type: str
+        shipTo:
+          description: The address the PO's items should be delivered to.
+          inferred_type: str
+          type: str
+        notesToVendor:
+          description: Any notes sent to the vendor, possibly containing handling,
+            packaging, or delivery instructions.
+          inferred_type: str
+          type: str
+        customField1:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        customField2:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        customField3:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        customField4:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        customField5:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        customField6:
+          description: PO custom field, the customer chooses which custom fields are
+            available on all POs.
+          inferred_type: str
+          type: str
+        poPrefix:
+          description: If a PO prefix is configured, it will show up here.
+          inferred_type: str
+          type: str
+        lastEdited:
+          description: Last time this PO was edited as a UNIX timestamp.
+          inferred_type: str
+          type: str
+        status:
+          description: 'This is the current status of a PO. Status of PO can be as
+            follows:0: the PO has only been setup. (Status: Setup)1-97: these are
+            custom statuses based on the budget steps. Refer to "budgetSteps" in meta.
+            (Status : {Name of the budgetStep it is on} )97: the PO is in the ready
+            to receive step. This means items can be received for this PO. (Status:
+            Ready to Receive)98 all budget steps have been completed, but not all
+            items on the PO have been received. This means only some items or partial
+            qty of items have been received. (Status: Partially Received)99: the PO
+            is completed. This means all the items and their full qty on the PO have
+            been received but not been paid for ( i.e. all the bills generated for
+            this PO have not been marked as paid yet.) (Status: Fully Received - Pending
+            Payment)100: the PO is closed. This means all the items on the PO have
+            been received and have been paid for. (i.e. all the bills for this PO
+            have been marked as paid.) (Status: Closed)'
+          inferred_type: list[str]
+          type: list[str]
+        stateDetails:
+          description: JSON object containing details about the PO's current state,
+            and available state transitions.
+          inferred_type: list[str]
+          type: list[str]
+        poNumberDisplay:
+          description: Formatted display string with leading zeros and prefix. This
+            is the PO Number the UI will display.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.purchase_orders.items:
     is_folder: true
     description_data:
@@ -4717,32 +6336,120 @@ endpoints:
       value: 1,2,3
       description: This parameter is used to only get specific POs. This parameter
         expects a comma delimited list of PO IDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: items
       value: 45,8998,3434
       description: This parameter is used to only get specific PO Items by ID. This
         parameter expects a comma delimited list of poItem IDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: numbers
       value: 1,2
       description: This parameter is used to only get specific POs by Number. This
         parameter expects a comma delimited list of PO Numbers.
+      inferred_type: list[str]
+      type: list[str]
     - key: cursor
       value: '112'
       description: This parameter is a cursor that selects what vendorID you want
         to start receiving results at. e.g. passing 137 here will only get you vendors
         with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: lastEditedStart
       value: '1518559856'
       description: This parameter is used to only get PO items that were last edited
         after the unix timestamp passed into the start parameter. For example, all
         PO items that were last edited after April 18th, 2018.
+      inferred_type: int
+      type: int
     - key: lastEditedEnd
       value: '1518559856'
       description: This parameter is used to only get POs items that were last edited
         *before* the unix timestamp passed in.
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        poID:
+          description: The unique ID of the purchase order associated to this item.
+          inferred_type: int
+          type: int
+        poItemID:
+          description: The unqiue ID of this Purchase Order Item
+          inferred_type: int
+          type: int
+        itemType:
+          description: Which type (Part, Service, or Other) this item is.
+          inferred_type: str
+          type: str
+        name:
+          description: The name of the item.
+          inferred_type: str
+          type: str
+        description:
+          description: A more detailed description of the item.
+          inferred_type: str
+          type: str
+        glID:
+          description: The unique ID of the GL associated to this item.
+          inferred_type: int
+          type: int
+        partID:
+          description: The unique ID of the part associated to this item.
+          inferred_type: int
+          type: int
+        taskID:
+          description: The unique ID of the task associated to this item.
+          inferred_type: int
+          type: int
+        poNumber:
+          description: The user-set Purchase Order number.
+          inferred_type: str
+          type: str
+        qty:
+          description: The quantity purchased.
+          inferred_type: str
+          type: str
+        rate:
+          description: The billing rate for the item on the Purchase Order.
+          inferred_type: str
+          type: str
+        tax:
+          description: The tax percent rate for the item on the Purchase Order.
+          inferred_type: str
+          type: str
+        discount:
+          description: The discount percent rate for the item on the Purchase Order.
+          inferred_type: str
+          type: str
+        shipping:
+          description: The shipping rate for the item on the Purchase Order.
+          inferred_type: str
+          type: str
+        qtyReceived:
+          description: A number representing the total quantity that has been marked
+            as "received" for this item.
+          inferred_type: str
+          type: str
+        lastEdited:
+          description: Last time this PO item was edited, this field outputs a UNIX
+            timestamp.
+          inferred_type: str
+          type: str
+        orderUnitAbbreviation:
+          description: The abbreviation for the unit of measure in which the PO item
+            was ordered. (NULL for items not assigned to a unit of measure)
+          inferred_type: str
+          type: str
+      container_type: list
   routes.purchase_orders.items.new_purchase_order_item:
     url: '{api_base_url}/po/:poID/items'
     method: POST
@@ -4995,10 +6702,43 @@ endpoints:
       description: This parameter is a cursor that selects what commentID you want
         to start receiving results at. e.g. passing 137 here will only get you comments
         with an id greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        commentID:
+          description: This is the commentID of comment.
+          inferred_type: int
+          type: int
+        comment:
+          description: The text comment that was entered by the user.
+          inferred_type: str
+          type: str
+        timestamp:
+          description: The date this comment was created. This is a unix timestamp.
+          inferred_type: int
+          type: int
+        userID:
+          description: The ID of the user that made the comment.
+          inferred_type: int
+          type: int
+        commentEmailAddress:
+          description: The email address of the external user that made this comment.
+            This is only populated if the comment was made by an external user via
+            the comment reply system.
+          inferred_type: list[str]
+          type: list[str]
+        commentFiles:
+          description: Array containing fileName and link properties.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.purchase_orders.comments.upload_po_comment_file:
     url: '{api_base_url}/po/:poID/comments/:commentID/file'
     method: PUT
@@ -5080,6 +6820,9 @@ endpoints:
     query_params:
     - key: filename
       value: invoice.pdf
+      description: ''
+      inferred_type: str
+      type: str
   routes.purchase_orders.comments.create_po_comment:
     url: '{api_base_url}/po/:poID/comments'
     method: POST
@@ -5182,15 +6925,34 @@ endpoints:
         \nParameters:\n\n| Parameter | In | Type | Required | Default | Description\
         \ |\n| --- | --- | --- | --- | --- | --- |\n| poID | path | integer | yes\
         \ |  | Purchase Order identifier |\n| newState | body | string | yes |  |\
-        \ All PO states: 0 (setup), 1\u201396 (custom), 97 (ready_to_receive), 98\
-        \ (partially_received), 99 (fully_received), 100 (closed), 101 (disapproved).\
-        \ API accepts numbers, standard names, or custom_step_N |\n| reason | body\
-        \ | string | no |  | Optional note (max 500 chars) |\n\nResponses:\n\n- 200\
-        \ OK: State changed.\n    \n- 400 Bad Request: Invalid transition or failed\
-        \ validation.\n    \n- 404 Not Found: PO not found.\n    \n\nResponse data:"
+        \ All PO states: 0 (setup), 1–96 (custom), 97 (ready_to_receive), 98 (partially_received),\
+        \ 99 (fully_received), 100 (closed), 101 (disapproved). API accepts numbers,\
+        \ standard names, or custom_step_N |\n| reason | body | string | no |  | Optional\
+        \ note (max 500 chars) |\n\nResponses:\n\n- 200 OK: State changed.\n    \n\
+        - 400 Bad Request: Invalid transition or failed validation.\n    \n- 404 Not\
+        \ Found: PO not found.\n    \n\nResponse data:"
       non_table_after: ''
     is_folder: false
     query_params: []
+    response:
+      fields:
+        success:
+          description: Boolean, if this operation was successful
+          inferred_type: list[str]
+          type: list[str]
+        state:
+          description: JSON object describing current state.
+          inferred_type: str
+          type: str
+        previousState:
+          description: JSON object describing previous state.
+          inferred_type: str
+          type: str
+        validNextStates:
+          description: JSON object with a list of possible next states.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.purchase_orders.state.get_po_state_transitions:
     url: '{api_base_url}/po/:poID/state/transitions'
     method: GET
@@ -5412,37 +7174,78 @@ endpoints:
       description: This parameter is a cursor that selects what glID you want to start
         receiving results at. e.g. passing 137 here will only get you GLs with an
         ID greater than 137.
+      inferred_type: int
       type: text
+      origin_type: text
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
       type: text
+      origin_type: text
     - key: name
       value: '%office%'
       description: This is a parameter used to string search for a name or partial
         name of a GL. This parameter expects a string with the wildcard %.
+      inferred_type: str
       type: text
+      origin_type: text
     - key: abbr
       value: '%off%'
       description: This is a parameter used to string search for an abbreviation or
         partial abbreviation of a GL. This parameter expects a string with the wildcard
         %.
+      inferred_type: str
+      type: str
     - key: locations
       value: 1,163,2
       description: This parameter is used to only get GLs that are linked to a location.
         This parameter accepts a comma delimited list of location IDs.
+      inferred_type: list[str]
       type: text
+      origin_type: text
     - key: gls
       value: 1,2,3
       description: This parameter is used to only get specific GLs. This parameter
         accepts a comma delimited list of GL IDs.
+      inferred_type: list[str]
       type: text
+      origin_type: text
     - key: assets
       value: 1,2,3
       description: This parameter is used to only get GLs that are linked to an asset.
         This parameter accepts a comma delimited list of asset IDs.
+      inferred_type: list[str]
       type: text
+      origin_type: text
+    response:
+      fields:
+        glID:
+          description: The GL's unique identifier.
+          inferred_type: int
+          type: int
+        abbr:
+          description: An abbreviation for the GL.
+          inferred_type: str
+          type: str
+        name:
+          description: The full name of the GL.
+          inferred_type: str
+          type: str
+        locationID:
+          description: Which Location this GL belongs to.
+          inferred_type: int
+          type: int
+        description:
+          description: An optional bit of descriptive text for the GL.
+          inferred_type: str
+          type: str
+        assetID:
+          description: Which Asset this GL belongs to.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.general_ledgers.new_general_ledger:
     url: '{api_base_url}/gl'
     method: POST
@@ -5543,22 +7346,47 @@ endpoints:
       description: This parameter is a cursor that selects what budgetID you want
         to start receiving results at. e.g. passing 137 here will only get you budgets
         with an ID greater than 137.
+      inferred_type: int
+      type: int
     - key: limit
       value: '1'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: name
       value: '%General%'
       description: This is a parameter used to string search for a name or partial
         name of a budget. This parameter expects a string with the wildcard %.
+      inferred_type: str
+      type: str
     - key: locations
       value: 1,2,3
       description: This parameter is used to only get budgets that are linked to a
         location. This parameter accepts a comma delimited list of location IDs.
+      inferred_type: list[str]
+      type: list[str]
     - key: budgets
       value: 1,2,3
       description: This parameter is used to only get specific budgets. This parameter
         accepts a comma delimited list of budget IDs.
+      inferred_type: list[str]
+      type: list[str]
+    response:
+      fields:
+        budgetID:
+          description: The Budget's unique identifier.
+          inferred_type: int
+          type: int
+        name:
+          description: The full name of the Budget.
+          inferred_type: str
+          type: str
+        locationID:
+          description: Which Location this Budget belongs to.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.budgets.steps:
     url: '{api_base_url}/budgets/steps'
     method: GET
@@ -5573,33 +7401,45 @@ endpoints:
       value: '%test%'
       description: This is a parameter used to string search for a name or partial
         name of a budget. This parameter expects a string with the wildcard %.
+      inferred_type: str
       type: text
+      origin_type: text
     - key: steps
       value: 1,2,3
       description: This parameter is used to only get specific steps. This parameter
         accepts a comma delimited list of step IDs.
+      inferred_type: list[str]
       type: text
+      origin_type: text
     - key: budgets
       value: '158'
       description: This parameter is used to only get steps that are linked to a budget.
         This parameter accepts a comma delimited list of budget IDs.
+      inferred_type: int
+      type: int
     - key: locations
       value: 1,2,3
       description: This parameter is used to only get steps that are linked to a budget
         at a specific location. This parameter accepts a comma delimited list of location
         IDs.
+      inferred_type: list[str]
       type: text
+      origin_type: text
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what stepID you want to
         start receiving results at. e.g. passing 137 here will only get you steps
         with an ID greater than 137.
+      inferred_type: int
       type: text
+      origin_type: text
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
       type: text
+      origin_type: text
   routes.budgets.steps.new_step:
     url: '{api_base_url}/budgets/:budgetID/steps'
     method: POST
@@ -5877,6 +7717,34 @@ endpoints:
     query_params:
     - key: priorities
       value: '118'
+      description: ''
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        priorityID:
+          description: The priority's unique identifier.
+          inferred_type: int
+          type: int
+        name:
+          description: The full name of the priority.
+          inferred_type: str
+          type: str
+        priorityLevel:
+          description: A number representing ordering or indicator of severity.
+          inferred_type: str
+          type: str
+        color:
+          description: A hex-color string that will be used to color tasks associated
+            to this priority.
+          inferred_type: str
+          type: str
+        isDefault:
+          description: A boolean representing whether or not this is the priority
+            that will be associated to tasks by default.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.priorities.update_priority:
     url: '{api_base_url}/priorities/:priorityID'
     method: PATCH
@@ -5992,7 +7860,17 @@ endpoints:
     query_params:
     - key: name
       value: safety
+      description: ''
+      inferred_type: str
       type: text
+      origin_type: text
+    response:
+      fields:
+        name:
+          description: A search-string for tags.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.tags.create_account_tag:
     url: '{api_base_url}/tags'
     method: POST
@@ -6114,12 +7992,40 @@ endpoints:
     query_params:
     - key: limit
       value: '3'
+      description: ''
+      inferred_type: int
+      type: int
     - key: cursor
       value: '1'
+      description: ''
+      inferred_type: int
+      type: int
     - key: name
       value: '%ogr%'
+      description: ''
+      inferred_type: str
+      type: str
     - key: statuses
       value: '1'
+      description: ''
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        statusID:
+          description: A unique identifier for this status.
+          inferred_type: int
+          type: int
+        name:
+          description: A custom string that labels this status.
+          inferred_type: str
+          type: str
+        description:
+          description: An optional description that elaborates on what this status
+            means.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.statuses.create_status:
     url: '{api_base_url}/statuses'
     method: POST
@@ -6181,6 +8087,8 @@ endpoints:
     - key: replacementStatusID
       value: '1'
       description: ID of the status to reassign tasks to (required)
+      inferred_type: int
+      type: int
   routes.bills:
     url: '{api_base_url}/bills'
     method: GET
@@ -6231,45 +8139,110 @@ endpoints:
       value: '1'
       description: This parameter is used to only get specific Bills. This parameter
         expects a comma delimited list of billIDs.
+      inferred_type: int
+      type: int
     - key: numbers
       value: '1'
       description: This parameter is used to only get specific Bills by Number. This
         parameter expects a comma delimited list of billNumbers.
+      inferred_type: int
+      type: int
     - key: status
       value: 0,1
       description: 'This parameter is used to only get specific Bills by their status.
         The bill status could be 0,1 or 2
 
         '
+      inferred_type: list[str]
+      type: list[str]
     - key: end
       value: '1697443800'
       description: 'This parameter is used to only get Bills that were created before
         or on the unix timestamp passed into it. '
+      inferred_type: int
+      type: int
     - key: limit
       value: '2'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: pos
       value: '5'
       description: This parameter is used to only get specific Bills by POs. This
         parameter expects a comma delimited list of PO IDs.
+      inferred_type: int
+      type: int
     - key: start
       value: '1597443703'
       description: 'This parameter is used to only get Bills that were created after
         or on the unix timestamp passed into it. '
+      inferred_type: int
+      type: int
     - key: locations
       value: '163'
       description: This parameter is used to only get Bills at a specific group of
         Locations. This parameter accepts a comma delimited list of Location IDs.
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what billID you want to
         start receiving results at. e.g. passing 130 here will only get you bills
         with an id greater than 130.
+      inferred_type: int
+      type: int
     - key: page
       value: '2'
       description: This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information.
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        meta:
+          description: useful links relating to this Bill
+          inferred_type: str
+          type: str
+        billID:
+          description: The unique ID of the Bill.
+          inferred_type: int
+          type: int
+        billNumber:
+          description: The bill number assigned to the Bill.
+          inferred_type: str
+          type: str
+        poID:
+          description: The poID of which the Bill was made.
+          inferred_type: int
+          type: int
+        locationID:
+          description: The unique ID of the location associated with this Bill.
+          inferred_type: int
+          type: int
+        date:
+          description: The date this Bill was created as a UNIX timestamp.
+          inferred_type: int
+          type: int
+        status:
+          description: "The status of this Bill.\n            The status can be as\
+            \ follows:\n            0: The bill is setup.\n            1: The bill\
+            \ is submitted.\n            2: The bill is closed i.e. Marked as Paid"
+          inferred_type: list[str]
+          type: list[str]
+        userID:
+          description: The Id of the user this Bill was assigned to.
+          inferred_type: int
+          type: int
+        userIDStarted:
+          description: The ID of the user this Bill was created by.
+          inferred_type: list[str]
+          type: list[str]
+        userIDMarkPaid:
+          description: The ID of the user this Bill was marked paid by.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.bills.transactions:
     is_folder: true
     description_data:
@@ -6315,31 +8288,45 @@ endpoints:
       value: '423'
       description: This parameter is used to only get specific Bill Transactions by
         billID. This parameter expects a comma delimited list of billIDs.
+      inferred_type: int
+      type: int
     - key: items
       value: '358'
       description: This parameter is used to only get specific Bill Transactions by
         items in a Bill. This parameter expects a comma delimited list of poItem IDs.
+      inferred_type: int
+      type: int
     - key: start
       value: '1630611650'
       description: 'This parameter is used to only get Bill Transactions that were
         created after or on the unix timestamp passed into it. '
+      inferred_type: int
+      type: int
     - key: end
       value: '1630611660'
       description: 'This parameter is used to only get Bill transactions that were
         created before or on the unix timestamp passed into it. '
+      inferred_type: int
+      type: int
     - key: transactions
       value: '397'
       description: This parameter is used to only get specific Bill Transactions.
         This parameter expects a comma delimited list of transactionIDs.
+      inferred_type: int
+      type: int
     - key: limit
       value: '10'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
+      inferred_type: int
+      type: int
     - key: locations
       value: '163'
       description: This parameter is used to only get Bill Transactions at a specific
         group of Locations. This parameter accepts a comma delimited list of Location
         IDs.
+      inferred_type: int
+      type: int
   routes.bills.transactions.update_bill_transaction:
     url: '{api_base_url}/bills/:billID/transactions/:transactionID'
     method: PATCH
@@ -6401,12 +8388,43 @@ endpoints:
       description: This parameter is a cursor that selects what commentID you want
         to start receiving results at. e.g. passing 100 here will only get you comments
         with an id greater than 100
-      disabled: true
+      inferred_type: str
+      type: str
     - key: limit
       value: ''
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        commentID:
+          description: This is the commentID of comment.
+          inferred_type: int
+          type: int
+        comment:
+          description: The text comment that was entered by the user.
+          inferred_type: str
+          type: str
+        timestamp:
+          description: The date this comment was created. This is a unix timestamp.
+          inferred_type: int
+          type: int
+        userID:
+          description: The ID of the user that made the comment.
+          inferred_type: int
+          type: int
+        commentEmailAddress:
+          description: The email address of the external user that made this comment.
+            This is only populated if the comment was made by an external user via
+            the comment reply system.
+          inferred_type: list[str]
+          type: list[str]
+        commentFiles:
+          description: Array containing fileName and link properties.
+          inferred_type: list[str]
+          type: list[str]
+      container_type: list
   routes.bills.comments.create_bill_comment:
     url: '{api_base_url}/bills/:billID/comments'
     method: POST
@@ -6526,6 +8544,9 @@ endpoints:
     query_params:
     - key: filename
       value: receipt.png
+      description: ''
+      inferred_type: str
+      type: str
   routes.bills.comments.delete_bill_comment:
     url: '{api_base_url}/bills/:billID/comments/:commentID'
     method: DELETE
@@ -6641,20 +8662,43 @@ endpoints:
       value: '1'
       description: This parameter is used to only get regions in the list provided.
         This parameter accepts a comma delimited list of Region IDs.
+      inferred_type: int
+      type: int
     - key: name
       value: '%One%'
       description: "This parameter is used to only get specific regions by name. This\
         \ parameter expects a string- the full name of a region\n or partial name\
         \ with the wildcard %."
+      inferred_type: str
+      type: str
     - key: cursor
       value: '0'
       description: "This parameter is a cursor that selects what regionID you want\
         \ to start receiving results at. e.g. passing 137 here will only get you regions\n\
         \ with an id greater than 137."
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: "This parameter is a result limiter. The default is set to return\
         \ no more than 100 \nresults at one time."
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        regionID:
+          description: The ID of the Region
+          inferred_type: int
+          type: int
+        regionName:
+          description: The name of the Region
+          inferred_type: str
+          type: str
+        parentRegionID:
+          description: The regionID of the parent of a region.
+          inferred_type: int
+          type: int
+      container_type: list
   routes.regions.create_region:
     url: '{api_base_url}/regions'
     method: POST
@@ -6682,7 +8726,7 @@ endpoints:
         - integer
         - 'no'
         - '0'
-        - "Parent region (\u2265 0)"
+        - Parent region (≥ 0)
       non_table_after: 'Responses:
 
         - 201 Created: { regionID } with Location header.'
@@ -6721,7 +8765,7 @@ endpoints:
         - integer
         - 'no'
         - ''
-        - "New parent (\u2265 1)"
+        - New parent (≥ 1)
       non_table_after: ''
     is_folder: false
     query_params: []
@@ -6779,34 +8823,59 @@ endpoints:
       value: '24'
       description: This parameter is used to only get specific Webhooks. This parameter
         expects a comma delimited list of webhookIDs.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: endpoint
       value: '%hello.com'
       description: This parameter is used for a string search by the webhook endpoint.
         This parameter expects a URL or partial URL of a webhook using a string with
         the wildcard %.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: type
       value: task
       description: This parameter is used to only get Webhooks of a specific type.
         This parameter accepts a comma delimited list of webhook types.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: enabled
       value: '1'
       description: 'This parameter is used to get Webooks which are enabled. This
         paramter expects 1: Enabled or 0: Disabled'
-      disabled: true
+      inferred_type: int
+      type: int
     - key: cursor
       value: '0'
       description: This parameter is a cursor that selects what webhookID you want
         to start receiving results at. e.g. passing 10 here will only get you webhooks
         with an id greater than 10.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: limit
       value: '100'
       description: This parameter is a result limiter. The default is set to return
         no more than 100 results at one time.
-      disabled: true
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        webhhokID:
+          description: The ID of the Webhook
+          inferred_type: int
+          type: int
+        endpoint:
+          description: The webhook URL.
+          inferred_type: str
+          type: str
+        type:
+          description: The type of webhook. Webhooks can be of type task, po, poItem.
+          inferred_type: str
+          type: str
+        enabled:
+          description: Determines if the webhook is enabled. 0 = Disabled 1=Enabled
+          inferred_type: str
+          type: str
+      container_type: list
   routes.webhooks.delete_webhook:
     url: '{api_base_url}/webhooks/:webhookID'
     method: DELETE
@@ -6918,26 +8987,70 @@ endpoints:
       value: fluid_ounce_us, W0gzuwOpmOo_dXKtrc2RL
       description: This parameter is used to only get specific units. This parameter
         accepts a comma delimited list of unit codes.
-      disabled: true
+      inferred_type: list[str]
+      type: list[str]
     - key: limit
       value: '10'
       description: This parameter is a result limiter. The default is 20 units and
         the max is 100.
-      disabled: true
+      inferred_type: int
+      type: int
     - key: page
       value: '2'
       description: 'This parameter is used to paginate results based on the limit.
         Refer to Pagination section for more information. '
-      disabled: true
+      inferred_type: int
+      type: int
     - key: nameStartsWith
       value: p
       description: Filter by units that have a name which starts with this string.
-      disabled: true
+      inferred_type: str
+      type: str
     - key: abbreviationStartsWith
       value: l
       description: Filter by units that have an abbreviation which starts with this
         string.
-      disabled: true
+      inferred_type: str
+      type: str
+    response:
+      fields:
+        unitCode:
+          description: The identifier of this unit of measure. It is some random text
+            for custom units (e.g. `j5VEKvW-TD8femkRe02KV`) and it is something semantic
+            for provided units (e.g. `fluid_ounce`)
+          inferred_type: str
+          type: str
+        name:
+          description: The full name of a unit to make it clear what it is.
+          inferred_type: str
+          type: str
+        abbreviation:
+          description: The abbreviated name of a unit that is used for compact formatting
+            such as `fl oz`. Can override the default abbreviation of a provided unit.
+            E.g. if the default abbreviation of fluid ounce is `fl oz`, you can make
+            it `oz.`
+          inferred_type: str
+          type: str
+        defaultAbbreviation:
+          description: This is always the same as abbreviation for custom units. For
+            provided units, this never changes. If you choose to alias the abbreviation,
+            this will show the original, and the abbreivation property will be your
+            alias.
+          inferred_type: str
+          type: str
+        category:
+          description: Also known as the "physical quantity" of a unit, which tells
+            you what exactly this is measuring. The possibilities are `volume`, `weight`,
+            `length`, `count`. All custom units will have the category of `count`,
+            as there is no way to setup custom conversion rates.
+          inferred_type: str
+          type: str
+        isCustom:
+          description: Boolean which tells you if this is a custom unit or provided
+            unit.
+          inferred_type: str
+          type: str
+      container_type: list
   routes.units_of_measure.create_unit:
     url: '{api_base_url}/uom'
     method: POST
