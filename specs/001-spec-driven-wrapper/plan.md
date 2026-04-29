@@ -57,7 +57,7 @@ specs/[###-feature]/
 LimbleConnection/
 ├── _generate_classes_automatically/  # Scaffolding & Generation Logic
 │   ├── generator.py                  # Translation Engine (FR-001, FR-016, FR-017, FR-018, FR-019, FR-020)
-│   │                                 # - Query param processing (omit 'disabled')
+│   │                                 # - Query param processing (include all, omit their 'disabled' property)
 │   │                                 # - Response data extraction from Postman tables
 │   │                                 # - Type inference system (inferred/origin/override)
 │   │                                 # - Override preservation and conflict warnings
@@ -79,9 +79,9 @@ tests/
 **Structure Decision**: Single project (SDK). The existing `LimbleConnection` folder will be expanded. Generic layer will be dynamically attached to `LimbleConnection` instances at runtime based on the `registry.yaml` generated from Postman.
 
 **Registry Schema Extensions**: The `registry.yaml` schema has been enhanced to include:
-- `query_params` array with QueryParameter objects (key, value, description, type, inferred_type, origin_type, override_type)
+- `query_params` array with QueryParameter objects (key, value, description, type, inferred_type, origin_type, override_type) - includes all documented parameters regardless of Postman 'disabled' status
 - Enhanced `response` mapping with ResponseField objects containing the same type inference system
-- Omission of Postman-specific 'disabled' property from query parameters
+- Omission of the Postman-specific 'disabled' property from query parameters (but not the parameters themselves) in the generated registry
 
 ## Complexity Tracking
 
