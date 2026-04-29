@@ -2,6 +2,7 @@
 
 **Input**: Design documents from `/specs/001-spec-driven-wrapper/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+**Propagated**: 2026-04-29 — Updated from spec.md refinement
 
 **Tests**: Tests are explicitly requested in `spec.md` (Independent Test sections).
 
@@ -42,15 +43,18 @@
 **Independent Test**: Add a new endpoint to a mock Postman JSON, run generator, and verify it's available on `lc` with correct types.
 
 ### Tests for User Story 1
-- [ ] T007 [P] [US1] Create generator unit tests in `tests/unit/test_generator.py`
 - [x] T007 [P] [US1] Create generator unit tests in `tests/unit/test_generator.py` - include tests for type inference system (FR-018)
+- [ ] T007a [P] [US1] Add test for query parameter processing - verify 'disabled' property is omitted (FR-016)
+- [ ] T007b [P] [US1] Add test for response data extraction from Postman description tables (FR-017)
+- [ ] T007c [P] [US1] Add test for override preservation and conflict warnings (FR-019, FR-020)
 - [ ] T008 [P] [US1] Create dynamic attachment tests in `tests/integration/test_dynamic_loading.py`
 
 ### Implementation for User Story 1
-- [ ] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)
-- [ ] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
-- [ ] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [x] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)
+- [ ] T009a [US1] Add query parameter extraction to `TranslationEngine` - omit 'disabled' property from query_params (FR-016) (depends on T009)
+- [ ] T009b [US1] Add response data table parsing to `TranslationEngine` - extract tabular 'return data'/'response data' from Postman descriptions (FR-017) (depends on T009)
+- [ ] T009c [US1] Implement type inference system in `TranslationEngine` for query_params and response fields (FR-018) (depends on T009a, T009b)
+- [ ] T009d [US1] Implement override preservation logic - preserve existing override_type values and emit warnings on conflicts (FR-019, FR-020) (depends on T009c)
 - [x] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
 - [x] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [ ] T012 [US1] Implement `ErrorNormalization` middleware in `LimbleConnection/endpoint.py` (FR-008)
@@ -93,9 +97,10 @@
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T019 [P] Update `readme.md` with new Spec-Driven architecture details
+- [ ] T019 [P] Update `readme.md` with new Spec-Driven architecture details and type inference system
 - [ ] T020 [P] Run `speckit.analyze` to verify Constitution compliance
 - [ ] T021 Finalize `CHANGELOG.md` for version 0.1.0
+- [ ] T022 [P] Update `specs/001-spec-driven-wrapper/contracts/registry_schema.yaml` documentation with examples of type system usage
 
 ---
 
