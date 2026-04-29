@@ -20,6 +20,8 @@
 
 - [x] T001 Create `LimbleConnection/endpoint.py` and `LimbleConnection/curated/` directory
 - [x] T002 [P] Update `LimbleConnection/util.py` with `LimbleConnector` logger and `ResilienceHandler` (NFR-001, NFR-002)
+- [x] T002a [P] Add registry access utilities `get_registry()` and `get_registry_path()` to `LimbleConnection/util.py` (FR-021)
+- [x] T002b [P] Update `pyproject.toml` to include `registry.yaml` as package data (FR-021)
 - [x] T003 [P] Add `postmanparser` and `pyyaml` to `requirements311.txt` if missing (already present/planned)
 
 ---

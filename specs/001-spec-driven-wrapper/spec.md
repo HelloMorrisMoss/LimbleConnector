@@ -1,8 +1,9 @@
 # Feature Specification: LimbleConnector Spec-Driven Wrapper (Hybrid Option C)
 
-**Feature Branch**: `001-spec-driven-wrapper`  
-**Created**: 2026-02-27  
-**Status**: Draft  
+**Feature Branch**: `001-spec-driven-wrapper`
+**Created**: 2026-02-27
+**Status**: Refined
+**Refined**: 2026-04-29 — Added FR-021 for registry access utilities
 **Input**: Refined prompt for Hybrid SDK implementation (Option C)
 
 ## User Scenarios & Testing *(mandatory)*
@@ -97,6 +98,7 @@ As an SDK user, I want my code to continue working without modification even whe
   - `override_type`: Manual configuration value (initially empty, preserved on updates)
 - **FR-019: Override Preservation**: When the generator updates or creates registry entries, it MUST preserve existing override_type values.
 - **FR-020: Type Conflict Warnings**: The generator MUST emit warnings when updating registry entries if the newly generated inferred_type or origin_type differs from the existing values, allowing developers to review and confirm the changes or set override_type.
+- **FR-021: Registry Access Utilities**: The system MUST provide utilities for runtime access to the registry.yaml file, including `get_registry()` to return the parsed registry content and `get_registry_path()` to return the file path, enabling programs using the package to inspect available LimbleEndpoint properties at runtime.
 
 ### Key Entities
 

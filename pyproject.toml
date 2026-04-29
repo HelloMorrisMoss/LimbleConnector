@@ -44,3 +44,6 @@ dependencies = [
 [tool.setuptools]
 packages = ["LimbleConnection"]
 package-dir = {"limbleconnector" = "LimbleConnection"}
+
+[tool.setuptools.package-data]
+LimbleConnection = ["registry.yaml"]

@@ -2,7 +2,7 @@
 
 **Branch**: `001-spec-driven-wrapper` | **Date**: 2026-03-02 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `/specs/001-spec-driven-wrapper/spec.md`
-**Propagated**: 2026-04-29 — Updated from spec.md refinement
+**Propagated**: 2026-04-29 — Updated from spec.md refinement (FR-021 registry access utilities)
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
@@ -68,7 +68,7 @@ LimbleConnection/
 │                                     # - Contains query_params with type metadata
 │                                     # - Contains response.fields with ResponseField specs
 ├── curated/                          # Curated Operation Layer (FR-006)
-└── util.py                           # Logging (NFR-001), Retries (NFR-002)
+└── util.py                           # Logging (NFR-001), Retries (NFR-002), Registry Access (FR-021)
 
 tests/
 ├── contract/                         # Contract validation (FR-009)

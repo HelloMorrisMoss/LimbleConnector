@@ -1,5 +1,7 @@
-"""Utilities used by or useful for the LimbleConnections.
+"""Utilities used by or useful for using LimbleConnection.
 
+get_registry: Returns the parsed registry.yaml content for runtime inspection (FR-021).
+get_registry_path: Returns the path to the registry.yaml file (FR-021).
 encode_credentials: a function that accepts the client id and client secret from your Limble API and returns the
     base64 encoded credentials needed to authenticate your connection with the Limble API. Check the bottom of the
     settings page as a superuser to get/find your id and secret.
@@ -16,6 +18,8 @@ import re
 import logging
 import time
 from typing import Callable, Any
+from importlib.resources import files
+from pathlib import Path
 
 # Configure standard logger (NFR-001)
 logger = logging.getLogger("LimbleConnector")
@@ -24,9 +28,39 @@ from pprint import pprint, pformat
 
 import pandas as pd
 from pandas import DatetimeTZDtype
+import yaml
 
 # from LimbleConnection.untracked_config.timezones import local_tz
 local_tz = None
+
+
+def get_registry() -> dict:
+    """Returns the parsed registry.yaml content (FR-021).
+
+    Enables programs using the package to inspect available LimbleEndpoint
+    properties at runtime.
+
+    Returns:
+        dict: The complete parsed registry.yaml structure
+
+    Example:
+        >>> registry = get_registry()
+        >>> for endpoint_name, endpoint_spec in registry['endpoints'].items():
+        ...     print(f"{endpoint_name}: {endpoint_spec.get('query_params', [])}")
+    """
+    registry_text = files('LimbleConnection').joinpath('registry.yaml').read_text()
+    return yaml.safe_load(registry_text)
+
+
+def get_registry_path():
+    """Returns path to registry.yaml (FR-021).
+
+    Note: May be in a zip file for installed packages.
+
+    Returns:
+        Path: Path-like object to the registry.yaml file
+    """
+    return files('LimbleConnection').joinpath('registry.yaml')
 
 
 def encode_credentials(client_id: str, client_secret: str) -> str:
