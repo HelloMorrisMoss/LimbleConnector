@@ -1,10 +1,12 @@
 import json
 import yaml
-from typing import Dict, Any, List, Tuple
+import os
+import re
+from typing import Dict, Any, List, Tuple, Optional
 from bs4 import BeautifulSoup
 
 try:
-    from LimbleConnection.util import collapse_redundant_path_parts
+    from LimbleConnection.util import collapse_redundant_path_parts, logger
 except ImportError:
     import sys
     import os
@@ -12,7 +14,7 @@ except ImportError:
     _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     if _root not in sys.path:
         sys.path.append(_root)
-    from LimbleConnection.util import collapse_redundant_path_parts
+    from LimbleConnection.util import collapse_redundant_path_parts, logger
 
 def clean_bs4_text(soup_fragment):
     """Clean <p> and <b> tags and return text with preserved line breaks."""
@@ -91,6 +93,67 @@ def get_text_and_table(text: str):
         'non_table_after': non_table_after.strip()
     }
 
+def infer_type_from_value(value: str) -> str:
+    """Infer Python type from a string value (FR-018)."""
+    if not value:
+        return "str"
+
+    # Try to infer from the value
+    value_clean = value.strip()
+
+    # Boolean
+    if value_clean.lower() in ('true', 'false'):
+        return "bool"
+
+    # Integer
+    if re.match(r'^-?\d+$', value_clean):
+        return "int"
+
+    # Float
+    if re.match(r'^-?\d+\.\d+$', value_clean):
+        return "float"
+
+    # List/Array (comma-separated or JSON array)
+    if ',' in value_clean or (value_clean.startswith('[') and value_clean.endswith(']')):
+        return "list[str]"
+
+    # Default to string
+    return "str"
+
+def infer_type_from_name(name: str) -> str:
+    """Infer type from parameter/field name patterns (FR-018)."""
+    name_lower = name.lower()
+
+    # ID patterns
+    if name_lower.endswith('id') or name_lower.endswith('_id'):
+        return "int"
+
+    # Boolean patterns
+    if name_lower.startswith('is_') or name_lower.startswith('has_') or name_lower.startswith('can_'):
+        return "bool"
+
+    # Date/timestamp patterns
+    if 'date' in name_lower or 'time' in name_lower or 'timestamp' in name_lower:
+        return "int"  # Epoch timestamps
+
+    # Count/limit patterns
+    if name_lower in ('limit', 'count', 'page', 'offset', 'size'):
+        return "int"
+
+    # List patterns
+    if name_lower.endswith('s') or name_lower.endswith('_list') or 'ids' in name_lower:
+        return "list[str]"
+
+    return "str"
+
+def compute_final_type(inferred: str, origin: Optional[str], override: Optional[str]) -> str:
+    """Compute final type using preference order: override > origin > inferred (FR-018)."""
+    if override:
+        return override
+    if origin:
+        return origin
+    return inferred
+
 class TranslationEngine:
     """Translates Postman JSON to registry.yaml (FR-001, FR-002)."""
 
@@ -149,18 +212,18 @@ class TranslationEngine:
                 request_description_data = get_text_and_table(request_description_text)
                 
                 url_obj = request.get('url', {})
-                
+
                 if isinstance(url_obj, str):
                     url = url_obj
-                    query_params = []
+                    query_params_raw = []
                 else:
                     url = url_obj.get('raw', '')
-                    query_params = url_obj.get('query', [])
-                
+                    query_params_raw = url_obj.get('query', [])
+
                 # Normalize URL: replace {{baseUrl}} with a placeholder
                 url = url.replace('{{baseUrl}}', '{api_base_url}')
                 url = url.replace('{{protocol}}://{{server}}:{{port}}/v2', '{api_base_url}')
-                
+
                 # Strip query parameters from the URL as they should not be part of the endpoint definition (FR-001)
                 url = url.split('?')[0]
 
@@ -168,10 +231,16 @@ class TranslationEngine:
                 # It currently is assets/1?assetID={{assetID}} but it should be assets/:assetID and no query param.
                 if endpoint_key == 'routes.assets.delete_asset' and request.get('method') == 'DELETE':
                     url = url.replace('/assets/1', '/assets/:assetID')
-                    query_params = []
-                
-                # Update folder entry if it exists (some items are both folder and request? unlikely in this structure but possible)
-                endpoints[endpoint_key] = {
+                    query_params_raw = []
+
+                # T009a: Process query parameters - omit 'disabled' property (FR-016)
+                query_params = self._process_query_params(query_params_raw)
+
+                # T009b: Extract response fields from description tables (FR-017)
+                response_fields = self._extract_response_fields(request_description_data)
+
+                # Build endpoint entry
+                endpoint_data = {
                     'url': url,
                     'method': request.get('method', 'GET'),
                     'description_data': request_description_data,
@@ -179,20 +248,273 @@ class TranslationEngine:
                     'query_params': query_params
                 }
 
+                # Add response mapping if fields were found
+                if response_fields:
+                    endpoint_data['response'] = {
+                        'fields': response_fields,
+                        'container_type': 'list'  # Default assumption for Limble endpoints
+                    }
+
+                endpoints[endpoint_key] = endpoint_data
+
+    def _process_query_params(self, raw_params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Process query parameters, omitting 'disabled' property but keeping the param (FR-016, FR-018).
+
+        Note: 'disabled' in Postman means the parameter isn't sent in the example request by default,
+        but it's still a valid, documented API parameter that should be in our registry.
+        We omit the 'disabled' property itself (as it's Postman-specific), not the parameter.
+        """
+        processed = []
+
+        for param in raw_params:
+            key = param.get('key', '')
+            value = param.get('value', '')
+            description = param.get('description', '')
+
+            # T009c: Infer types (FR-018)
+            inferred_type = infer_type_from_value(value) if value else infer_type_from_name(key)
+            origin_type = param.get('type')  # Explicit type from Postman (rare)
+
+            processed_param = {
+                'key': key,
+                'value': value,
+                'description': description,
+                'inferred_type': inferred_type,
+                'type': compute_final_type(inferred_type, origin_type, None)
+            }
+
+            # Include origin_type if it exists
+            if origin_type:
+                processed_param['origin_type'] = origin_type
+
+            # NOTE: We intentionally do NOT include 'disabled' property (FR-016)
+            # as it's Postman-specific UI state, not API metadata
+
+            processed.append(processed_param)
+
+        return processed
+
+    def _extract_response_fields(self, description_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+        """Extract response fields from description tables (FR-017, FR-018)."""
+        if not description_data:
+            return {}
+
+        headers = description_data.get('headers', [])
+        rows = description_data.get('data_rows', [])
+
+        # Look for tables with "Property" or "Field" and "Description" headers
+        # Common patterns in Limble Postman collection:
+        # - "Property" | "Description"
+        # - "Property" | "Type" | "Description"
+        # - "Field" | "Description"
+
+        if not headers or not rows:
+            return {}
+
+        # Normalize headers
+        headers_lower = [h.lower().strip() for h in headers]
+
+        # Find relevant column indices
+        prop_idx = next((i for i, h in enumerate(headers_lower) if 'property' in h or 'field' in h), None)
+        desc_idx = next((i for i, h in enumerate(headers_lower) if 'description' in h), None)
+        type_idx = next((i for i, h in enumerate(headers_lower) if h == 'type'), None)
+
+        if prop_idx is None or desc_idx is None:
+            return {}
+
+        fields = {}
+        for row in rows:
+            if len(row) <= max(prop_idx, desc_idx):
+                continue
+
+            field_name = row[prop_idx].strip()
+            field_desc = row[desc_idx].strip()
+
+            if not field_name:
+                continue
+
+            # Get origin type if available
+            origin_type = row[type_idx].strip() if type_idx is not None and len(row) > type_idx else None
+
+            # Infer type
+            inferred_type = infer_type_from_name(field_name)
+
+            fields[field_name] = {
+                'description': field_desc,
+                'inferred_type': inferred_type,
+                'type': compute_final_type(inferred_type, origin_type, None)
+            }
+
+            if origin_type:
+                fields[field_name]['origin_type'] = origin_type
+
+        return fields
+
 class Generator:
-    """Generates registry.yaml and .pyi stubs (FR-007, FR-013)."""
-    
+    """Generates registry.yaml and .pyi stubs (FR-007, FR-013, FR-019, FR-020)."""
+
     def __init__(self, postman_json_path: str, output_registry_path: str, output_stubs_path: str):
         self.engine = TranslationEngine(postman_json_path)
         self.output_registry_path = output_registry_path
         self.output_stubs_path = output_stubs_path
 
     def run(self):
-        registry = self.engine.translate()
+        # Load existing registry if it exists (T009d: FR-019, FR-020)
+        existing_registry = self._load_existing_registry()
+
+        # Generate new registry from Postman
+        new_registry = self.engine.translate()
+
+        # Merge with existing, preserving overrides
+        merged_registry = self._merge_registries(existing_registry, new_registry)
+
+        # Write updated registry
         with open(self.output_registry_path, 'w', encoding='utf-8') as f:
-            yaml.dump(registry, f, sort_keys=False)
-        
-        self.generate_stubs(registry)
+            yaml.dump(merged_registry, f, sort_keys=False, allow_unicode=True)
+
+        # Generate stubs
+        self.generate_stubs(merged_registry)
+
+    def _load_existing_registry(self) -> Dict[str, Any]:
+        """Load existing registry.yaml if it exists."""
+        if not os.path.exists(self.output_registry_path):
+            return {}
+
+        try:
+            with open(self.output_registry_path, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f) or {}
+        except Exception as e:
+            logger.warning(f"Could not load existing registry: {e}")
+            return {}
+
+    def _merge_registries(self, existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge registries, preserving override_type values and emitting warnings (FR-019, FR-020)."""
+        if not existing or 'endpoints' not in existing:
+            return new
+
+        merged = new.copy()
+        existing_endpoints = existing.get('endpoints', {})
+        new_endpoints = new.get('endpoints', {})
+
+        for endpoint_key, new_data in new_endpoints.items():
+            if endpoint_key not in existing_endpoints:
+                continue  # New endpoint, no merging needed
+
+            existing_data = existing_endpoints[endpoint_key]
+
+            # Merge query_params
+            if 'query_params' in new_data and 'query_params' in existing_data:
+                merged_params = self._merge_params(
+                    existing_data['query_params'],
+                    new_data['query_params'],
+                    endpoint_key,
+                    'query_param'
+                )
+                merged['endpoints'][endpoint_key]['query_params'] = merged_params
+
+            # Merge response fields
+            if 'response' in new_data and 'response' in existing_data:
+                new_fields = new_data.get('response', {}).get('fields', {})
+                existing_fields = existing_data.get('response', {}).get('fields', {})
+
+                merged_fields = self._merge_fields(
+                    existing_fields,
+                    new_fields,
+                    endpoint_key
+                )
+
+                if 'response' not in merged['endpoints'][endpoint_key]:
+                    merged['endpoints'][endpoint_key]['response'] = {}
+                merged['endpoints'][endpoint_key]['response']['fields'] = merged_fields
+
+        return merged
+
+    def _merge_params(self, existing_params: List[Dict[str, Any]], new_params: List[Dict[str, Any]],
+                      endpoint_key: str, param_type: str) -> List[Dict[str, Any]]:
+        """Merge query parameters, preserving override_type (FR-019, FR-020)."""
+        # Build lookup by key
+        existing_by_key = {p['key']: p for p in existing_params if 'key' in p}
+
+        merged = []
+        for new_param in new_params:
+            key = new_param.get('key')
+            if not key:
+                merged.append(new_param)
+                continue
+
+            if key not in existing_by_key:
+                # New parameter
+                merged.append(new_param)
+                continue
+
+            existing_param = existing_by_key[key]
+
+            # Start with new param
+            merged_param = new_param.copy()
+
+            # Preserve override_type if it exists (FR-019)
+            if 'override_type' in existing_param and existing_param['override_type']:
+                merged_param['override_type'] = existing_param['override_type']
+                # Recalculate final type with override
+                merged_param['type'] = compute_final_type(
+                    merged_param.get('inferred_type', 'str'),
+                    merged_param.get('origin_type'),
+                    merged_param['override_type']
+                )
+
+            # Emit warning if generated values differ (FR-020)
+            if 'override_type' in existing_param and existing_param['override_type']:
+                new_inferred = new_param.get('inferred_type', 'str')
+                old_inferred = existing_param.get('inferred_type', 'str')
+
+                if new_inferred != old_inferred:
+                    logger.warning(
+                        f"Type inference changed for {endpoint_key}.{param_type}[{key}]: "
+                        f"{old_inferred} -> {new_inferred}. Override is set to {existing_param['override_type']}"
+                    )
+
+            merged.append(merged_param)
+
+        return merged
+
+    def _merge_fields(self, existing_fields: Dict[str, Dict[str, Any]], new_fields: Dict[str, Dict[str, Any]],
+                      endpoint_key: str) -> Dict[str, Dict[str, Any]]:
+        """Merge response fields, preserving override_type (FR-019, FR-020)."""
+        merged = {}
+
+        for field_name, new_field in new_fields.items():
+            if field_name not in existing_fields:
+                # New field
+                merged[field_name] = new_field
+                continue
+
+            existing_field = existing_fields[field_name]
+            merged_field = new_field.copy()
+
+            # Preserve override_type if it exists (FR-019)
+            if 'override_type' in existing_field and existing_field['override_type']:
+                merged_field['override_type'] = existing_field['override_type']
+                # Recalculate final type with override
+                merged_field['type'] = compute_final_type(
+                    merged_field.get('inferred_type', 'str'),
+                    merged_field.get('origin_type'),
+                    merged_field['override_type']
+                )
+
+            # Emit warning if generated values differ (FR-020)
+            if 'override_type' in existing_field and existing_field['override_type']:
+                new_inferred = new_field.get('inferred_type', 'str')
+                old_inferred = existing_field.get('inferred_type', 'str')
+
+                if new_inferred != old_inferred:
+                    logger.warning(
+                        f"Type inference changed for {endpoint_key}.response.{field_name}: "
+                        f"{old_inferred} -> {new_inferred}. Override is set to {existing_field['override_type']}"
+                    )
+
+            merged[field_name] = merged_field
+
+        return merged
 
     def generate_stubs(self, registry: Dict[str, Any]):
         """Build a tree and generate nested stubs for the fluent API."""

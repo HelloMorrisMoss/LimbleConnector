@@ -44,18 +44,17 @@
 
 ### Tests for User Story 1
 - [x] T007 [P] [US1] Create generator unit tests in `tests/unit/test_generator.py` - include tests for type inference system (FR-018)
-- [ ] T007a [P] [US1] Add test for query parameter processing - verify 'disabled' property is omitted (FR-016)
-- [ ] T007b [P] [US1] Add test for response data extraction from Postman description tables (FR-017)
-- [ ] T007c [P] [US1] Add test for override preservation and conflict warnings (FR-019, FR-020)
+- [x] T007a [P] [US1] Add test for query parameter processing - verify all params are included but 'disabled' property itself is omitted (FR-016)
+- [x] T007b [P] [US1] Add test for response data extraction from Postman description tables (FR-017)
+- [x] T007c [P] [US1] Add test for override preservation and conflict warnings (FR-019, FR-020)
 - [ ] T008 [P] [US1] Create dynamic attachment tests in `tests/integration/test_dynamic_loading.py`
 
 ### Implementation for User Story 1
 - [x] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)
-- [ ] T009a [US1] Add query parameter extraction to `TranslationEngine` - omit 'disabled' property from query_params (FR-016) (depends on T009)
-- [ ] T009b [US1] Add response data table parsing to `TranslationEngine` - extract tabular 'return data'/'response data' from Postman descriptions (FR-017) (depends on T009)
-- [ ] T009c [US1] Implement type inference system in `TranslationEngine` for query_params and response fields (FR-018) (depends on T009a, T009b)
-- [ ] T009d [US1] Implement override preservation logic - preserve existing override_type values and emit warnings on conflicts (FR-019, FR-020) (depends on T009c)
-- [ ] T009a [US1] Add query parameter extraction to `TranslationEngine` - include all params but omit their Postman-specific 'disabled' property (FR-016) (depends on T009)
+- [x] T009a [US1] Add query parameter extraction to `TranslationEngine` - include all params but omit their Postman-specific 'disabled' property (FR-016) (depends on T009)
+- [x] T009b [US1] Add response data table parsing to `TranslationEngine` - extract tabular 'return data'/'response data' from Postman descriptions (FR-017) (depends on T009)
+- [x] T009c [US1] Implement type inference system in `TranslationEngine` for query_params and response fields (FR-018) (depends on T009a, T009b)
+- [x] T009d [US1] Implement override preservation logic - preserve existing override_type values and emit warnings on conflicts (FR-019, FR-020) (depends on T009c)
 - [x] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
 - [x] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [ ] T012 [US1] Implement `ErrorNormalization` middleware in `LimbleConnection/endpoint.py` (FR-008)
