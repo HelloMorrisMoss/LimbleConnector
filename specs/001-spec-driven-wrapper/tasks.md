@@ -17,9 +17,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create `LimbleConnection/endpoint.py` and `LimbleConnection/curated/` directory
-- [ ] T002 [P] Update `LimbleConnection/util.py` with `LimbleConnector` logger and `ResilienceHandler` (NFR-001, NFR-002)
-- [ ] T003 [P] Add `postmanparser` and `pyyaml` to `requirements311.txt` if missing (already present/planned)
+- [x] T001 Create `LimbleConnection/endpoint.py` and `LimbleConnection/curated/` directory
+- [x] T002 [P] Update `LimbleConnection/util.py` with `LimbleConnector` logger and `ResilienceHandler` (NFR-001, NFR-002)
+- [x] T003 [P] Add `postmanparser` and `pyyaml` to `requirements311.txt` if missing (already present/planned)
 
 ---
 
@@ -27,9 +27,9 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T004 Implement base `LimbleEndpoint` class in `LimbleConnection/endpoint.py` supporting `get()`, `list()`, `raw()` (FR-004)
-- [ ] T005 Implement `Paginator` interface and `AutoPagination` logic in `LimbleConnection/endpoint.py` (FR-011, FR-014)
-- [ ] T006 Implement `RegistryLoader` to load and validate `registry.yaml` against `specs/001-spec-driven-wrapper/contracts/registry_schema.yaml`
+- [x] T004 Implement base `LimbleEndpoint` class in `LimbleConnection/endpoint.py` supporting `get()`, `list()`, `raw()` (FR-004)
+- [x] T005 Implement `Paginator` interface and `AutoPagination` logic in `LimbleConnection/endpoint.py` (FR-011, FR-014)
+- [x] T006 Implement `RegistryLoader` to load and validate `registry.yaml` against `specs/001-spec-driven-wrapper/contracts/registry_schema.yaml`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -43,12 +43,16 @@
 
 ### Tests for User Story 1
 - [ ] T007 [P] [US1] Create generator unit tests in `tests/unit/test_generator.py`
+- [x] T007 [P] [US1] Create generator unit tests in `tests/unit/test_generator.py` - include tests for type inference system (FR-018)
 - [ ] T008 [P] [US1] Create dynamic attachment tests in `tests/integration/test_dynamic_loading.py`
 
 ### Implementation for User Story 1
 - [ ] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)
 - [ ] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
 - [ ] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
+- [x] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)
+- [x] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
+- [x] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [ ] T012 [US1] Implement `ErrorNormalization` middleware in `LimbleConnection/endpoint.py` (FR-008)
 
 **Checkpoint**: User Story 1 complete. MVP achieved.
