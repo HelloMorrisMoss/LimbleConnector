@@ -82,13 +82,21 @@ As an SDK user, I want my code to continue working without modification even whe
 - **FR-007: Scaffolding and Typing**: System MUST generate IDE-visible typing artifacts (stubs or modules) that synchronize with the dynamic endpoint registry.
 - **FR-008: Error Normalization**: Errors MUST be mapped to a typed exception hierarchy with metadata including endpoint name, status code, and redacted response context.
 - **FR-009: Contract Validation**: Every endpoint MUST have associated JSON fixtures and validation tests to detect upstream drift.
-
-- FR-010: Unknown Response Handling: If an endpoint lacks a defined response schema in Postman, the system MUST default its return type to a generic dictionary (`dict[str, Any]`) and emit a warning during the generation phase to ensure SC-001 is met.
-- FR-011: Unified Pagination: The system MUST provide a standard `Paginator` interface for generic endpoints, with specific field mapping (e.g., `next_token` vs `page`) defined in the internal spec file to ensure consistency.
-- FR-012: Auth Strategy Overrides: The system MUST support an auth strategy registry in the internal spec, defaulting to the collection-level auth but allowing per-endpoint overrides.
-- FR-013: Committed Typing Stubs: The system MUST generate and commit IDE-visible typing stubs (`.pyi` files) for all Postman-derived generic endpoints to the repository to ensure SC-002 is met across all developer environments.
-- FR-014: Auto-Pagination by Default: The `list()` method on generic endpoints MUST auto-paginate until the end of the result set and return a full list of items, abstracting away individual page requests.
-- FR-015: Parameter Support Validation: The system MUST provide a mechanism to check if a specific query parameter is supported by an endpoint (e.g., via `supports_query_param()`) based on the internal spec to prevent invalid requests.
+- **FR-010: Unknown Response Handling**: If an endpoint lacks a defined response schema in Postman, the system MUST default its return type to a generic dictionary (`dict[str, Any]`) and emit a warning during the generation phase to ensure SC-001 is met.
+- **FR-011: Unified Pagination**: The system MUST provide a standard `Paginator` interface for generic endpoints, with specific field mapping (e.g., `next_token` vs `page`) defined in the internal spec file to ensure consistency.
+- **FR-012: Auth Strategy Overrides**: The system MUST support an auth strategy registry in the internal spec, defaulting to the collection-level auth but allowing per-endpoint overrides.
+- **FR-013: Committed Typing Stubs**: The system MUST generate and commit IDE-visible typing stubs (`.pyi` files) for all Postman-derived generic endpoints to the repository to ensure SC-002 is met across all developer environments.
+- **FR-014: Auto-Pagination by Default**: The `list()` method on generic endpoints MUST auto-paginate until the end of the result set and return a full list of items, abstracting away individual page requests.
+- **FR-015: Parameter Support Validation**: The system MUST provide a mechanism to check if a specific query parameter is supported by an endpoint (e.g., via `supports_query_param()`) based on the internal spec to prevent invalid requests.
+- **FR-016: Query Parameter Processing**: The generator MUST omit the 'disabled' property from query parameters as it is Postman-specific and not meaningful for the SDK registry. Only active query parameters with relevant metadata (key, value, description, type information) MUST be included.
+- **FR-017: Response Data Extraction**: The generator MUST parse tabular 'return data' and 'response data' sections from Postman endpoint descriptions and populate the ResponseMapping fields in the registry with field names, descriptions, and type information.
+- **FR-018: Type Inference System**: Both query_params and response fields MUST include a comprehensive type system with:
+  - `type`: Final computed type derived from the preference order: override_type > origin_type > inferred_type
+  - `inferred_type`: Type inferred from examples, patterns, and naming conventions
+  - `origin_type`: Explicit type declarations from the Postman collection (if available)
+  - `override_type`: Manual configuration value (initially empty, preserved on updates)
+- **FR-019: Override Preservation**: When the generator updates or creates registry entries, it MUST preserve existing override_type values.
+- **FR-020: Type Conflict Warnings**: The generator MUST emit warnings when updating registry entries if the newly generated inferred_type or origin_type differs from the existing values, allowing developers to review and confirm the changes or set override_type.
 
 ### Key Entities
 

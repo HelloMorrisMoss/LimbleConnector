@@ -47,10 +47,42 @@ definitions:
         type: string
         enum: [Stable, Experimental, Deprecated]
         default: Experimental
+      query_params:
+        type: array
+        description: Query parameters for this endpoint (disabled property omitted as it's Postman-specific)
+        items:
+          $ref: '#/definitions/QueryParameter'
       pagination:
         $ref: '#/definitions/PaginationMapping'
-      responses:
+      response:
         $ref: '#/definitions/ResponseMapping'
+
+  QueryParameter:
+    type: object
+    required:
+      - key
+    properties:
+      key:
+        type: string
+        description: Parameter name
+      value:
+        type: string
+        description: Example value from Postman
+      description:
+        type: string
+        description: Parameter description from Postman
+      type:
+        type: string
+        description: Final computed type (override_type > origin_type > inferred_type)
+      inferred_type:
+        type: string
+        description: Type inferred from examples and patterns
+      origin_type:
+        type: string
+        description: Explicit type from Postman collection (if available)
+      override_type:
+        type: string
+        description: Manual configuration override (empty initially, preserved on updates)
 
   PaginationMapping:
     type: object
@@ -65,13 +97,38 @@ definitions:
 
   ResponseMapping:
     type: object
+    description: Mapping for response data based on tabular 'return data'/'response data' from Postman descriptions
     properties:
       fields:
         type: object
+        description: Map of response field names to their specifications
         additionalProperties:
-          type: string
+          $ref: '#/definitions/ResponseField'
       defaults:
         type: object
-      type:
+        description: Default values for missing fields
+      container_type:
         type: string
         enum: [dict, list, dataframe]
+        description: The container type for the response
+
+  ResponseField:
+    type: object
+    required:
+      - description
+    properties:
+      description:
+        type: string
+        description: Field description from Postman
+      type:
+        type: string
+        description: Final computed type (override_type > origin_type > inferred_type)
+      inferred_type:
+        type: string
+        description: Type inferred from examples and patterns
+      origin_type:
+        type: string
+        description: Explicit type from Postman collection (if available)
+      override_type:
+        type: string
+        description: Manual configuration override (empty initially, preserved on updates)
