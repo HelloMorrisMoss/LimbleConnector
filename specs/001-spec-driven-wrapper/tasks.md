@@ -60,7 +60,7 @@
 - [x] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
 - [x] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [x] T011a [US1] Implement `supports_query_param()` in `LimbleConnection/endpoint.py` (FR-015)
-- [ ] T012 [US1] Implement `ErrorNormalization` middleware in `LimbleConnection/endpoint.py` (FR-008)
+- [x] T012 [US1] Implement `ErrorNormalization` middleware in `LimbleConnection/endpoint.py` (FR-008)
 
 **Checkpoint**: User Story 1 complete. MVP achieved.
 
