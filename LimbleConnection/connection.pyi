@@ -145,6 +145,8 @@ This parameter expects a regionID a location may belong to.
         template | This field indicates if the task is a 'template' that spawns other tasks based on schedules or not.
         createdDate | The date this Task was created. This is a unix timestamp.
         startDate | By default this value is 0 as the startDate is usually the same as the createdDate. Sometimes a task is created such that it is scheduled to start in the future (i.e. after the createdDate). In such a case this value will be a unix timestamp indicating the actual start date of the Task.
+        scheduledStart | The scheduled start date of the Task. This is a unix timestamp. A value of null means no scheduled start date is set.
+        scheduledEnd | The scheduled end date of the Task. This is a unix timestamp. A value of null means no scheduled end date is set.
         due | The date this Task is due. This is a unix timestamp.
         dateCompleted | The date this Task was completed. This is a unix timestamp. A value of 0 means this Task is not completed.
         lastEdited | The date this Task was last edited. This is a unix timestamp.
@@ -171,6 +173,7 @@ This parameter expects a regionID a location may belong to.
         type | 1 = Preventative Maintanance (PM);2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);5 = Cycle Count;6 = Work Request (WR);7 = Min Part Threshold;8 = Materials Request;
         status | 1 - Complete0 - IncompleteNote: this property indicates a task status with respect to task completion. For the custom task status refer to statusID
         statusID | The current custom status assigned to this task.Note: this indicates the current status of a task. Use GET Statuses to find the value of each statusID.
+        poIDs | An array of Purchase Order IDs linked to this Task. Returns an empty array if no Purchase Orders are linked.
         associatedTaskID (deprecated) | Please refer to associatedTask meta property on GET Task Instruction for instruction type 14.
         meta1 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         meta2 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
@@ -185,25 +188,25 @@ This parameter expects a regionID a location may belong to.
         - type: This parameter is used to only get Tasks of a specific type. This parameter accepts a comma delimited list of task types.
         - name: This is a parameter used to string search for a name or partial name of a task this parameter expects a string with the wildcard %.
         - start: This parameter is used to only get Tasks that were last edited after the unix timestamp passed into the start parameter. For example, all Tasks that were last edited after April 18th, 2018.
-        - end: This parameter is used to only get Tasks that were last edited *before* the unix timestamp passed into the end parameter.
+        - end: This parameter is used to only get Tasks that were last edited before the unix timestamp passed into the end parameter.
         - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
         - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
         - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
         - completedStart: This parameter is used to only get Tasks that were completed after the unix timestamp passed into this parameter. For example, all Assets that were completed after April 18th, 2018.
-        - completedEnd: This parameter is used to only get Tasks that were completed *before* the unix timestamp passed into this parameter.
-        - scheduledStart: This parameter is used to only get Tasks whose scheduled start is after the unix timestamp passed into this parameter. 
-        - scheduledEnd: This parameter is used to only get Tasks whose scheduled end is *before* the unix timestamp passed into this parameter. 
-        - orderBy: This parameter sorts based on the value you pass. I.e. passing createdDate will order the results based on createdDate. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted and lastEdited.
-        - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
-        - lastEditedByUsers: This parameter is used to filter tasks by users that have completed tasks.
+        - completedEnd: This parameter is used to only get Tasks that were completed before the unix timestamp passed into this parameter.
+        - scheduledStart: This parameter is used as the start of a scheduled-date window. Tasks are returned when their scheduled date range overlaps this timestamp.
+        - scheduledEnd: This parameter is used as the end of a scheduled-date window. Tasks are returned when their scheduled date range overlaps this timestamp.
+        - orderBy: This parameter sorts based on the value you pass. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted, scheduledStart, scheduledEnd, and lastEdited.
+        - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return all tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+        - users: This parameter filters tasks by assignee user IDs. It returns tasks directly assigned to those users and tasks assigned through team/profile membership (including multi-user assignments). This parameter accepts a comma delimited list of user IDs.
+        - teams: This parameter is used to only get Tasks assigned to specific teams/profiles. This parameter accepts a comma delimited list of team IDs.
+        - lastEditedByUsers: This parameter is used to filter tasks by users who last edited the task.
         - status: This parameter is used to filter tasks by completed status. 1 - Complete  0 - Incomplete
         - meta1: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         - meta2: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         - meta3: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         - statusIDs: This parameter is used to filter tasks by their associated statusID.
-        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
-        - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
-        - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semi-colon (";") colon at the end it is recommended that the param follows the same format. 
+        - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semicolon (";") at the end it is recommended that the param follows the same format.
         """
         ...
     @property
@@ -3200,6 +3203,8 @@ class UsersNamespace(LimbleEndpoint):
     @property
     def teams(self) -> UsersTeamsNamespace: ...
     @property
+    def capacity(self) -> UsersCapacityNamespace: ...
+    @property
     def new_user(self) -> UsersNew_userNamespace:
         """
         This request creates a new User and emails them a welcome email with details on how to access Limble.
@@ -3283,6 +3288,337 @@ class UsersNew_userNamespace(LimbleEndpoint):
     active | Boolean | Optional | The User's activation status.
     emailNotificationActive | Boolean | Optional | The User's email notification activation status.  Should they receive email notifications?
     pushNotificationActive | Boolean | Optional | The User's push notification activation status. Should they receive push notifications?
+    """
+
+class UsersCapacityNamespace(object):
+    @property
+    def exceptions(self) -> UsersCapacityExceptionsNamespace: ...
+    @property
+    def schedules(self) -> UsersCapacitySchedulesNamespace: ...
+
+class UsersCapacitySchedulesNamespace(object):
+    @property
+    def get_capacity_schedules(self) -> UsersCapacitySchedulesGet_capacity_schedulesNamespace:
+        """
+        Returns per-user daily capacity rows for a date range, including applied precedence details.
+        
+        Precedence order:
+        `exception > holiday > userSchedule > profileSchedule > default`.
+        
+        Pagination:
+        - `cursor` is a zero-based offset.
+        - `limit` max is 100.
+        
+        Date limits:
+        - `startDate` and `endDate` are required (YYYY-MM-DD).
+        - Date range cannot exceed 31 days.
+        
+        Response notes:
+        - `range` now contains only `startDate` and `endDate`.
+        - `pagination` contains `cursor`, `limit`, `totalUsers`, and `nextCursor`.
+
+        Query Parameters:
+        - locations: Required comma-separated location IDs to scope users.
+        - users: Optional comma-separated user IDs filter.
+        - schedules: Optional comma-separated schedule IDs to narrow results to specific schedules.
+        - startDate: Required start date (YYYY-MM-DD).
+        - endDate: Required end date (YYYY-MM-DD), must be >= startDate and within 31 days.
+        - cursor: Optional zero-based user offset for pagination.
+        - limit: Optional page size (1-100).
+        """
+        ...
+    @property
+    def create_capacity_schedule(self) -> UsersCapacitySchedulesCreate_capacity_scheduleNamespace:
+        """
+        Creates a capacity schedule for a user or a team profile.
+        
+        You must provide exactly one of `userID` or `profileID` (not both).
+        
+        **Required fields:**
+        - `scheduleName` — Name of the schedule (max 255 chars).
+        - `startDate` — Start date in YYYY-MM-DD format.
+        - `locationID` — The location this schedule applies to.
+        - One of `userID` or `profileID`.
+        
+        **Optional fields:**
+        - `endDate` — End date (YYYY-MM-DD). Must be >= startDate. If omitted, the schedule continues indefinitely.
+        - Day capacities (`mondayCapacity` through `sundayCapacity`) — Minutes per day (0–1440).
+        - Day start/end times (`mondayStartTime` through `sundayEndTime`) — HH:MM or HH:MM:SS format.
+        - `rotationPatternEnabled` — Enable rotation pattern (boolean).
+        - `rotationWeeksOn` / `rotationWeeksOff` — Required when rotation is enabled (1–52).
+        - `scheduleNotes` — Free-text notes (max 2000 chars).
+        - `priority` — Priority ranking (0–1000). Default: 0.
+        - `isActive` — Whether the schedule is active (boolean). Default: true.
+        
+        **Capacity defaults (when not provided):**
+        - Monday–Friday: **480 minutes (8 hours)**
+        - Saturday–Sunday: **0 minutes**
+        
+        **Time defaults (when not provided):**
+        - All days: **08:00–16:00**
+        
+        Returns `201` with the new `scheduleID` and a `Location` header.
+        """
+        ...
+
+class UsersCapacitySchedulesCreate_capacity_scheduleNamespace(LimbleEndpoint):
+    """
+    Creates a capacity schedule for a user or a team profile.
+    
+    You must provide exactly one of `userID` or `profileID` (not both).
+    
+    **Required fields:**
+    - `scheduleName` — Name of the schedule (max 255 chars).
+    - `startDate` — Start date in YYYY-MM-DD format.
+    - `locationID` — The location this schedule applies to.
+    - One of `userID` or `profileID`.
+    
+    **Optional fields:**
+    - `endDate` — End date (YYYY-MM-DD). Must be >= startDate. If omitted, the schedule continues indefinitely.
+    - Day capacities (`mondayCapacity` through `sundayCapacity`) — Minutes per day (0–1440).
+    - Day start/end times (`mondayStartTime` through `sundayEndTime`) — HH:MM or HH:MM:SS format.
+    - `rotationPatternEnabled` — Enable rotation pattern (boolean).
+    - `rotationWeeksOn` / `rotationWeeksOff` — Required when rotation is enabled (1–52).
+    - `scheduleNotes` — Free-text notes (max 2000 chars).
+    - `priority` — Priority ranking (0–1000). Default: 0.
+    - `isActive` — Whether the schedule is active (boolean). Default: true.
+    
+    **Capacity defaults (when not provided):**
+    - Monday–Friday: **480 minutes (8 hours)**
+    - Saturday–Sunday: **0 minutes**
+    
+    **Time defaults (when not provided):**
+    - All days: **08:00–16:00**
+    
+    Returns `201` with the new `scheduleID` and a `Location` header.
+    """
+
+class UsersCapacitySchedulesGet_capacity_schedulesNamespace(LimbleEndpoint):
+    """
+    Returns per-user daily capacity rows for a date range, including applied precedence details.
+    
+    Precedence order:
+    `exception > holiday > userSchedule > profileSchedule > default`.
+    
+    Pagination:
+    - `cursor` is a zero-based offset.
+    - `limit` max is 100.
+    
+    Date limits:
+    - `startDate` and `endDate` are required (YYYY-MM-DD).
+    - Date range cannot exceed 31 days.
+    
+    Response notes:
+    - `range` now contains only `startDate` and `endDate`.
+    - `pagination` contains `cursor`, `limit`, `totalUsers`, and `nextCursor`.
+
+    Query Parameters:
+    - locations: Required comma-separated location IDs to scope users.
+    - users: Optional comma-separated user IDs filter.
+    - schedules: Optional comma-separated schedule IDs to narrow results to specific schedules.
+    - startDate: Required start date (YYYY-MM-DD).
+    - endDate: Required end date (YYYY-MM-DD), must be >= startDate and within 31 days.
+    - cursor: Optional zero-based user offset for pagination.
+    - limit: Optional page size (1-100).
+    """
+
+class UsersCapacityExceptionsNamespace(object):
+    @property
+    def get_capacity_exceptions_by_user(self) -> UsersCapacityExceptionsGet_capacity_exceptions_by_userNamespace:
+        """
+        Gets capacity exception records for a specific user.
+        
+        `capacityMinutes` is the user's available capacity **per day** for each date in the exception range.
+        
+        Query behavior:
+        - `locations` scopes by user location membership.
+        - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+        - `cursor`/`limit` paginate results.
+        
+        Response fields include:
+        `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`, `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.
+
+        Query Parameters:
+        - locations: Required comma-separated location IDs used to scope the user access context.
+        - startDate: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+        - endDate: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must be >= startDate when both are present.
+        - cursor: Optional ID cursor for keyset pagination.
+        - limit: Optional max rows per page.
+        """
+        ...
+    @property
+    def get_capacity_exceptions_by_location(self) -> UsersCapacityExceptionsGet_capacity_exceptions_by_locationNamespace:
+        """
+        Gets capacity exception records across users for the requested locations.
+        
+        `capacityMinutes` is the user's available capacity **per day** for each date in the exception range.
+        
+        Query behavior:
+        - `locations` is required.
+        - `users` optionally narrows results to specific users.
+        - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+        - `cursor`/`limit` paginate results.
+        
+        Response fields include:
+        `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`, `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.
+
+        Query Parameters:
+        - locations: Required comma-separated location IDs.
+        - users: Optional comma-separated user IDs filter.
+        - startDate: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+        - endDate: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must be >= startDate when both are present.
+        - cursor: Optional ID cursor for keyset pagination.
+        - limit: Optional max rows per page.
+        """
+        ...
+    @property
+    def new_capacity_exception(self) -> UsersCapacityExceptionsNew_capacity_exceptionNamespace:
+        """
+        Creates a capacity exception for a user.
+        
+        `capacityMinutes` means the user's available work capacity **per day** for each day in the exception date/range. It is **not** the total duration of the exception range.
+        
+        Examples:
+        
+        - `capacityMinutes: 0` => unavailable that day (or each day in the range).
+            
+        - `capacityMinutes: 480` => 8 hours available per day.
+            
+        
+        You can provide either:
+        
+        - `capacityMinutes` directly, or
+            
+        - `hoursPerDay` + `minutesPerDay` (equivalent input).
+        """
+        ...
+    @property
+    def delete_capacity_exception(self) -> UsersCapacityExceptionsDelete_capacity_exceptionNamespace:
+        """
+        Deletes a capacity exception for a user.
+        """
+        ...
+    @property
+    def update_capacity_exception(self) -> UsersCapacityExceptionsUpdate_capacity_exceptionNamespace:
+        """
+        This request updates an existing capacity exception and returns the updated resource.
+        
+        `capacityMinutes` means the user's available capacity **per day** for each day in the exception date/range. It is **not** the total duration of the exception range.
+        
+        Examples:
+        - `capacityMinutes: 0` => unavailable that day (or each day in the range).
+        - `capacityMinutes: 480` => 8 hours available per day.
+        
+        Return data description
+        
+        Property	Description
+        exceptionID	Unique ID for the capacity exception record.
+        userID	The user the exception applies to.
+        createdByUserID	The user who created the exception.
+        exceptionStartDate	The first date the exception applies (YYYY-MM-DD).
+        exceptionEndDate	The last date the exception applies (YYYY-MM-DD). Null when the exception is only for one day.
+        capacityMinutes	Allowed capacity in minutes **per day** for the exception date/range.
+        hoursPerDay	Derived whole-hour portion of capacityMinutes.
+        minutesPerDay	Derived minute remainder after hoursPerDay.
+        exceptionTitle	Optional short title for the exception.
+        exceptionNotes	Optional notes/details for the exception.
+        """
+        ...
+
+class UsersCapacityExceptionsUpdate_capacity_exceptionNamespace(LimbleEndpoint):
+    """
+    This request updates an existing capacity exception and returns the updated resource.
+    
+    `capacityMinutes` means the user's available capacity **per day** for each day in the exception date/range. It is **not** the total duration of the exception range.
+    
+    Examples:
+    - `capacityMinutes: 0` => unavailable that day (or each day in the range).
+    - `capacityMinutes: 480` => 8 hours available per day.
+    
+    Return data description
+    
+    Property	Description
+    exceptionID	Unique ID for the capacity exception record.
+    userID	The user the exception applies to.
+    createdByUserID	The user who created the exception.
+    exceptionStartDate	The first date the exception applies (YYYY-MM-DD).
+    exceptionEndDate	The last date the exception applies (YYYY-MM-DD). Null when the exception is only for one day.
+    capacityMinutes	Allowed capacity in minutes **per day** for the exception date/range.
+    hoursPerDay	Derived whole-hour portion of capacityMinutes.
+    minutesPerDay	Derived minute remainder after hoursPerDay.
+    exceptionTitle	Optional short title for the exception.
+    exceptionNotes	Optional notes/details for the exception.
+    """
+
+class UsersCapacityExceptionsDelete_capacity_exceptionNamespace(LimbleEndpoint):
+    """
+    Deletes a capacity exception for a user.
+    """
+
+class UsersCapacityExceptionsNew_capacity_exceptionNamespace(LimbleEndpoint):
+    """
+    Creates a capacity exception for a user.
+    
+    `capacityMinutes` means the user's available work capacity **per day** for each day in the exception date/range. It is **not** the total duration of the exception range.
+    
+    Examples:
+    
+    - `capacityMinutes: 0` => unavailable that day (or each day in the range).
+        
+    - `capacityMinutes: 480` => 8 hours available per day.
+        
+    
+    You can provide either:
+    
+    - `capacityMinutes` directly, or
+        
+    - `hoursPerDay` + `minutesPerDay` (equivalent input).
+    """
+
+class UsersCapacityExceptionsGet_capacity_exceptions_by_locationNamespace(LimbleEndpoint):
+    """
+    Gets capacity exception records across users for the requested locations.
+    
+    `capacityMinutes` is the user's available capacity **per day** for each date in the exception range.
+    
+    Query behavior:
+    - `locations` is required.
+    - `users` optionally narrows results to specific users.
+    - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+    - `cursor`/`limit` paginate results.
+    
+    Response fields include:
+    `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`, `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.
+
+    Query Parameters:
+    - locations: Required comma-separated location IDs.
+    - users: Optional comma-separated user IDs filter.
+    - startDate: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+    - endDate: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must be >= startDate when both are present.
+    - cursor: Optional ID cursor for keyset pagination.
+    - limit: Optional max rows per page.
+    """
+
+class UsersCapacityExceptionsGet_capacity_exceptions_by_userNamespace(LimbleEndpoint):
+    """
+    Gets capacity exception records for a specific user.
+    
+    `capacityMinutes` is the user's available capacity **per day** for each date in the exception range.
+    
+    Query behavior:
+    - `locations` scopes by user location membership.
+    - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+    - `cursor`/`limit` paginate results.
+    
+    Response fields include:
+    `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`, `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.
+
+    Query Parameters:
+    - locations: Required comma-separated location IDs used to scope the user access context.
+    - startDate: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+    - endDate: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must be >= startDate when both are present.
+    - cursor: Optional ID cursor for keyset pagination.
+    - limit: Optional max rows per page.
     """
 
 class UsersTeamsNamespace(object):
@@ -3401,6 +3737,8 @@ class TasksNamespace(LimbleEndpoint):
     template | This field indicates if the task is a 'template' that spawns other tasks based on schedules or not.
     createdDate | The date this Task was created. This is a unix timestamp.
     startDate | By default this value is 0 as the startDate is usually the same as the createdDate. Sometimes a task is created such that it is scheduled to start in the future (i.e. after the createdDate). In such a case this value will be a unix timestamp indicating the actual start date of the Task.
+    scheduledStart | The scheduled start date of the Task. This is a unix timestamp. A value of null means no scheduled start date is set.
+    scheduledEnd | The scheduled end date of the Task. This is a unix timestamp. A value of null means no scheduled end date is set.
     due | The date this Task is due. This is a unix timestamp.
     dateCompleted | The date this Task was completed. This is a unix timestamp. A value of 0 means this Task is not completed.
     lastEdited | The date this Task was last edited. This is a unix timestamp.
@@ -3427,6 +3765,7 @@ class TasksNamespace(LimbleEndpoint):
     type | 1 = Preventative Maintanance (PM);2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);5 = Cycle Count;6 = Work Request (WR);7 = Min Part Threshold;8 = Materials Request;
     status | 1 - Complete0 - IncompleteNote: this property indicates a task status with respect to task completion. For the custom task status refer to statusID
     statusID | The current custom status assigned to this task.Note: this indicates the current status of a task. Use GET Statuses to find the value of each statusID.
+    poIDs | An array of Purchase Order IDs linked to this Task. Returns an empty array if no Purchase Orders are linked.
     associatedTaskID (deprecated) | Please refer to associatedTask meta property on GET Task Instruction for instruction type 14.
     meta1 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     meta2 | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
@@ -3441,25 +3780,25 @@ class TasksNamespace(LimbleEndpoint):
     - type: This parameter is used to only get Tasks of a specific type. This parameter accepts a comma delimited list of task types.
     - name: This is a parameter used to string search for a name or partial name of a task this parameter expects a string with the wildcard %.
     - start: This parameter is used to only get Tasks that were last edited after the unix timestamp passed into the start parameter. For example, all Tasks that were last edited after April 18th, 2018.
-    - end: This parameter is used to only get Tasks that were last edited *before* the unix timestamp passed into the end parameter.
+    - end: This parameter is used to only get Tasks that were last edited before the unix timestamp passed into the end parameter.
     - cursor: This parameter is a cursor that selects what taskID you want to start receiving results at. e.g. passing 137 here will only get you tasks with an id greater than 137.
     - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time.
     - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     - completedStart: This parameter is used to only get Tasks that were completed after the unix timestamp passed into this parameter. For example, all Assets that were completed after April 18th, 2018.
-    - completedEnd: This parameter is used to only get Tasks that were completed *before* the unix timestamp passed into this parameter.
-    - scheduledStart: This parameter is used to only get Tasks whose scheduled start is after the unix timestamp passed into this parameter. 
-    - scheduledEnd: This parameter is used to only get Tasks whose scheduled end is *before* the unix timestamp passed into this parameter. 
-    - orderBy: This parameter sorts based on the value you pass. I.e. passing createdDate will order the results based on createdDate. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted and lastEdited.
-    - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
-    - lastEditedByUsers: This parameter is used to filter tasks by users that have completed tasks.
+    - completedEnd: This parameter is used to only get Tasks that were completed before the unix timestamp passed into this parameter.
+    - scheduledStart: This parameter is used as the start of a scheduled-date window. Tasks are returned when their scheduled date range overlaps this timestamp.
+    - scheduledEnd: This parameter is used as the end of a scheduled-date window. Tasks are returned when their scheduled date range overlaps this timestamp.
+    - orderBy: This parameter sorts based on the value you pass. Negative parameters are used to reverse sort order. This supports sorting by due, createdDate, dateCompleted, scheduledStart, scheduledEnd, and lastEdited.
+    - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return all tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
+    - users: This parameter filters tasks by assignee user IDs. It returns tasks directly assigned to those users and tasks assigned through team/profile membership (including multi-user assignments). This parameter accepts a comma delimited list of user IDs.
+    - teams: This parameter is used to only get Tasks assigned to specific teams/profiles. This parameter accepts a comma delimited list of team IDs.
+    - lastEditedByUsers: This parameter is used to filter tasks by users who last edited the task.
     - status: This parameter is used to filter tasks by completed status. 1 - Complete  0 - Incomplete
     - meta1: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     - meta2: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     - meta3: This parameter is used to filter tasks by task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     - statusIDs: This parameter is used to filter tasks by their associated statusID.
-    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
-    - geoLocation: This parameter is used to filter results that contain a geoLocation property. By default it is false and will return **all** tasks with and without geoLocation property. If true, it will only return tasks with a geoLocation property.
-    - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semi-colon (";") colon at the end it is recommended that the param follows the same format. 
+    - tag: This parameter is used to filter results that contain a certain custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom Tag" but because custom tags are stored with an at sign ("@") at the beginning and a semicolon (";") at the end it is recommended that the param follows the same format.
     """
     @property
     def invoices(self) -> TasksInvoicesNamespace:
@@ -3511,12 +3850,14 @@ class TasksNamespace(LimbleEndpoint):
         due | Int | Required | The time at which the Task is due. Must be a unix timestamp.
         type | Int | Required | The type of Task according to this legend:1 = Preventative Maintanance (PM).2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);6 = Work Request (WR).Task types not listed here are not currently supported.If you would like another Task type to be supported, please contact us.A taskType of 6 prevents the user from assigning a batchID.
         description | string | Optional | A brief description about the Task.
-        assetID | Int | Optional | The Asset that the Task will be attached to, if any.Must be the unique ID number of the Asset.Omitting this parameter or setting it to zero will not attach the Task to an asset.
+        assetID | Int | Optional | The Asset that the Task will be attached to, if any. Must be the unique ID number of the Asset. Omitting this parameter or setting it to zero will not attach the Task to an asset.
         assignment | Int | Optional. Required if 'assignmentType' is used. | The User or Team to which the Task will be assigned. Must be a User or Team that exists at the specified Location. Must be the unique ID number of the user or Team. If this parameter is set, the assignmentType parameter must also be set.
         templateID | Int | Optional | The taskID of the task you wish to utilize as a template when posting a new Task. Using this will duplicate all steps in the Template to the newly created task. Templates can be easily viewed and built in Limble's web application.
-        assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this Task will be assigned to a 'user', 'team' or 'multi'. Those two strings are the only accepted input. If this parameter is set, the assignment parameter must also be set.
-        priority | Int | Optional | Specifies the priority of the Task. Must correspond to a 'priorityLevel' (See GET Priorities) configured in your in your Limble account.
+        assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this Task will be assigned to a 'user', 'team' or 'multi'. If this parameter is set, the assignment parameter must also be set.
+        priority | Int | Optional | Specifies the priority of the Task. Must correspond to a 'priorityLevel' (See GET Priorities) configured in your Limble account.
         estimatedTime | Int | Optional | Updates the estimated time of the task. This is the time it takes to complete the task in minutes.
+        scheduledStart | Int | Optional | The scheduled start date of the task. Must be a unix timestamp. Must be 0 or greater.
+        scheduledEnd | Int | Optional | The scheduled end date of the task. Must be a unix timestamp. Must be 0 or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd must be greater than scheduledStart.
         requestName | string | Optional | Specifies the name of the Work Requestor.
         requestEmail | string | Optional | Specifies the email address of the Work Requestor.
         requestPhone | string | Optional | Specifies the phone number of the Work Requestor.
@@ -3544,14 +3885,16 @@ class TasksNamespace(LimbleEndpoint):
         ------------------------------------------
         name | String | Optional | The name of the task.
         locationID | Int | Optional | The location to which the task is assigned. Must be the location's unique ID number.
-        due | Int | Optional | The time at which the task is due for completion. Must be aunixtimestamp.
+        due | Int | Optional | The time at which the task is due for completion. Must be a unix timestamp.
         type | Int | Optional | The type of task according to this legend:1 = Preventative Maintanance (PM).2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);6 = Work Request (WR).Only these type of tasks can be changed from one task type to another.
         description | string | Optional | A brief description about the task.
-        asset | Int | Optional | The asset that the task will be attached to, if any.Must be the unique ID number of the asset.Omitting this parameter or setting it to zero will not attach the task to any asset.
-        assignment | Int | Optional. Required if 'assignmentType' is used. | The user or team to which the task will be assigned.Must be a user or team that exists at the specified location. Must be the unique ID number of the user orteam.If this parameter is set, the assignmentType parameter must also be set.
-        assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies wether this task will be assigned to a 'user' , 'team' or `multi`. Those two strings are the only acceptedinput.If this parameter is set, the assignment parameter must also be set.
-        priority | Int | Optional | Specifies the priority of the task. Must be between 0 and 6 inclusive: 0 = lowest priority, 5 = highestpriority, 6 = "On Hold".
+        asset | Int | Optional | The asset that the task will be attached to, if any. Must be the unique ID number of the asset. Omitting this parameter or setting it to zero will not attach the task to any asset.
+        assignment | Int | Optional. Required if 'assignmentType' is used. | The user or team to which the task will be assigned. Must be a user or team that exists at the specified location. Must be the unique ID number of the user or team. If this parameter is set, the assignmentType parameter must also be set.
+        assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this task will be assigned to a 'user', 'team' or 'multi'. If this parameter is set, the assignment parameter must also be set.
+        priority | Int | Optional | Specifies the priority of the task. Must be between 0 and 6 inclusive: 0 = lowest priority, 5 = highest priority, 6 = "On Hold".
         estimatedTime | Int | Optional | Updates the estimated time of the task. This is the time it takes to complete the task in minutes.
+        scheduledStart | Int | Optional | The scheduled start date of the task. Must be a unix timestamp. Must be 0 or greater.
+        scheduledEnd | Int | Optional | The scheduled end date of the task. Must be a unix timestamp. Must be 0 or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd must be greater than scheduledStart.
         requestName | string | Optional | Specifies the name of the work requestor.
         requestEmail | string | Optional | Specifies the email address of the work requestor.
         requestPhone | string | Optional | Specifies the phone number of the work requestor.
@@ -3560,7 +3903,7 @@ class TasksNamespace(LimbleEndpoint):
         meta1 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         meta2 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
         meta3 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
-        geoLocation | geoJSON | Optional | ThegeoJSONFeature object that can be used to locate a task on a Map. To remove geoLocation from a Task pass an empty object ( {}).
+        geoLocation | geoJSON | Optional | The geoJSON Feature object that can be used to locate a task on a Map. To remove geoLocation from a Task pass an empty object ({}).
         statusID | int | Optional | Update the custom status of the task. Cannot update custom status to 1 (Open) or 2 (Complete).
         multiUsers | array | Optional. Required if assignmentType = multi | Array list of users a task is being assigned to.
         """
@@ -3579,14 +3922,16 @@ class TasksUpdate_taskNamespace(LimbleEndpoint):
     ------------------------------------------
     name | String | Optional | The name of the task.
     locationID | Int | Optional | The location to which the task is assigned. Must be the location's unique ID number.
-    due | Int | Optional | The time at which the task is due for completion. Must be aunixtimestamp.
+    due | Int | Optional | The time at which the task is due for completion. Must be a unix timestamp.
     type | Int | Optional | The type of task according to this legend:1 = Preventative Maintanance (PM).2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);6 = Work Request (WR).Only these type of tasks can be changed from one task type to another.
     description | string | Optional | A brief description about the task.
-    asset | Int | Optional | The asset that the task will be attached to, if any.Must be the unique ID number of the asset.Omitting this parameter or setting it to zero will not attach the task to any asset.
-    assignment | Int | Optional. Required if 'assignmentType' is used. | The user or team to which the task will be assigned.Must be a user or team that exists at the specified location. Must be the unique ID number of the user orteam.If this parameter is set, the assignmentType parameter must also be set.
-    assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies wether this task will be assigned to a 'user' , 'team' or `multi`. Those two strings are the only acceptedinput.If this parameter is set, the assignment parameter must also be set.
-    priority | Int | Optional | Specifies the priority of the task. Must be between 0 and 6 inclusive: 0 = lowest priority, 5 = highestpriority, 6 = "On Hold".
+    asset | Int | Optional | The asset that the task will be attached to, if any. Must be the unique ID number of the asset. Omitting this parameter or setting it to zero will not attach the task to any asset.
+    assignment | Int | Optional. Required if 'assignmentType' is used. | The user or team to which the task will be assigned. Must be a user or team that exists at the specified location. Must be the unique ID number of the user or team. If this parameter is set, the assignmentType parameter must also be set.
+    assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this task will be assigned to a 'user', 'team' or 'multi'. If this parameter is set, the assignment parameter must also be set.
+    priority | Int | Optional | Specifies the priority of the task. Must be between 0 and 6 inclusive: 0 = lowest priority, 5 = highest priority, 6 = "On Hold".
     estimatedTime | Int | Optional | Updates the estimated time of the task. This is the time it takes to complete the task in minutes.
+    scheduledStart | Int | Optional | The scheduled start date of the task. Must be a unix timestamp. Must be 0 or greater.
+    scheduledEnd | Int | Optional | The scheduled end date of the task. Must be a unix timestamp. Must be 0 or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd must be greater than scheduledStart.
     requestName | string | Optional | Specifies the name of the work requestor.
     requestEmail | string | Optional | Specifies the email address of the work requestor.
     requestPhone | string | Optional | Specifies the phone number of the work requestor.
@@ -3595,7 +3940,7 @@ class TasksUpdate_taskNamespace(LimbleEndpoint):
     meta1 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     meta2 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
     meta3 | string | Optional | Task meta data. This does not show in the web application, but can be used to track items between integrated systems.
-    geoLocation | geoJSON | Optional | ThegeoJSONFeature object that can be used to locate a task on a Map. To remove geoLocation from a Task pass an empty object ( {}).
+    geoLocation | geoJSON | Optional | The geoJSON Feature object that can be used to locate a task on a Map. To remove geoLocation from a Task pass an empty object ({}).
     statusID | int | Optional | Update the custom status of the task. Cannot update custom status to 1 (Open) or 2 (Complete).
     multiUsers | array | Optional. Required if assignmentType = multi | Array list of users a task is being assigned to.
     """
@@ -3611,12 +3956,14 @@ class TasksNew_taskNamespace(LimbleEndpoint):
     due | Int | Required | The time at which the Task is due. Must be a unix timestamp.
     type | Int | Required | The type of Task according to this legend:1 = Preventative Maintanance (PM).2 = Unplanned Work Order (WO);4 = Planned Work Order (WO);6 = Work Request (WR).Task types not listed here are not currently supported.If you would like another Task type to be supported, please contact us.A taskType of 6 prevents the user from assigning a batchID.
     description | string | Optional | A brief description about the Task.
-    assetID | Int | Optional | The Asset that the Task will be attached to, if any.Must be the unique ID number of the Asset.Omitting this parameter or setting it to zero will not attach the Task to an asset.
+    assetID | Int | Optional | The Asset that the Task will be attached to, if any. Must be the unique ID number of the Asset. Omitting this parameter or setting it to zero will not attach the Task to an asset.
     assignment | Int | Optional. Required if 'assignmentType' is used. | The User or Team to which the Task will be assigned. Must be a User or Team that exists at the specified Location. Must be the unique ID number of the user or Team. If this parameter is set, the assignmentType parameter must also be set.
     templateID | Int | Optional | The taskID of the task you wish to utilize as a template when posting a new Task. Using this will duplicate all steps in the Template to the newly created task. Templates can be easily viewed and built in Limble's web application.
-    assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this Task will be assigned to a 'user', 'team' or 'multi'. Those two strings are the only accepted input. If this parameter is set, the assignment parameter must also be set.
-    priority | Int | Optional | Specifies the priority of the Task. Must correspond to a 'priorityLevel' (See GET Priorities) configured in your in your Limble account.
+    assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies whether this Task will be assigned to a 'user', 'team' or 'multi'. If this parameter is set, the assignment parameter must also be set.
+    priority | Int | Optional | Specifies the priority of the Task. Must correspond to a 'priorityLevel' (See GET Priorities) configured in your Limble account.
     estimatedTime | Int | Optional | Updates the estimated time of the task. This is the time it takes to complete the task in minutes.
+    scheduledStart | Int | Optional | The scheduled start date of the task. Must be a unix timestamp. Must be 0 or greater.
+    scheduledEnd | Int | Optional | The scheduled end date of the task. Must be a unix timestamp. Must be 0 or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd must be greater than scheduledStart.
     requestName | string | Optional | Specifies the name of the Work Requestor.
     requestEmail | string | Optional | Specifies the email address of the Work Requestor.
     requestPhone | string | Optional | Specifies the phone number of the Work Requestor.
@@ -4661,6 +5008,8 @@ class PartsNamespace(LimbleEndpoint):
         """
         ...
     @property
+    def vendor_associations(self) -> PartsVendor_associationsNamespace: ...
+    @property
     def create_part(self) -> PartsCreate_partNamespace:
         """
         This request adds new Parts to inventory list.
@@ -4821,6 +5170,121 @@ class PartsCreate_partNamespace(LimbleEndpoint):
     staleStatus | Boolean | Optional | This indicates if the part has gone stale or not. This value cannot be changed by regular user interaction it is change automatically by limble.
     assignment | Int | Optional. Required if 'assignmentType' is used. | The user or team to which the task will be assigned.Must be a user or team that exists at the specified location. Must be the unique ID number of the user or team. If this parameter is set, the assignmentType parameter must also be set.
     assignmentType | Enum | Optional. Required if 'assignment' is used. | Specifies wether this task will be assigned to a 'user' or a 'team'. Those two strings are the only accepted input. If this parameter is set, the assignment parameter must also be set.
+    """
+
+class PartsVendor_associationsNamespace(object):
+    @property
+    def get_part_vendor_associations(self) -> PartsVendor_associationsGet_part_vendor_associationsNamespace:
+        """
+        Returns a paginated list of vendor-part associations for the customer.
+        
+        **Note:** this endpoint supports both cursor-based and page-based pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+        
+        Return data description
+
+        Property | Description
+        ----------------------
+        relationID | The unique ID of this vendor-part association.
+        partID | The ID of the associated part.
+        vendorID | The ID of the associated vendor.
+        vendorPartNumber | The vendor's part number for this part, if provided.
+        partPrice | The vendor's price for this part, if provided.
+        createdAt | Unix timestamp of when this association was created.
+        updatedAt | Unix timestamp of when this association was last updated.
+        partName | The name of the associated part.
+        number | The part's internal part number.
+        locationID | The ID of the location this part belongs to.
+        vendorName | The name of the associated vendor.
+
+        Query Parameters:
+        - parts: This parameter is used to only get associations for specific parts. This parameter accepts a comma delimited list of part IDs.
+        - vendors: This parameter is used to only get associations for specific vendors. This parameter accepts a comma delimited list of vendor IDs.
+        - vendorPartNumber: This parameter is used to search for associations by vendor part number. This parameter expects a string with the wildcard % for partial matching.
+        - vendorName: This parameter is used to search for associations by vendor name. This parameter expects a string with the wildcard % for partial matching.
+        - start: This parameter is used to only get associations that were last updated after the unix timestamp passed into the start parameter.
+        - end: This parameter is used to only get associations that were last updated before the unix timestamp passed into the end parameter.
+        - cursor: This parameter is a cursor that selects what relationID you want to start receiving results at. This will return results with a relationID greater than the value of cursor.
+        - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time. The maximum is 1000.
+        - orderBy: This parameter is used to order results. Accepted values: relationID, -relationID, createdAt, -createdAt, updatedAt, -updatedAt, partName, -partName, vendorName, -vendorName. Prefix with - for descending order.
+        - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
+        """
+        ...
+    @property
+    def delete_part_vendor_association(self) -> PartsVendor_associationsDelete_part_vendor_associationNamespace:
+        """
+        Deletes a vendor-part association by its `relationID`. Only manually created associations (associationType: `manual`) can be deleted through this endpoint.
+        
+        Returns `204 No Content` on success. Returns `404 Not Found` if the association does not exist or does not belong to your account.
+        """
+        ...
+    @property
+    def create_part_vendor_association(self) -> PartsVendor_associationsCreate_part_vendor_associationNamespace:
+        """
+        Creates a manual vendor-part association.
+        
+        The part and vendor must both exist and the vendor must be at the same location as the part. If an association between the given part and vendor already exists, a `409 Conflict` is returned.
+        
+        **Required fields:**
+        - `partID` — The ID of the part.
+        - `vendorID` — The ID of the vendor.
+        
+        Returns `201 Created` with the new `relationID` and a `Location` header pointing to the association.
+        """
+        ...
+
+class PartsVendor_associationsCreate_part_vendor_associationNamespace(LimbleEndpoint):
+    """
+    Creates a manual vendor-part association.
+    
+    The part and vendor must both exist and the vendor must be at the same location as the part. If an association between the given part and vendor already exists, a `409 Conflict` is returned.
+    
+    **Required fields:**
+    - `partID` — The ID of the part.
+    - `vendorID` — The ID of the vendor.
+    
+    Returns `201 Created` with the new `relationID` and a `Location` header pointing to the association.
+    """
+
+class PartsVendor_associationsDelete_part_vendor_associationNamespace(LimbleEndpoint):
+    """
+    Deletes a vendor-part association by its `relationID`. Only manually created associations (associationType: `manual`) can be deleted through this endpoint.
+    
+    Returns `204 No Content` on success. Returns `404 Not Found` if the association does not exist or does not belong to your account.
+    """
+
+class PartsVendor_associationsGet_part_vendor_associationsNamespace(LimbleEndpoint):
+    """
+    Returns a paginated list of vendor-part associations for the customer.
+    
+    **Note:** this endpoint supports both cursor-based and page-based pagination. Please refer to the [**Pagination**](#pagination) section for more information.
+    
+    Return data description
+
+    Property | Description
+    ----------------------
+    relationID | The unique ID of this vendor-part association.
+    partID | The ID of the associated part.
+    vendorID | The ID of the associated vendor.
+    vendorPartNumber | The vendor's part number for this part, if provided.
+    partPrice | The vendor's price for this part, if provided.
+    createdAt | Unix timestamp of when this association was created.
+    updatedAt | Unix timestamp of when this association was last updated.
+    partName | The name of the associated part.
+    number | The part's internal part number.
+    locationID | The ID of the location this part belongs to.
+    vendorName | The name of the associated vendor.
+
+    Query Parameters:
+    - parts: This parameter is used to only get associations for specific parts. This parameter accepts a comma delimited list of part IDs.
+    - vendors: This parameter is used to only get associations for specific vendors. This parameter accepts a comma delimited list of vendor IDs.
+    - vendorPartNumber: This parameter is used to search for associations by vendor part number. This parameter expects a string with the wildcard % for partial matching.
+    - vendorName: This parameter is used to search for associations by vendor name. This parameter expects a string with the wildcard % for partial matching.
+    - start: This parameter is used to only get associations that were last updated after the unix timestamp passed into the start parameter.
+    - end: This parameter is used to only get associations that were last updated before the unix timestamp passed into the end parameter.
+    - cursor: This parameter is a cursor that selects what relationID you want to start receiving results at. This will return results with a relationID greater than the value of cursor.
+    - limit: This parameter is a result limiter. The default is set to return no more than 100 results at one time. The maximum is 1000.
+    - orderBy: This parameter is used to order results. Accepted values: relationID, -relationID, createdAt, -createdAt, updatedAt, -updatedAt, partName, -partName, vendorName, -vendorName. Prefix with - for descending order.
+    - page: This parameter is used to paginate results based on the limit. Refer to Pagination section for more information.
     """
 
 class PartsPurchasablesNamespace(LimbleEndpoint):

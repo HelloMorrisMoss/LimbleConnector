@@ -78,13 +78,6 @@ class LimbleEndpoint:
         logger.debug(f"Raw request to {self.name} with kwargs: {kwargs}")
         url = self.route_url
 
-        # this is a hackish way to cover for a typo in their Postman collection; in the one place we're looking for the
-        # url to generate the registry they have "{{protocol}}://{{server}}:{{port}}/v2/assets/1?assetID={{assetID}}"
-        # which is wrong, even according to the rest of the documentation for that endpoint
-        if self.name == 'routes.assets.delete_asset':
-            if method == 'DELETE' and self.route_url.endswith('1'):
-                url = self.route_url[:-1] + ':assetID'
-
         # _ = kwargs.pop('limit', None)  # don't pass this to the request
         path_params = kwargs.pop('path_params', {})
         for k, v in path_params.items():

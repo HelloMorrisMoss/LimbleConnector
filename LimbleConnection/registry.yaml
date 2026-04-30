@@ -1002,7 +1002,7 @@ endpoints:
     is_folder: false
     query_params: []
   routes.assets.delete_asset:
-    url: '{api_base_url}/assets/:assetID'
+    url: '{api_base_url}/assets/'
     method: DELETE
     description_data:
       headers: []
@@ -2182,6 +2182,206 @@ endpoints:
           inferred_type: str
           type: str
       container_type: list
+  routes.parts.vendor_associations:
+    is_folder: true
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: ''
+      non_table_after: ''
+  routes.parts.vendor_associations.get_part_vendor_associations:
+    url: '{api_base_url}/parts/vendors/associations'
+    method: GET
+    description_data:
+      headers:
+      - Property
+      - Description
+      data_rows:
+      - - relationID
+        - The unique ID of this vendor-part association.
+      - - partID
+        - The ID of the associated part.
+      - - vendorID
+        - The ID of the associated vendor.
+      - - vendorPartNumber
+        - The vendor's part number for this part, if provided.
+      - - partPrice
+        - The vendor's price for this part, if provided.
+      - - createdAt
+        - Unix timestamp of when this association was created.
+      - - updatedAt
+        - Unix timestamp of when this association was last updated.
+      - - partName
+        - The name of the associated part.
+      - - number
+        - The part's internal part number.
+      - - locationID
+        - The ID of the location this part belongs to.
+      - - vendorName
+        - The name of the associated vendor.
+      non_table_before: 'Returns a paginated list of vendor-part associations for
+        the customer.
+
+
+        **Note:** this endpoint supports both cursor-based and page-based pagination.
+        Please refer to the [**Pagination**](#pagination) section for more information.
+
+
+        Return data description'
+      non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: parts
+      value: 158,159
+      description: This parameter is used to only get associations for specific parts.
+        This parameter accepts a comma delimited list of part IDs.
+      inferred_type: list[str]
+      type: list[str]
+    - key: vendors
+      value: 12,34
+      description: This parameter is used to only get associations for specific vendors.
+        This parameter accepts a comma delimited list of vendor IDs.
+      inferred_type: list[str]
+      type: list[str]
+    - key: vendorPartNumber
+      value: '%ABC%'
+      description: This parameter is used to search for associations by vendor part
+        number. This parameter expects a string with the wildcard % for partial matching.
+      inferred_type: str
+      type: str
+    - key: vendorName
+      value: '%Acme%'
+      description: This parameter is used to search for associations by vendor name.
+        This parameter expects a string with the wildcard % for partial matching.
+      inferred_type: str
+      type: str
+    - key: start
+      value: '1700000000'
+      description: This parameter is used to only get associations that were last
+        updated after the unix timestamp passed into the start parameter.
+      inferred_type: int
+      type: int
+    - key: end
+      value: '1800000000'
+      description: This parameter is used to only get associations that were last
+        updated before the unix timestamp passed into the end parameter.
+      inferred_type: int
+      type: int
+    - key: cursor
+      value: '0'
+      description: This parameter is a cursor that selects what relationID you want
+        to start receiving results at. This will return results with a relationID
+        greater than the value of cursor.
+      inferred_type: int
+      type: int
+    - key: limit
+      value: '100'
+      description: This parameter is a result limiter. The default is set to return
+        no more than 100 results at one time. The maximum is 1000.
+      inferred_type: int
+      type: int
+    - key: orderBy
+      value: relationID
+      description: 'This parameter is used to order results. Accepted values: relationID,
+        -relationID, createdAt, -createdAt, updatedAt, -updatedAt, partName, -partName,
+        vendorName, -vendorName. Prefix with - for descending order.'
+      inferred_type: str
+      type: str
+    - key: page
+      value: '1'
+      description: This parameter is used to paginate results based on the limit.
+        Refer to Pagination section for more information.
+      inferred_type: int
+      type: int
+    response:
+      fields:
+        relationID:
+          description: The unique ID of this vendor-part association.
+          inferred_type: int
+          type: int
+        partID:
+          description: The ID of the associated part.
+          inferred_type: int
+          type: int
+        vendorID:
+          description: The ID of the associated vendor.
+          inferred_type: int
+          type: int
+        vendorPartNumber:
+          description: The vendor's part number for this part, if provided.
+          inferred_type: str
+          type: str
+        partPrice:
+          description: The vendor's price for this part, if provided.
+          inferred_type: str
+          type: str
+        createdAt:
+          description: Unix timestamp of when this association was created.
+          inferred_type: str
+          type: str
+        updatedAt:
+          description: Unix timestamp of when this association was last updated.
+          inferred_type: int
+          type: int
+        partName:
+          description: The name of the associated part.
+          inferred_type: str
+          type: str
+        number:
+          description: The part's internal part number.
+          inferred_type: str
+          type: str
+        locationID:
+          description: The ID of the location this part belongs to.
+          inferred_type: int
+          type: int
+        vendorName:
+          description: The name of the associated vendor.
+          inferred_type: str
+          type: str
+      container_type: list
+  routes.parts.vendor_associations.delete_part_vendor_association:
+    url: '{api_base_url}/parts/vendors/associations/:relationID'
+    method: DELETE
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Deletes a vendor-part association by its `relationID`. Only
+        manually created associations (associationType: `manual`) can be deleted through
+        this endpoint.
+
+
+        Returns `204 No Content` on success. Returns `404 Not Found` if the association
+        does not exist or does not belong to your account.'
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.parts.vendor_associations.create_part_vendor_association:
+    url: '{api_base_url}/parts/vendors/associations'
+    method: POST
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Creates a manual vendor-part association.
+
+
+        The part and vendor must both exist and the vendor must be at the same location
+        as the part. If an association between the given part and vendor already exists,
+        a `409 Conflict` is returned.
+
+
+        **Required fields:**
+
+        - `partID` — The ID of the part.
+
+        - `vendorID` — The ID of the vendor.
+
+
+        Returns `201 Created` with the new `relationID` and a `Location` header pointing
+        to the association.'
+      non_table_after: ''
+    is_folder: false
+    query_params: []
   routes.parts.create_part:
     url: '{api_base_url}/parts/'
     method: POST
@@ -2529,6 +2729,12 @@ endpoints:
           Sometimes a task is created such that it is scheduled to start in the future
           (i.e. after the createdDate). In such a case this value will be a unix timestamp
           indicating the actual start date of the Task.
+      - - scheduledStart
+        - The scheduled start date of the Task. This is a unix timestamp. A value
+          of null means no scheduled start date is set.
+      - - scheduledEnd
+        - The scheduled end date of the Task. This is a unix timestamp. A value of
+          null means no scheduled end date is set.
       - - due
         - The date this Task is due. This is a unix timestamp.
       - - dateCompleted
@@ -2588,6 +2794,9 @@ endpoints:
       - - statusID
         - 'The current custom status assigned to this task.Note: this indicates the
           current status of a task. Use GET Statuses to find the value of each statusID.'
+      - - poIDs
+        - An array of Purchase Order IDs linked to this Task. Returns an empty array
+          if no Purchase Orders are linked.
       - - associatedTaskID (deprecated)
         - Please refer to associatedTask meta property on GET Task Instruction for
           instruction type 14.
@@ -2656,7 +2865,7 @@ endpoints:
     - key: end
       value: '2500000000'
       description: This parameter is used to only get Tasks that were last edited
-        *before* the unix timestamp passed into the end parameter.
+        before the unix timestamp passed into the end parameter.
       inferred_type: int
       type: int
     - key: cursor
@@ -2687,42 +2896,55 @@ endpoints:
       type: int
     - key: completedEnd
       value: '2500000000'
-      description: This parameter is used to only get Tasks that were completed *before*
+      description: This parameter is used to only get Tasks that were completed before
         the unix timestamp passed into this parameter.
       inferred_type: int
       type: int
     - key: scheduledStart
       value: '0'
-      description: 'This parameter is used to only get Tasks whose scheduled start
-        is after the unix timestamp passed into this parameter. '
+      description: This parameter is used as the start of a scheduled-date window.
+        Tasks are returned when their scheduled date range overlaps this timestamp.
       inferred_type: int
       type: int
     - key: scheduledEnd
       value: '2500000000'
-      description: 'This parameter is used to only get Tasks whose scheduled end is
-        *before* the unix timestamp passed into this parameter. '
+      description: This parameter is used as the end of a scheduled-date window. Tasks
+        are returned when their scheduled date range overlaps this timestamp.
       inferred_type: int
       type: int
     - key: orderBy
       value: -createdDate
-      description: This parameter sorts based on the value you pass. I.e. passing
-        createdDate will order the results based on createdDate. Negative parameters
+      description: This parameter sorts based on the value you pass. Negative parameters
         are used to reverse sort order. This supports sorting by due, createdDate,
-        dateCompleted and lastEdited.
+        dateCompleted, scheduledStart, scheduledEnd, and lastEdited.
       inferred_type: str
       type: str
     - key: geoLocation
       value: 'true'
       description: This parameter is used to filter results that contain a geoLocation
-        property. By default it is false and will return **all** tasks with and without
+        property. By default it is false and will return all tasks with and without
         geoLocation property. If true, it will only return tasks with a geoLocation
         property.
       inferred_type: bool
       type: bool
+    - key: users
+      value: '11'
+      description: This parameter filters tasks by assignee user IDs. It returns tasks
+        directly assigned to those users and tasks assigned through team/profile membership
+        (including multi-user assignments). This parameter accepts a comma delimited
+        list of user IDs.
+      inferred_type: int
+      type: int
+    - key: teams
+      value: '500'
+      description: This parameter is used to only get Tasks assigned to specific teams/profiles.
+        This parameter accepts a comma delimited list of team IDs.
+      inferred_type: int
+      type: int
     - key: lastEditedByUsers
       value: 0,340,341
-      description: This parameter is used to filter tasks by users that have completed
-        tasks.
+      description: This parameter is used to filter tasks by users who last edited
+        the task.
       inferred_type: list[str]
       type: list[str]
     - key: status
@@ -2757,28 +2979,14 @@ endpoints:
       description: This parameter is used to filter tasks by their associated statusID.
       inferred_type: list[str]
       type: list[str]
-    - key: page
-      value: '2'
-      description: This parameter is used to paginate results based on the limit.
-        Refer to Pagination section for more information.
-      inferred_type: int
-      type: int
-    - key: geoLocation
-      value: 'true'
-      description: This parameter is used to filter results that contain a geoLocation
-        property. By default it is false and will return **all** tasks with and without
-        geoLocation property. If true, it will only return tasks with a geoLocation
-        property.
-      inferred_type: bool
-      type: bool
     - key: tag
       value: '@My Custom Tag;'
-      description: 'This parameter is used to filter results that contain a certain
+      description: This parameter is used to filter results that contain a certain
         custom tag. The tag must match exactly, i.e. "Tag" would not match "My Custom
         Tag". Searching for "@My Custom Tag;" is equivalent to searching for "My Custom
         Tag" but because custom tags are stored with an at sign ("@") at the beginning
-        and a semi-colon (";") colon at the end it is recommended that the param follows
-        the same format. '
+        and a semicolon (";") at the end it is recommended that the param follows
+        the same format.
       inferred_type: str
       type: str
     response:
@@ -2823,6 +3031,16 @@ endpoints:
             Task.
           inferred_type: int
           type: int
+        scheduledStart:
+          description: The scheduled start date of the Task. This is a unix timestamp.
+            A value of null means no scheduled start date is set.
+          inferred_type: str
+          type: str
+        scheduledEnd:
+          description: The scheduled end date of the Task. This is a unix timestamp.
+            A value of null means no scheduled end date is set.
+          inferred_type: str
+          type: str
         due:
           description: The date this Task is due. This is a unix timestamp.
           inferred_type: str
@@ -2937,6 +3155,11 @@ endpoints:
             of each statusID.'
           inferred_type: int
           type: int
+        poIDs:
+          description: An array of Purchase Order IDs linked to this Task. Returns
+            an empty array if no Purchase Orders are linked.
+          inferred_type: list[str]
+          type: list[str]
         associatedTaskID (deprecated):
           description: Please refer to associatedTask meta property on GET Task Instruction
             for instruction type 14.
@@ -4605,9 +4828,9 @@ endpoints:
       - - assetID
         - Int
         - Optional
-        - The Asset that the Task will be attached to, if any.Must be the unique ID
-          number of the Asset.Omitting this parameter or setting it to zero will not
-          attach the Task to an asset.
+        - The Asset that the Task will be attached to, if any. Must be the unique
+          ID number of the Asset. Omitting this parameter or setting it to zero will
+          not attach the Task to an asset.
       - - assignment
         - Int
         - Optional. Required if 'assignmentType' is used.
@@ -4625,18 +4848,28 @@ endpoints:
         - Enum
         - Optional. Required if 'assignment' is used.
         - Specifies whether this Task will be assigned to a 'user', 'team' or 'multi'.
-          Those two strings are the only accepted input. If this parameter is set,
-          the assignment parameter must also be set.
+          If this parameter is set, the assignment parameter must also be set.
       - - priority
         - Int
         - Optional
         - Specifies the priority of the Task. Must correspond to a 'priorityLevel'
-          (See GET Priorities) configured in your in your Limble account.
+          (See GET Priorities) configured in your Limble account.
       - - estimatedTime
         - Int
         - Optional
         - Updates the estimated time of the task. This is the time it takes to complete
           the task in minutes.
+      - - scheduledStart
+        - Int
+        - Optional
+        - The scheduled start date of the task. Must be a unix timestamp. Must be
+          0 or greater.
+      - - scheduledEnd
+        - Int
+        - Optional
+        - The scheduled end date of the task. Must be a unix timestamp. Must be 0
+          or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd
+          must be greater than scheduledStart.
       - - requestName
         - string
         - Optional
@@ -4728,7 +4961,7 @@ endpoints:
       - - due
         - Int
         - Optional
-        - The time at which the task is due for completion. Must be aunixtimestamp.
+        - The time at which the task is due for completion. Must be a unix timestamp.
       - - type
         - Int
         - Optional
@@ -4742,32 +4975,42 @@ endpoints:
       - - asset
         - Int
         - Optional
-        - The asset that the task will be attached to, if any.Must be the unique ID
-          number of the asset.Omitting this parameter or setting it to zero will not
-          attach the task to any asset.
+        - The asset that the task will be attached to, if any. Must be the unique
+          ID number of the asset. Omitting this parameter or setting it to zero will
+          not attach the task to any asset.
       - - assignment
         - Int
         - Optional. Required if 'assignmentType' is used.
-        - The user or team to which the task will be assigned.Must be a user or team
+        - The user or team to which the task will be assigned. Must be a user or team
           that exists at the specified location. Must be the unique ID number of the
-          user orteam.If this parameter is set, the assignmentType parameter must
+          user or team. If this parameter is set, the assignmentType parameter must
           also be set.
       - - assignmentType
         - Enum
         - Optional. Required if 'assignment' is used.
-        - Specifies wether this task will be assigned to a 'user' , 'team' or `multi`.
-          Those two strings are the only acceptedinput.If this parameter is set, the
-          assignment parameter must also be set.
+        - Specifies whether this task will be assigned to a 'user', 'team' or 'multi'.
+          If this parameter is set, the assignment parameter must also be set.
       - - priority
         - Int
         - Optional
         - 'Specifies the priority of the task. Must be between 0 and 6 inclusive:
-          0 = lowest priority, 5 = highestpriority, 6 = "On Hold".'
+          0 = lowest priority, 5 = highest priority, 6 = "On Hold".'
       - - estimatedTime
         - Int
         - Optional
         - Updates the estimated time of the task. This is the time it takes to complete
           the task in minutes.
+      - - scheduledStart
+        - Int
+        - Optional
+        - The scheduled start date of the task. Must be a unix timestamp. Must be
+          0 or greater.
+      - - scheduledEnd
+        - Int
+        - Optional
+        - The scheduled end date of the task. Must be a unix timestamp. Must be 0
+          or greater. If both scheduledStart and scheduledEnd are provided, scheduledEnd
+          must be greater than scheduledStart.
       - - requestName
         - string
         - Optional
@@ -4807,8 +5050,8 @@ endpoints:
       - - geoLocation
         - geoJSON
         - Optional
-        - ThegeoJSONFeature object that can be used to locate a task on a Map. To
-          remove geoLocation from a Task pass an empty object ( {}).
+        - The geoJSON Feature object that can be used to locate a task on a Map. To
+          remove geoLocation from a Task pass an empty object ({}).
       - - statusID
         - int
         - Optional
@@ -5074,6 +5317,332 @@ endpoints:
       headers: []
       data_rows: []
       non_table_before: This request removes a Team from a User.
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.users.capacity:
+    is_folder: true
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: ''
+      non_table_after: ''
+  routes.users.capacity.exceptions:
+    is_folder: true
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: ''
+      non_table_after: ''
+  routes.users.capacity.exceptions.get_capacity_exceptions_by_user:
+    url: '{api_base_url}/users/capacity/exceptions/:userID'
+    method: GET
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Gets capacity exception records for a specific user.
+
+
+        `capacityMinutes` is the user''s available capacity **per day** for each date
+        in the exception range.
+
+
+        Query behavior:
+
+        - `locations` scopes by user location membership.
+
+        - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+
+        - `cursor`/`limit` paginate results.
+
+
+        Response fields include:
+
+        `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`,
+        `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.'
+      non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: locations
+      value: '1'
+      description: Required comma-separated location IDs used to scope the user access
+        context.
+      inferred_type: int
+      type: int
+    - key: startDate
+      value: '2026-01-01'
+      description: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+      inferred_type: str
+      type: str
+    - key: endDate
+      value: '2026-01-31'
+      description: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must
+        be >= startDate when both are present.
+      inferred_type: str
+      type: str
+    - key: cursor
+      value: '0'
+      description: Optional ID cursor for keyset pagination.
+      inferred_type: int
+      type: int
+    - key: limit
+      value: '100'
+      description: Optional max rows per page.
+      inferred_type: int
+      type: int
+  routes.users.capacity.exceptions.get_capacity_exceptions_by_location:
+    url: '{api_base_url}/users/capacity/exceptions'
+    method: GET
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Gets capacity exception records across users for the requested
+        locations.
+
+
+        `capacityMinutes` is the user''s available capacity **per day** for each date
+        in the exception range.
+
+
+        Query behavior:
+
+        - `locations` is required.
+
+        - `users` optionally narrows results to specific users.
+
+        - `startDate`/`endDate` filter by date overlap (YYYY-MM-DD).
+
+        - `cursor`/`limit` paginate results.
+
+
+        Response fields include:
+
+        `exceptionID`, `userID`, `createdByUserID`, `exceptionStartDate`, `exceptionEndDate`,
+        `capacityMinutes`, `hoursPerDay`, `minutesPerDay`, `exceptionTitle`, `exceptionNotes`.'
+      non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: locations
+      value: 1,3
+      description: Required comma-separated location IDs.
+      inferred_type: list[str]
+      type: list[str]
+    - key: users
+      value: 42,57
+      description: Optional comma-separated user IDs filter.
+      inferred_type: list[str]
+      type: list[str]
+    - key: startDate
+      value: '2026-01-01'
+      description: Optional lower date bound (YYYY-MM-DD) for overlap filtering.
+      inferred_type: str
+      type: str
+    - key: endDate
+      value: '2026-01-31'
+      description: Optional upper date bound (YYYY-MM-DD) for overlap filtering. Must
+        be >= startDate when both are present.
+      inferred_type: str
+      type: str
+    - key: cursor
+      value: '0'
+      description: Optional ID cursor for keyset pagination.
+      inferred_type: int
+      type: int
+    - key: limit
+      value: '100'
+      description: Optional max rows per page.
+      inferred_type: int
+      type: int
+  routes.users.capacity.exceptions.new_capacity_exception:
+    url: '{api_base_url}/users/capacity/exceptions/:userID'
+    method: POST
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: "Creates a capacity exception for a user.\n\n`capacityMinutes`\
+        \ means the user's available work capacity **per day** for each day in the\
+        \ exception date/range. It is **not** the total duration of the exception\
+        \ range.\n\nExamples:\n\n- `capacityMinutes: 0` => unavailable that day (or\
+        \ each day in the range).\n    \n- `capacityMinutes: 480` => 8 hours available\
+        \ per day.\n    \n\nYou can provide either:\n\n- `capacityMinutes` directly,\
+        \ or\n    \n- `hoursPerDay` + `minutesPerDay` (equivalent input)."
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.users.capacity.exceptions.delete_capacity_exception:
+    url: '{api_base_url}/users/capacity/exceptions/:userID/:exceptionID'
+    method: DELETE
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: Deletes a capacity exception for a user.
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.users.capacity.exceptions.update_capacity_exception:
+    url: '{api_base_url}/users/capacity/exceptions/:userID/:exceptionID'
+    method: PATCH
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: "This request updates an existing capacity exception and returns\
+        \ the updated resource.\n\n`capacityMinutes` means the user's available capacity\
+        \ **per day** for each day in the exception date/range. It is **not** the\
+        \ total duration of the exception range.\n\nExamples:\n- `capacityMinutes:\
+        \ 0` => unavailable that day (or each day in the range).\n- `capacityMinutes:\
+        \ 480` => 8 hours available per day.\n\nReturn data description\n\nProperty\t\
+        Description\nexceptionID\tUnique ID for the capacity exception record.\nuserID\t\
+        The user the exception applies to.\ncreatedByUserID\tThe user who created\
+        \ the exception.\nexceptionStartDate\tThe first date the exception applies\
+        \ (YYYY-MM-DD).\nexceptionEndDate\tThe last date the exception applies (YYYY-MM-DD).\
+        \ Null when the exception is only for one day.\ncapacityMinutes\tAllowed capacity\
+        \ in minutes **per day** for the exception date/range.\nhoursPerDay\tDerived\
+        \ whole-hour portion of capacityMinutes.\nminutesPerDay\tDerived minute remainder\
+        \ after hoursPerDay.\nexceptionTitle\tOptional short title for the exception.\n\
+        exceptionNotes\tOptional notes/details for the exception."
+      non_table_after: ''
+    is_folder: false
+    query_params: []
+  routes.users.capacity.schedules:
+    is_folder: true
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: ''
+      non_table_after: ''
+  routes.users.capacity.schedules.get_capacity_schedules:
+    url: '{api_base_url}/users/capacity/schedules'
+    method: GET
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Returns per-user daily capacity rows for a date range, including
+        applied precedence details.
+
+
+        Precedence order:
+
+        `exception > holiday > userSchedule > profileSchedule > default`.
+
+
+        Pagination:
+
+        - `cursor` is a zero-based offset.
+
+        - `limit` max is 100.
+
+
+        Date limits:
+
+        - `startDate` and `endDate` are required (YYYY-MM-DD).
+
+        - Date range cannot exceed 31 days.
+
+
+        Response notes:
+
+        - `range` now contains only `startDate` and `endDate`.
+
+        - `pagination` contains `cursor`, `limit`, `totalUsers`, and `nextCursor`.'
+      non_table_after: ''
+    is_folder: false
+    query_params:
+    - key: locations
+      value: 1,3
+      description: Required comma-separated location IDs to scope users.
+      inferred_type: list[str]
+      type: list[str]
+    - key: users
+      value: 42,57
+      description: Optional comma-separated user IDs filter.
+      inferred_type: list[str]
+      type: list[str]
+    - key: schedules
+      value: 101,201
+      description: Optional comma-separated schedule IDs to narrow results to specific
+        schedules.
+      inferred_type: list[str]
+      type: list[str]
+    - key: startDate
+      value: '2026-01-05'
+      description: Required start date (YYYY-MM-DD).
+      inferred_type: str
+      type: str
+    - key: endDate
+      value: '2026-01-07'
+      description: Required end date (YYYY-MM-DD), must be >= startDate and within
+        31 days.
+      inferred_type: str
+      type: str
+    - key: cursor
+      value: '0'
+      description: Optional zero-based user offset for pagination.
+      inferred_type: int
+      type: int
+    - key: limit
+      value: '100'
+      description: Optional page size (1-100).
+      inferred_type: int
+      type: int
+  routes.users.capacity.schedules.create_capacity_schedule:
+    url: '{api_base_url}/users/capacity/schedules'
+    method: POST
+    description_data:
+      headers: []
+      data_rows: []
+      non_table_before: 'Creates a capacity schedule for a user or a team profile.
+
+
+        You must provide exactly one of `userID` or `profileID` (not both).
+
+
+        **Required fields:**
+
+        - `scheduleName` — Name of the schedule (max 255 chars).
+
+        - `startDate` — Start date in YYYY-MM-DD format.
+
+        - `locationID` — The location this schedule applies to.
+
+        - One of `userID` or `profileID`.
+
+
+        **Optional fields:**
+
+        - `endDate` — End date (YYYY-MM-DD). Must be >= startDate. If omitted, the
+        schedule continues indefinitely.
+
+        - Day capacities (`mondayCapacity` through `sundayCapacity`) — Minutes per
+        day (0–1440).
+
+        - Day start/end times (`mondayStartTime` through `sundayEndTime`) — HH:MM
+        or HH:MM:SS format.
+
+        - `rotationPatternEnabled` — Enable rotation pattern (boolean).
+
+        - `rotationWeeksOn` / `rotationWeeksOff` — Required when rotation is enabled
+        (1–52).
+
+        - `scheduleNotes` — Free-text notes (max 2000 chars).
+
+        - `priority` — Priority ranking (0–1000). Default: 0.
+
+        - `isActive` — Whether the schedule is active (boolean). Default: true.
+
+
+        **Capacity defaults (when not provided):**
+
+        - Monday–Friday: **480 minutes (8 hours)**
+
+        - Saturday–Sunday: **0 minutes**
+
+
+        **Time defaults (when not provided):**
+
+        - All days: **08:00–16:00**
+
+
+        Returns `201` with the new `scheduleID` and a `Location` header.'
       non_table_after: ''
     is_folder: false
     query_params: []
