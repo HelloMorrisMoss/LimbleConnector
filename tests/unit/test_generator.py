@@ -2,7 +2,7 @@ import unittest
 import os
 import json
 import yaml
-from LimbleConnection._generate_classes_automatically.generator import Generator
+from LimbleConnection._generate_classes_automatically.generator import Generator, compute_final_type
 
 class TestGenerator(unittest.TestCase):
     def setUp(self):
@@ -204,6 +204,91 @@ class TestGenerator(unittest.TestCase):
         # Verify override is preserved
         self.assertEqual(param['override_type'], 'str')
         self.assertEqual(param['type'], 'str')  # Should use override, not inferred 'int'
+
+
+class TestTypePrecedence(unittest.TestCase):
+    """T007c-1: Test origin_type precedence and type merging logic (FR-018).
+
+    Tests the type precedence: override_type > origin_type > inferred_type
+    """
+
+    def test_compute_final_type_override_wins(self):
+        """Override type has highest priority."""
+        result = compute_final_type(
+            inferred='int',
+            origin='str',
+            override='bool'
+        )
+        self.assertEqual(result, 'bool')
+
+    def test_compute_final_type_origin_over_inferred(self):
+        """Origin type takes precedence over inferred when no override."""
+        result = compute_final_type(
+            inferred='int',
+            origin='str',
+            override=None
+        )
+        self.assertEqual(result, 'str')
+
+    def test_compute_final_type_inferred_fallback(self):
+        """Inferred type is used when no origin or override."""
+        result = compute_final_type(
+            inferred='int',
+            origin=None,
+            override=None
+        )
+        self.assertEqual(result, 'int')
+
+    def test_compute_final_type_empty_string_not_truthy(self):
+        """Empty strings should be treated as falsy (not set)."""
+        result = compute_final_type(
+            inferred='int',
+            origin='',
+            override=''
+        )
+        # Empty strings are falsy, should fall through to inferred
+        self.assertEqual(result, 'int')
+
+    def test_openapi_origin_type_precedence(self):
+        """Test that OpenAPI-derived origin_type takes precedence over Postman table type.
+
+        Simulates the scenario where:
+        - Postman table says a field is "string"
+        - OpenAPI schema says it's "integer"
+        - OpenAPI should win as the origin_type
+        """
+        # This test validates the documented precedence from FR-018:
+        # origin_type should use: OpenAPI schema type > Postman explicit table type
+
+        # Scenario: OpenAPI provides integer, Postman example infers string
+        openapi_origin = 'int'  # From OpenAPI schema
+        postman_inferred = 'str'  # From Postman example
+
+        final_type = compute_final_type(
+            inferred=postman_inferred,
+            origin=openapi_origin,
+            override=None
+        )
+
+        # OpenAPI origin_type should win
+        self.assertEqual(final_type, 'int')
+
+    def test_type_merging_with_all_sources(self):
+        """Test complete type merging scenario with multiple sources."""
+        # Scenario: All three type sources present
+        # - Postman example suggests: "10" → inferred as int
+        # - OpenAPI schema declares: string
+        # - User override: Sequence[int] (for comma-delimited IDs)
+
+        result = compute_final_type(
+            inferred='int',
+            origin='str',  # From OpenAPI
+            override='Sequence[int]'  # Manual configuration
+        )
+
+        # Override should win
+        self.assertEqual(result, 'Sequence[int]')
+
 
 if __name__ == '__main__':
     unittest.main()
