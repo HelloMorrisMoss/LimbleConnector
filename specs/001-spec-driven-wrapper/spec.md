@@ -4,6 +4,7 @@
 **Created**: 2026-02-27
 **Status**: Refined
 **Refined**: 2026-04-29 — Added FR-021 for registry access utilities
+**Refined**: 2026-04-30 — Enhanced FR-018 to use OpenAPI spec as supplemental source for origin_type
 **Input**: Refined prompt for Hybrid SDK implementation (Option C)
 
 ## User Scenarios & Testing *(mandatory)*
@@ -94,8 +95,9 @@ As an SDK user, I want my code to continue working without modification even whe
 - **FR-018: Type Inference System**: Both query_params and response fields MUST include a comprehensive type system with:
   - `type`: Final computed type derived from the preference order: override_type > origin_type > inferred_type
   - `inferred_type`: Type inferred from examples, patterns, and naming conventions
-  - `origin_type`: Explicit type declarations from the Postman collection (if available)
+  - `origin_type`: Explicit type declarations from upstream sources, with precedence: OpenAPI schema type > Postman explicit table type (when available)
   - `override_type`: Manual configuration value (initially empty, preserved on updates)
+  - The generator MUST use the Postman-generated OpenAPI spec (`20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml`) as a supplemental source for `origin_type` by extracting parameter/request/response schema types, following conservative type mapping (integer→int, string→str, array→list[T], object→dict[str, Any]/TypedDict candidate)
 - **FR-019: Override Preservation**: When the generator updates or creates registry entries, it MUST preserve existing override_type values.
 - **FR-020: Type Conflict Warnings**: The generator MUST emit warnings when updating registry entries if the newly generated inferred_type or origin_type differs from the existing values, allowing developers to review and confirm the changes or set override_type.
 - **FR-021: Registry Access Utilities**: The system MUST provide utilities for runtime access to the registry.yaml file, including `get_registry()` to return the parsed registry content and `get_registry_path()` to return the file path, enabling programs using the package to inspect available LimbleEndpoint properties at runtime.
