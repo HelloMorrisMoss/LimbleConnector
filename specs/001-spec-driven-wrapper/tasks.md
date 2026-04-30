@@ -49,7 +49,7 @@
 - [x] T007a [P] [US1] Add test for query parameter processing - verify all params are included but 'disabled' property itself is omitted (FR-016)
 - [x] T007b [P] [US1] Add test for response data extraction from Postman description tables (FR-017)
 - [x] T007c [P] [US1] Add test for override preservation and conflict warnings (FR-019, FR-020)
-- [ ] T008 [P] [US1] Create dynamic attachment tests in `tests/integration/test_dynamic_loading.py`
+- [x] T008 [P] [US1] Create dynamic attachment tests in `tests/integration/test_dynamic_loading.py`
 
 ### Implementation for User Story 1
 - [x] T009 [US1] Implement `TranslationEngine` in `LimbleConnection/_generate_classes_automatically/generator.py` to convert Postman JSON to `registry.yaml` (FR-001, FR-002)

@@ -237,5 +237,5 @@ class RegistryLoader:
         """Load and validate registry."""
         import yaml
         # Validation logic using schema_path would go here
-        with open(self.registry_path, 'r') as f:
+        with open(self.registry_path, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)

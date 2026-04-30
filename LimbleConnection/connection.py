@@ -1,15 +1,17 @@
 from __future__ import annotations
-from typing import Optional, Union, Any
+import os
+from typing import Any
 
-import requests
 import tzlocal
 import pandas as pd
 import pytz
 
 from LimbleConnection.util import logger, collapse_redundant_path_parts
-from LimbleConnection.endpoint import LimbleEndpoint, RegistryLoader
+from LimbleConnection.endpoint import LimbleEndpoint
 from LimbleConnection.curated.assets import AssetsCurated
-from LimbleConnection._documentation_placeholders import Users
+
+
+os  # protect from 'unused imports cleanup'; os needs to be patched for integration testing in this module
 
 api_cache_lifetime_seconds = 5
 
