@@ -16,6 +16,21 @@ except ImportError:
         sys.path.append(_root)
     from LimbleConnection.util import collapse_redundant_path_parts, logger
 
+# T009c-1: Import OpenAPI extraction utilities (FR-018)
+try:
+    from LimbleConnection._generate_classes_automatically.openapi_extract import (
+        load_openapi,
+        iter_operations,
+        extract_params,
+        extract_response_fields as extract_openapi_response_fields
+    )
+except ImportError:
+    # Fallback if module not available
+    load_openapi = None
+    iter_operations = None
+    extract_params = None
+    extract_openapi_response_fields = None
+
 def clean_bs4_text(soup_fragment):
     """Clean <p> and <b> tags and return text with preserved line breaks."""
     for tag in soup_fragment.find_all(['b', 'strong']):
@@ -157,8 +172,54 @@ def compute_final_type(inferred: str, origin: Optional[str], override: Optional[
 class TranslationEngine:
     """Translates Postman JSON to registry.yaml (FR-001, FR-002)."""
 
-    def __init__(self, postman_json_path: str):
+    def __init__(self, postman_json_path: str, openapi_spec_path: Optional[str] = None):
         self.postman_json_path = postman_json_path
+        self.openapi_spec_path = openapi_spec_path
+        self.openapi_operations = {}  # Maps (method, normalized_path) -> operation data
+
+        # T009c-1: Load OpenAPI spec if provided (FR-018)
+        if openapi_spec_path:
+            self._load_openapi_spec()
+
+    def _load_openapi_spec(self):
+        """Load OpenAPI spec and build operation lookup (T009c-1, FR-018)."""
+        if not load_openapi or not iter_operations:
+            logger.warning("OpenAPI extraction utilities not available - skipping OpenAPI type integration")
+            return
+
+        try:
+            openapi = load_openapi(self.openapi_spec_path)
+
+            # Build a lookup: (method, normalized_path) -> operation
+            for operation in iter_operations(openapi):
+                key = (operation['method'], operation['normalized_path'])
+                self.openapi_operations[key] = operation
+
+            logger.info(f"Loaded {len(self.openapi_operations)} OpenAPI operations for type enrichment")
+        except Exception as e:
+            logger.warning(f"Failed to load OpenAPI spec from {self.openapi_spec_path}: {e}")
+
+    def _normalize_url_for_openapi(self, url: str) -> str:
+        """Normalize a registry URL to match OpenAPI normalized paths (T009c-1, FR-018).
+
+        Converts:
+        - {api_base_url}/assets/:assetID -> /assets/{assetid}
+        - {api_base_url}/tasks -> /tasks
+        """
+        # Strip the {api_base_url} placeholder
+        path = url.replace('{api_base_url}', '')
+
+        # Convert :param to {param} style
+        path = re.sub(r':(\w+)', r'{\1}', path)
+
+        # Lowercase parameter names to match OpenAPI normalization
+        path = re.sub(r'\{([^}]+)\}', lambda m: '{' + m.group(1).lower() + '}', path)
+
+        # Ensure it starts with /
+        if not path.startswith('/'):
+            path = '/' + path
+
+        return path
 
     def translate(self) -> Dict[str, Any]:
         """Convert Postman collection to an internal registry format."""
@@ -233,16 +294,21 @@ class TranslationEngine:
                     url = url.replace('/assets/1', '/assets/:assetID')
                     query_params_raw = []
 
+                # Get HTTP method
+                method = request.get('method', 'GET')
+
                 # T009a: Process query parameters - omit 'disabled' property (FR-016)
-                query_params = self._process_query_params(query_params_raw)
+                # T009c-1: Pass method and url for OpenAPI lookup (FR-018)
+                query_params = self._process_query_params(query_params_raw, method, url)
 
                 # T009b: Extract response fields from description tables (FR-017)
-                response_fields = self._extract_response_fields(request_description_data)
+                # T009c-1: Pass method and url for OpenAPI lookup (FR-018)
+                response_fields = self._extract_response_fields(request_description_data, method, url)
 
                 # Build endpoint entry
                 endpoint_data = {
                     'url': url,
-                    'method': request.get('method', 'GET'),
+                    'method': method,
                     'description_data': request_description_data,
                     'is_folder': False,
                     'query_params': query_params
@@ -257,7 +323,7 @@ class TranslationEngine:
 
                 endpoints[endpoint_key] = endpoint_data
 
-    def _process_query_params(self, raw_params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _process_query_params(self, raw_params: List[Dict[str, Any]], method: str, url: str) -> List[Dict[str, Any]]:
         """Process query parameters, omitting 'disabled' property but keeping the param (FR-016, FR-018).
 
         Note: 'disabled' in Postman means the parameter isn't sent in the example request by default,
@@ -266,6 +332,21 @@ class TranslationEngine:
         """
         processed = []
 
+        # T009c-1: Get OpenAPI operation for type enrichment (FR-018)
+        normalized_url = self._normalize_url_for_openapi(url)
+        openapi_op = self.openapi_operations.get((method, normalized_url))
+        openapi_params_by_name = {}
+
+        if openapi_op and extract_params:
+            try:
+                openapi_params = extract_params(openapi_op)
+                # Build lookup by parameter name for query params only
+                openapi_params_by_name = {
+                    p['name']: p for p in openapi_params if p.get('in') == 'query'
+                }
+            except Exception as e:
+                logger.warning(f"Failed to extract OpenAPI params for {method} {normalized_url}: {e}")
+
         for param in raw_params:
             key = param.get('key', '')
             value = param.get('value', '')
@@ -273,7 +354,16 @@ class TranslationEngine:
 
             # T009c: Infer types (FR-018)
             inferred_type = infer_type_from_value(value) if value else infer_type_from_name(key)
-            origin_type = param.get('type')  # Explicit type from Postman (rare)
+
+            # T009c-1: Get origin_type with OpenAPI precedence (FR-018)
+            # Precedence: OpenAPI schema type > Postman explicit table type
+            origin_type = None
+            if key in openapi_params_by_name:
+                origin_type = openapi_params_by_name[key].get('origin_type')
+
+            # Fallback to Postman explicit type if OpenAPI didn't provide one
+            if not origin_type:
+                origin_type = param.get('type')  # Explicit type from Postman (rare)
 
             processed_param = {
                 'key': key,
@@ -294,7 +384,7 @@ class TranslationEngine:
 
         return processed
 
-    def _extract_response_fields(self, description_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    def _extract_response_fields(self, description_data: Dict[str, Any], method: str, url: str) -> Dict[str, Dict[str, Any]]:
         """Extract response fields from description tables (FR-017, FR-018)."""
         if not description_data:
             return {}
@@ -322,6 +412,17 @@ class TranslationEngine:
         if prop_idx is None or desc_idx is None:
             return {}
 
+        # T009c-1: Get OpenAPI operation for type enrichment (FR-018)
+        normalized_url = self._normalize_url_for_openapi(url)
+        openapi_op = self.openapi_operations.get((method, normalized_url))
+        openapi_fields_by_name = {}
+
+        if openapi_op and extract_openapi_response_fields:
+            try:
+                openapi_fields_by_name = extract_openapi_response_fields(openapi_op)
+            except Exception as e:
+                logger.warning(f"Failed to extract OpenAPI response fields for {method} {normalized_url}: {e}")
+
         fields = {}
         for row in rows:
             if len(row) <= max(prop_idx, desc_idx):
@@ -333,8 +434,15 @@ class TranslationEngine:
             if not field_name:
                 continue
 
-            # Get origin type if available
-            origin_type = row[type_idx].strip() if type_idx is not None and len(row) > type_idx else None
+            # T009c-1: Get origin_type with OpenAPI precedence (FR-018)
+            # Precedence: OpenAPI schema type > Postman explicit table type
+            origin_type = None
+            if field_name in openapi_fields_by_name:
+                origin_type = openapi_fields_by_name[field_name].get('origin_type')
+
+            # Fallback to Postman table type if OpenAPI didn't provide one
+            if not origin_type:
+                origin_type = row[type_idx].strip() if type_idx is not None and len(row) > type_idx else None
 
             # Infer type
             inferred_type = infer_type_from_name(field_name)
@@ -353,8 +461,8 @@ class TranslationEngine:
 class Generator:
     """Generates registry.yaml and .pyi stubs (FR-007, FR-013, FR-019, FR-020)."""
 
-    def __init__(self, postman_json_path: str, output_registry_path: str, output_stubs_path: str):
-        self.engine = TranslationEngine(postman_json_path)
+    def __init__(self, postman_json_path: str, output_registry_path: str, output_stubs_path: str, openapi_spec_path: Optional[str] = None):
+        self.engine = TranslationEngine(postman_json_path, openapi_spec_path)
         self.output_registry_path = output_registry_path
         self.output_stubs_path = output_stubs_path
 
@@ -651,9 +759,15 @@ if __name__ == "__main__":
     postman_path = os.path.join(os.path.dirname(base_dir), 'Limble API V2.postman_collection.json')
     registry_path = os.path.join(base_dir, 'registry.yaml')
     stubs_path = os.path.join(base_dir, 'connection.pyi')
-    
+
+    # T009c-1: Check for OpenAPI spec (FR-018)
+    openapi_path = os.path.join(os.path.dirname(base_dir), '20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml')
+    if not os.path.exists(openapi_path):
+        openapi_path = None
+        print("Note: OpenAPI spec not found - proceeding without OpenAPI type enrichment")
+
     if os.path.exists(postman_path):
-        gen = Generator(postman_path, registry_path, stubs_path)
+        gen = Generator(postman_path, registry_path, stubs_path, openapi_path)
         gen.run()
         print(f"Generated {registry_path} and {stubs_path}")
     else:
