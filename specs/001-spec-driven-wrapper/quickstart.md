@@ -45,9 +45,24 @@ for asset in assets:
 When Limble releases a new API version or endpoint in Postman:
 
 1. Update the `Limble API V2.postman_collection.json`.
-2. Run the generator:
+2. (Optional) Update the `20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml` for enhanced type information.
+3. Run the generator:
    ```bash
    python -m LimbleConnection._generate_classes_automatically.generator
    ```
-3. The `registry.yaml` and `.pyi` stubs will be updated.
-4. The new endpoint is immediately available in the SDK with full typing.
+4. The `registry.yaml` and `.pyi` stubs will be updated.
+5. The new endpoint is immediately available in the SDK with full typing.
+
+### Type Information Sources (FR-018)
+
+The generator uses multiple sources to infer accurate Python types for parameters and response fields:
+
+- **OpenAPI spec** (if available): Provides machine-readable schema types (integer→int, string→str, etc.)
+- **Postman collection**: Provides explicit type declarations from description tables
+- **Pattern inference**: Infers types from parameter names and example values
+- **Manual overrides**: Preserves human-curated type corrections in `registry.yaml`
+
+**Type precedence**: `override_type > origin_type (OpenAPI > Postman) > inferred_type`
+
+The OpenAPI spec is automatically used if present at:
+`20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml`
