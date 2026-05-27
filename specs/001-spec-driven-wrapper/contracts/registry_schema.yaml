@@ -73,13 +73,20 @@ definitions:
         description: Parameter description from Postman
       type:
         type: string
-        description: Final computed type (override_type > origin_type > inferred_type)
+        description: Final computed type (override_type > origin_type > observed_type > inferred_type)
       inferred_type:
         type: string
         description: Type inferred from examples and patterns
       origin_type:
         type: string
-        description: Explicit type from Postman collection (if available)
+        description: Explicit type from Postman collection or OpenAPI spec (if available)
+      observed_type:
+        type: string
+        description: >-
+          Type observed from live API responses by the semi-automated testing utility
+          (FR-022). Uses `Optional[X]` notation when a sampled value is null/None.
+          Empty until the parameter has been exercised against the live API. Preserved
+          across registry regeneration.
       override_type:
         type: string
         description: Manual configuration override (empty initially, preserved on updates)
@@ -111,6 +118,15 @@ definitions:
         type: string
         enum: [dict, list, dataframe]
         description: The container type for the response
+      empty_response_shape:
+        type: string
+        description: >-
+          Documents what the response envelope looks like when it carries no data
+          (FR-023). Examples: `null`, `[]`, `{}`, `{"data": [], "meta": {...}}`.
+          Captured opportunistically by the semi-automated testing utility when an
+          empty response is naturally observed; never synthesized. Absent for
+          endpoints where an empty response is impossible (e.g., single-record
+          GET by ID). Preserved across registry regeneration.
 
   ResponseField:
     type: object
@@ -122,13 +138,20 @@ definitions:
         description: Field description from Postman
       type:
         type: string
-        description: Final computed type (override_type > origin_type > inferred_type)
+        description: Final computed type (override_type > origin_type > observed_type > inferred_type)
       inferred_type:
         type: string
         description: Type inferred from examples and patterns
       origin_type:
         type: string
-        description: Explicit type from Postman collection (if available)
+        description: Explicit type from Postman collection or OpenAPI spec (if available)
+      observed_type:
+        type: string
+        description: >-
+          Type observed from live API responses by the semi-automated testing utility
+          (FR-022). Uses `Optional[X]` notation when a sampled value is null/None for
+          a per-field nullability case. Empty until the field has been exercised
+          against the live API. Preserved across registry regeneration.
       override_type:
         type: string
         description: Manual configuration override (empty initially, preserved on updates)
