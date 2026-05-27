@@ -1,3 +1,5 @@
+> ⚠️ **STALE**: spec.md was refined on 2026-05-27 — added US4 and FR-022 for live registry type reconciliation in `tests/semiautomated/attended_preliminary_testing.py` (with `flag-and-prompt` and `flag-and-skip` modes); extended FR-018 type system with `observed_type` (using `Optional[X]` for nullable fields) and revised precedence `override_type > origin_type > observed_type > inferred_type`; classified discrepancies into documentation drift / nullability / non-representative sample / prior-observation conflict / other; added FR-023 for opportunistic endpoint-level empty-response-shape capture. The registry schema contract (`contracts/registry_schema.yaml`) must also be updated (new `observed_type` field on QueryParameter/ResponseField, new `empty_response_shape` field on ResponseMapping). Run `/speckit.refine.propagate` to update this plan.
+
 # Tasks: LimbleConnector Spec-Driven Wrapper (Hybrid Option C)
 
 **Input**: Design documents from `/specs/001-spec-driven-wrapper/`

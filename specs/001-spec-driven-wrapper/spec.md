@@ -5,6 +5,7 @@
 **Status**: Refined
 **Refined**: 2026-04-29 — Added FR-021 for registry access utilities
 **Refined**: 2026-04-30 — Enhanced FR-018 to use OpenAPI spec as supplemental source for origin_type
+**Refined**: 2026-05-27 — Added US4 and FR-022 for live registry type reconciliation via `attended_preliminary_testing.py`; extended FR-018 type system with `observed_type` field (with `Optional[X]` nullability convention) and revised precedence `override_type > origin_type > observed_type > inferred_type`; added `flag-and-prompt` / `flag-and-skip` reconciliation modes and split per-field nullability from whole-response non-representative samples; added FR-023 for opportunistic empty-response-shape capture at the endpoint level
 **Input**: Refined prompt for Hybrid SDK implementation (Option C)
 
 ## User Scenarios & Testing *(mandatory)*
@@ -51,6 +52,26 @@ As an SDK user, I want my code to continue working without modification even whe
 
 1. **Given** Limble renames a field in an upstream response, **When** I update the mapping/adapter logic in the internal spec, **Then** the SDK's public return types MUST remain unchanged.
 
+---
+
+### User Story 4 - Registry Type Reconciliation from Live Testing (Priority: P4)
+
+As an SDK maintainer, I want the attended preliminary testing utility to optionally compare registry endpoint types against the types observed in live API responses and update the registry when they disagree, so that the registry's type information stays aligned with actual upstream behavior without manual reconciliation.
+
+**Why this priority**: Keeps the registry's `inferred_type` and `origin_type` values accurate over time, directly supporting SC-004 (schema drift detection) and reducing the manual effort of reviewing FR-020 type conflict warnings. Lower priority than the core generic/curated layers because it is a maintainer workflow, not an end-user-visible feature.
+
+**Independent Test**: Can be tested by deliberately seeding a registry entry with a wrong `inferred_type` or `origin_type`, running the testing utility with the type-update option enabled against a live endpoint, and verifying that the discrepancy is reported and the registry entry is updated (while any `override_type` is preserved).
+
+**Acceptance Scenarios**:
+
+1. **Given** a registry entry whose response field or query parameter type disagrees with the type observed in a live API response, **When** I run `attended_preliminary_testing.py` with the type-update option enabled in **`flag-and-prompt`** mode, **Then** the utility MUST classify the discrepancy (documentation drift / nullability / non-representative sample / prior-observation conflict / other), report it in a scannable form, and prompt for confirmation before writing `observed_type` to the registry.
+2. **Given** the same conditions but **`flag-and-skip`** mode is selected, **When** the run completes, **Then** the utility MUST log each classified discrepancy without prompting and without writing to the registry, so the maintainer can review the log afterward.
+3. **Given** a registry entry with a non-empty `override_type`, **When** a type discrepancy is detected for that field in either mode, **Then** the utility MUST NOT overwrite `override_type`; only `observed_type` may be updated by this path (preserving FR-019).
+4. **Given** a live response where a record is fully populated but one of its fields is `null` (e.g., `address: None` in a `locations` record), **When** the utility records the observation, **Then** the observed_type MUST be `Optional[<type>]` and the discrepancy (if any) MUST be classified as **nullability**, NOT as non-representative sample.
+5. **Given** the live response's whole envelope is empty (e.g., `[]`, `{}`, top-level `null`), **When** the utility records the observation, **Then** the discrepancy MUST be flagged as a **non-representative sample** with an explanation of why the observed_type may not be trustworthy, and (if FR-023 capture applies) the empty-response shape MUST be recorded against the endpoint.
+6. **Given** a previously stored `observed_type` exists for a field, **When** a new run produces a different observed_type, **Then** the utility MUST flag this as a **prior-observation conflict** so the maintainer can decide whether to accept the new value, keep the old, or escalate to an `override_type`.
+7. **Given** the type-update option is not enabled, **When** I run the testing utility, **Then** its behavior MUST be unchanged from before this refinement (live testing only, no registry writes).
+
 ### Edge Cases
 
 - **Handling Unknown Response Shapes**: For endpoints without a defined response schema in Postman, the generator will default to a generic `dict[str, Any]` to ensure all endpoints are accessible (SC-001) while emitting a warning for further documentation.
@@ -93,14 +114,43 @@ As an SDK user, I want my code to continue working without modification even whe
 - **FR-016: Query Parameter Processing**: The generator MUST include all documented API query parameters in the registry with relevant metadata (key, value, description, type information), omitting the 'disabled' property as it is Postman UI state-specific (indicating whether the parameter is sent in example requests).
 - **FR-017: Response Data Extraction**: The generator MUST parse tabular 'return data' and 'response data' sections from Postman endpoint descriptions and populate the ResponseMapping fields in the registry with field names, descriptions, and type information.
 - **FR-018: Type Inference System**: Both query_params and response fields MUST include a comprehensive type system with:
-  - `type`: Final computed type derived from the preference order: override_type > origin_type > inferred_type
+  - `type`: Final computed type derived from the preference order: **override_type > origin_type > observed_type > inferred_type**
   - `inferred_type`: Type inferred from examples, patterns, and naming conventions
   - `origin_type`: Explicit type declarations from upstream sources, with precedence: OpenAPI schema type > Postman explicit table type (when available)
+  - `observed_type`: Type recorded from live API responses by tooling such as `attended_preliminary_testing.py` (see FR-022). Empirical, may be absent until the field has been exercised against the live API. Initially empty; preserved on registry regeneration unless explicitly updated by reconciliation tooling. When a sampled field value is `null`/`None`, the observed_type MUST be recorded using `Optional[X]` notation (e.g., `Optional[str]`) where `X` is the non-null type derived from prior samples or, if no non-null sample exists yet, the inferred_type. The downstream consumers treat the type field as an opaque string, so `Optional[...]` is preserved without further parsing.
   - `override_type`: Manual configuration value (initially empty, preserved on updates)
+  - Documentation is treated as canonical in the precedence (origin above observed) so that one-off live samples (nulls, empty containers, edge cases) do not silently displace declared types. Disagreement between `observed_type` and `origin_type` MUST surface via FR-020-style warnings rather than being silently buried by the precedence rule.
   - The generator MUST use the Postman-generated OpenAPI spec (`20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml`) as a supplemental source for `origin_type` by extracting parameter/request/response schema types, following conservative type mapping (integer→int, string→str, array→list[T], object→dict[str, Any]/TypedDict candidate)
 - **FR-019: Override Preservation**: When the generator updates or creates registry entries, it MUST preserve existing override_type values.
 - **FR-020: Type Conflict Warnings**: The generator MUST emit warnings when updating registry entries if the newly generated inferred_type or origin_type differs from the existing values, allowing developers to review and confirm the changes or set override_type.
 - **FR-021: Registry Access Utilities**: The system MUST provide utilities for runtime access to the registry.yaml file, including `get_registry()` to return the parsed registry content and `get_registry_path()` to return the file path, enabling programs using the package to inspect available LimbleEndpoint properties at runtime.
+- **FR-022: Live Registry Type Reconciliation**: The semi-automated testing utility `tests/semiautomated/attended_preliminary_testing.py` MUST support an opt-in mode (off by default) that records the types observed in live API responses (for both response fields and query parameters exercised during testing) into the registry's `observed_type` field (FR-018), and reconciles them against the other registry type fields. When a discrepancy is detected, the utility MUST:
+  - Classify the discrepancy by *kind* (see below) and report the endpoint, field name, conflicting type values, and kind to the maintainer.
+  - Honor the configured reconciliation mode (see below) when deciding whether to write to the registry.
+  - When a write occurs, update only `observed_type`; `override_type` MUST be preserved per FR-019. Updates to `inferred_type` or `origin_type` MUST NOT occur through this path (those have their own upstream sources).
+  - Emit warnings consistent with FR-020 for each detected conflict.
+
+  **Reconciliation modes** (selected per run; default is `flag-and-prompt`):
+  - **`flag-and-prompt`** — full attended review. For every discrepancy the maintainer is prompted before any registry write. Optimizes for correctness.
+  - **`flag-and-skip`** — autonomy/throughput. Discrepancies are logged with their kind but no registry write occurs and no prompt is shown; the maintainer reviews the run log afterward. Useful for sweeping many endpoints quickly to surface where attention is needed.
+
+  **Discrepancy kinds** — discrepancies MUST be classified into at least the following so the maintainer can quickly judge whether action is needed:
+  - **documentation drift** — `observed_type` disagrees with the upstream-declared `origin_type`.
+  - **nullability** — a sampled field value was `null`/`None`, producing an `Optional[X]` observed_type that disagrees with a non-Optional `origin_type` or `inferred_type`. Distinct from "non-representative sample": the record itself is fully populated, the field is simply nullable.
+  - **non-representative sample** — the **whole response envelope** is empty or a sentinel (e.g., `[]`, `{}`, top-level `null`), so the underlying field types cannot be reliably inferred from this observation; the warning MUST indicate *why* the sample is suspect. Per-field `None` values inside an otherwise populated record do NOT qualify (those are `nullability`).
+  - **prior-observation conflict** — the newly observed_type differs from a previously stored `observed_type` for the same field.
+  - **other** — any other detected mismatch or gotcha not covered above.
+
+  Suspicion flagging is a maintainer concern; the registry's stored values and the end-user-facing computed `type` (FR-018) MUST NOT expose discrepancy-kind metadata. End users see only the resolved type; they should not have to inspect the registry to detect suspicious entries.
+
+  Output MUST be optimized for scannability so that signals are not lost during an already tedious attended-testing workflow; concrete display format (grouping, ordering, color, batching) is deferred to the plan/research phase but MUST avoid wall-of-text presentation.
+
+  The default (option-disabled) behavior MUST remain identical to the existing live-testing flow with no registry writes.
+- **FR-023: Empty-Response Shape Documentation**: The registry MUST be able to record, per endpoint, the **shape of the response envelope when it carries no data** — e.g., whether an empty result arrives as `null`, `[]`, `{}`, or as a populated envelope like `{"data": [], "meta": {...}}`. This information lives at the `ResponseMapping` (endpoint) level, not per-field, and exists to help end users write correct guard conditions (`if response:` vs `if response.get("data"):` etc.) without trial-and-error.
+  - The field MAY be absent for endpoints where an empty response is impossible (e.g., single-record `GET by ID`, which returns 404 instead).
+  - Capture is opportunistic: the live-testing utility (FR-022) MUST record the empty-response shape **when it naturally observes one** during testing, but MUST NOT block, retry, or attempt to synthesize empty responses to populate the field. Endpoints whose tests never produce an empty result leave the field empty.
+  - Once recorded, the value is preserved across registry regeneration in the same manner as `override_type` (FR-019); a maintainer-prompt path analogous to FR-022 MAY apply when a new observation conflicts with a stored one.
+  - The recorded shape is for end-user-facing documentation/typing decisions; format (literal value, schema fragment, or summary string) is deferred to the plan/research phase.
 
 ### Key Entities
 
