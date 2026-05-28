@@ -207,9 +207,9 @@ class TestGenerator(unittest.TestCase):
 
 
 class TestTypePrecedence(unittest.TestCase):
-    """T007c-1: Test origin_type precedence and type merging logic (FR-018).
+    """T007c-1 / T009c-2: Test type precedence and merging logic (FR-018).
 
-    Tests the type precedence: override_type > origin_type > inferred_type
+    Precedence: override_type > origin_type > observed_type > inferred_type
     """
 
     def test_compute_final_type_override_wins(self):
@@ -217,24 +217,37 @@ class TestTypePrecedence(unittest.TestCase):
         result = compute_final_type(
             inferred='int',
             origin='str',
+            observed='float',
             override='bool'
         )
         self.assertEqual(result, 'bool')
 
-    def test_compute_final_type_origin_over_inferred(self):
-        """Origin type takes precedence over inferred when no override."""
+    def test_compute_final_type_origin_over_observed(self):
+        """Origin type takes precedence over observed when no override (FR-018)."""
         result = compute_final_type(
             inferred='int',
             origin='str',
+            observed='Optional[str]',
             override=None
         )
         self.assertEqual(result, 'str')
 
-    def test_compute_final_type_inferred_fallback(self):
-        """Inferred type is used when no origin or override."""
+    def test_compute_final_type_observed_over_inferred(self):
+        """Observed type wins over inferred when origin/override absent (FR-018, FR-022)."""
         result = compute_final_type(
             inferred='int',
             origin=None,
+            observed='Optional[str]',
+            override=None
+        )
+        self.assertEqual(result, 'Optional[str]')
+
+    def test_compute_final_type_inferred_fallback(self):
+        """Inferred type is used when no origin, observed, or override."""
+        result = compute_final_type(
+            inferred='int',
+            origin=None,
+            observed=None,
             override=None
         )
         self.assertEqual(result, 'int')
@@ -244,6 +257,7 @@ class TestTypePrecedence(unittest.TestCase):
         result = compute_final_type(
             inferred='int',
             origin='',
+            observed='',
             override=''
         )
         # Empty strings are falsy, should fall through to inferred
@@ -267,6 +281,7 @@ class TestTypePrecedence(unittest.TestCase):
         final_type = compute_final_type(
             inferred=postman_inferred,
             origin=openapi_origin,
+            observed=None,
             override=None
         )
 
@@ -274,15 +289,16 @@ class TestTypePrecedence(unittest.TestCase):
         self.assertEqual(final_type, 'int')
 
     def test_type_merging_with_all_sources(self):
-        """Test complete type merging scenario with multiple sources."""
-        # Scenario: All three type sources present
+        """Test complete type merging scenario with all four sources present."""
         # - Postman example suggests: "10" → inferred as int
         # - OpenAPI schema declares: string
+        # - Live observation: Optional[str]
         # - User override: Sequence[int] (for comma-delimited IDs)
 
         result = compute_final_type(
             inferred='int',
             origin='str',  # From OpenAPI
+            observed='Optional[str]',  # From live testing
             override='Sequence[int]'  # Manual configuration
         )
 

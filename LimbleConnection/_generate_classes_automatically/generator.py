@@ -161,12 +161,14 @@ def infer_type_from_name(name: str) -> str:
 
     return "str"
 
-def compute_final_type(inferred: str, origin: Optional[str], override: Optional[str]) -> str:
-    """Compute final type using preference order: override > origin > inferred (FR-018)."""
+def compute_final_type(inferred: str, origin: Optional[str], observed: Optional[str], override: Optional[str]) -> str:
+    """Compute the final type using preference order: override > origin > observed > inferred (FR-018)."""
     if override:
         return override
     if origin:
         return origin
+    if observed:
+        return observed
     return inferred
 
 class TranslationEngine:
@@ -370,7 +372,7 @@ class TranslationEngine:
                 'value': value,
                 'description': description,
                 'inferred_type': inferred_type,
-                'type': compute_final_type(inferred_type, origin_type, None)
+                'type': compute_final_type(inferred_type, origin_type, None, None)
             }
 
             # Include origin_type if it exists
@@ -450,7 +452,7 @@ class TranslationEngine:
             fields[field_name] = {
                 'description': field_desc,
                 'inferred_type': inferred_type,
-                'type': compute_final_type(inferred_type, origin_type, None)
+                'type': compute_final_type(inferred_type, origin_type, None, None)
             }
 
             if origin_type:
@@ -535,6 +537,11 @@ class Generator:
                     merged['endpoints'][endpoint_key]['response'] = {}
                 merged['endpoints'][endpoint_key]['response']['fields'] = merged_fields
 
+                # Preserve empty_response_shape captured by the live testing utility (FR-023)
+                existing_shape = existing_data.get('response', {}).get('empty_response_shape')
+                if existing_shape and 'empty_response_shape' not in merged['endpoints'][endpoint_key]['response']:
+                    merged['endpoints'][endpoint_key]['response']['empty_response_shape'] = existing_shape
+
         return merged
 
     def _merge_params(self, existing_params: List[Dict[str, Any]], new_params: List[Dict[str, Any]],
@@ -561,17 +568,23 @@ class Generator:
             merged_param = new_param.copy()
 
             # Preserve override_type if it exists (FR-019)
-            if 'override_type' in existing_param and existing_param['override_type']:
+            if existing_param.get('override_type'):
                 merged_param['override_type'] = existing_param['override_type']
-                # Recalculate final type with override
-                merged_param['type'] = compute_final_type(
-                    merged_param.get('inferred_type', 'str'),
-                    merged_param.get('origin_type'),
-                    merged_param['override_type']
-                )
 
-            # Emit warning if generated values differ (FR-020)
-            if 'override_type' in existing_param and existing_param['override_type']:
+            # Preserve observed_type if it exists (FR-019, FR-022)
+            if existing_param.get('observed_type'):
+                merged_param['observed_type'] = existing_param['observed_type']
+
+            # Recalculate final type with full precedence
+            merged_param['type'] = compute_final_type(
+                merged_param.get('inferred_type', 'str'),
+                merged_param.get('origin_type'),
+                merged_param.get('observed_type'),
+                merged_param.get('override_type')
+            )
+
+            # Emit warning if generated inferred type changed under an override (FR-020)
+            if existing_param.get('override_type'):
                 new_inferred = new_param.get('inferred_type', 'str')
                 old_inferred = existing_param.get('inferred_type', 'str')
 
@@ -580,6 +593,16 @@ class Generator:
                         f"Type inference changed for {endpoint_key}.{param_type}[{key}]: "
                         f"{old_inferred} -> {new_inferred}. Override is set to {existing_param['override_type']}"
                     )
+
+            # Emit warning when observed_type disagrees with newly computed origin_type (FR-018, FR-020)
+            observed = merged_param.get('observed_type')
+            origin = merged_param.get('origin_type')
+            if observed and origin and observed != origin:
+                logger.warning(
+                    f"Observed/origin type disagreement for {endpoint_key}.{param_type}[{key}]: "
+                    f"origin_type={origin}, observed_type={observed}. "
+                    f"Precedence resolves to origin_type; set override_type to choose the other."
+                )
 
             merged.append(merged_param)
 
@@ -600,17 +623,23 @@ class Generator:
             merged_field = new_field.copy()
 
             # Preserve override_type if it exists (FR-019)
-            if 'override_type' in existing_field and existing_field['override_type']:
+            if existing_field.get('override_type'):
                 merged_field['override_type'] = existing_field['override_type']
-                # Recalculate final type with override
-                merged_field['type'] = compute_final_type(
-                    merged_field.get('inferred_type', 'str'),
-                    merged_field.get('origin_type'),
-                    merged_field['override_type']
-                )
 
-            # Emit warning if generated values differ (FR-020)
-            if 'override_type' in existing_field and existing_field['override_type']:
+            # Preserve observed_type if it exists (FR-019, FR-022)
+            if existing_field.get('observed_type'):
+                merged_field['observed_type'] = existing_field['observed_type']
+
+            # Recalculate final type with full precedence
+            merged_field['type'] = compute_final_type(
+                merged_field.get('inferred_type', 'str'),
+                merged_field.get('origin_type'),
+                merged_field.get('observed_type'),
+                merged_field.get('override_type')
+            )
+
+            # Emit warning if generated inferred type changed under an override (FR-020)
+            if existing_field.get('override_type'):
                 new_inferred = new_field.get('inferred_type', 'str')
                 old_inferred = existing_field.get('inferred_type', 'str')
 
@@ -619,6 +648,16 @@ class Generator:
                         f"Type inference changed for {endpoint_key}.response.{field_name}: "
                         f"{old_inferred} -> {new_inferred}. Override is set to {existing_field['override_type']}"
                     )
+
+            # Emit warning when observed_type disagrees with newly computed origin_type (FR-018, FR-020)
+            observed = merged_field.get('observed_type')
+            origin = merged_field.get('origin_type')
+            if observed and origin and observed != origin:
+                logger.warning(
+                    f"Observed/origin type disagreement for {endpoint_key}.response.{field_name}: "
+                    f"origin_type={origin}, observed_type={observed}. "
+                    f"Precedence resolves to origin_type; set override_type to choose the other."
+                )
 
             merged[field_name] = merged_field
 

@@ -36,7 +36,7 @@
 - [x] T005 Implement `Paginator` interface and `AutoPagination` logic in `LimbleConnection/endpoint.py` (FR-011, FR-014)
 - [x] T006 Implement `RegistryLoader` to load and validate `registry.yaml` against `specs/001-spec-driven-wrapper/contracts/registry_schema.yaml`
 - [x] T006a [P] [US4] Update `contracts/registry_schema.yaml` to add `observed_type` to `QueryParameter` and `ResponseField`, and `empty_response_shape` to `ResponseMapping` (FR-018, FR-022, FR-023) — *completed during refinement propagation 2026-05-27*
-- [ ] T006b [P] [US4] Verify `RegistryLoader` and existing registry validation pass with the new optional fields and continue to accept registry entries that omit them (FR-018, FR-022, FR-023) (depends on T006a)
+- [x] T006b [P] [US4] Verify `RegistryLoader` and existing registry validation pass with the new optional fields and continue to accept registry entries that omit them (FR-018, FR-022, FR-023) (depends on T006a) — *verified: RegistryLoader is a thin YAML loader; full test suite (62 tests) passes*
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -64,9 +64,9 @@
 - [x] T009b-1 [P] [US1] Implement OpenAPI extraction utilities in `LimbleConnection/_generate_classes_automatically/openapi_extract.py` - provide functions: `load_openapi()`, `iter_operations()`, `schema_to_python_type()`, `extract_params()`, `extract_request_body_fields()`, `extract_response_fields()` as documented in `limble_openapi_utilization_notes.md` (FR-018)
 - [x] T009c [US1] Implement type inference system in `TranslationEngine` for query_params and response fields (FR-018) (depends on T009a, T009b)
 - [x] T009c-1 [US1] Integrate OpenAPI spec into type inference system - extract origin_type from `20260430 - Limble API V2.postman OpenAPI3.0 generated spec.yaml` using precedence: OpenAPI schema type > Postman table type, with conservative type mapping (integer→int, string→str, array→list[T], object→dict[str, Any]) (depends on T009c, T009b-1)
-- [ ] T009c-2 [US1+US4] Extend type inference system to include `observed_type` in the precedence chain (`override_type > origin_type > observed_type > inferred_type`); update `compute_final_type` signature and update generator to read `observed_type` from existing registry entries when computing the final `type` (FR-018) (depends on T009c-1)
+- [x] T009c-2 [US1+US4] Extend type inference system to include `observed_type` in the precedence chain (`override_type > origin_type > observed_type > inferred_type`); update `compute_final_type` signature and update generator to read `observed_type` from existing registry entries when computing the final `type` (FR-018) (depends on T009c-1)
 - [x] T009d [US1] Implement override preservation logic - preserve existing override_type values and emit warnings on conflicts (FR-019, FR-020) (depends on T009c)
-- [ ] T009d-1 [US1+US4] Extend preservation logic to also preserve `observed_type` and `empty_response_shape` across registry regeneration; emit FR-020-style warning when an existing `observed_type` disagrees with the newly computed `origin_type` (origin↔observed disagreement surfaced rather than buried by precedence) (FR-018, FR-019, FR-020) (depends on T009d, T009c-2)
+- [x] T009d-1 [US1+US4] Extend preservation logic to also preserve `observed_type` and `empty_response_shape` across registry regeneration; emit FR-020-style warning when an existing `observed_type` disagrees with the newly computed `origin_type` (origin↔observed disagreement surfaced rather than buried by precedence) (FR-018, FR-019, FR-020) (depends on T009d, T009c-2)
 - [x] T010 [US1] Implement `.pyi` stub generator in `LimbleConnection/_generate_classes_automatically/generator.py` using Jinja2 templates (FR-007, FR-013)
 - [x] T011 [US1] Implement dynamic attribute attachment in `LimbleConnection/connection.py` using the `RegistryLoader` (FR-003)
 - [x] T011a [US1] Implement `supports_query_param()` in `LimbleConnection/endpoint.py` (FR-015)
