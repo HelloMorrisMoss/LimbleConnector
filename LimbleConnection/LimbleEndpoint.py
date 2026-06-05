@@ -97,7 +97,7 @@ class LimbleEndpoint:
         payload = json.dumps({'teamID': int(team_id), 'locationID': int(location_id)})
         headers_add = self.connection.authentication_header | {'Content-Type': 'application/json'}
         add_response = requests.put(url=user_teams_address, proxies=self.connection.proxy, headers=headers_add,
-                                    data=payload)
+                                    data=payload, verify=self.connection.verify)
         if add_response.status_code != 200:
             if add_response.status_code == 409:
                 print('This should be a log statement that the user already is added to that team!')
@@ -192,7 +192,7 @@ class LimbleEndpoint:
         payload = json.dumps({'teamID': int(team_id), 'locationID': int(location_id)})
         headers_add = self.connection.authentication_header | {'Content-Type': 'application/json'}
         add_response = requests.delete(url=user_teams_address, proxies=self.connection.proxy,
-                                       headers=headers_add, data=payload)
+                                       headers=headers_add, data=payload, verify=self.connection.verify)
         if add_response.status_code != 200:
             if add_response.status_code == 404:
                 print('This should be a log statement that the user is not on that team!')
@@ -350,7 +350,7 @@ class LimbleEndpoint:
     # @cached(cache=TTLCache(maxsize=100, ttl=api_cache_lifetime_seconds))
     def _get_request(self, params:dict, this_address:str):
         response = requests.get(url=this_address, proxies=self.connection.proxy,
-                           headers=self.connection.authentication_header, params=params)
+                           headers=self.connection.authentication_header, params=params, verify=self.connection.verify)
         if not response.ok:
             print(f'Error in response: {json.loads(response.text)}')
             response.raise_for_status()
@@ -360,7 +360,8 @@ class LimbleEndpoint:
         print(f'_delete_request: {this_address=}')
         response = requests.delete(url=this_address, proxies=self.connection.proxy,
                                   # unlike get, uses patch data instead of params, json.dumps, and type header
-                                  headers=self.connection.authentication_header | {'Content-Type': 'application/json'})
+                                  headers=self.connection.authentication_header | {'Content-Type': 'application/json'},
+                                  verify=self.connection.verify)
         if not response.ok:
             print(f'Error in response: {json.loads(response.text)}')
             if response.status_code == 429:
@@ -394,7 +395,7 @@ class LimbleEndpoint:
         response = requests.patch(url=this_address, proxies=self.connection.proxy,
                                   # unlike get, uses patch data instead of params, json.dumps, and type header
                                   headers=self.connection.authentication_header | {'Content-Type': 'application/json'},
-                                  data=json.dumps(params))
+                                  data=json.dumps(params), verify=self.connection.verify)
         if not response.ok:
             print(f'Error in response: {json.loads(response.text)}')
             response.raise_for_status()
@@ -415,7 +416,7 @@ class LimbleEndpoint:
 
     def _post_request(self, params:dict):
         response = requests.post(url=self.rt_addr, proxies=self.connection.proxy,
-                           headers=self.connection.authentication_header, params=params)
+                           headers=self.connection.authentication_header, params=params, verify=self.connection.verify)
         if not response.ok:
             response.raise_for_status()
         return response

@@ -119,6 +119,7 @@ class LimbleEndpoint:
                 url=url,
                 headers=headers,
                 proxies=self.connection.proxy,
+                verify=self.connection.verify,
                 **additional_params
             )
             self._normalize_error(response)
