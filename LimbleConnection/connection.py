@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import sys
 from typing import Any
 
 import tzlocal
@@ -8,7 +9,6 @@ import pytz
 
 from LimbleConnection.util import logger, collapse_redundant_path_parts
 from LimbleConnection.endpoint import LimbleEndpoint
-from LimbleConnection.curated.assets import AssetsCurated
 
 
 os  # protect from 'unused imports cleanup'; os needs to be patched for integration testing in this module
@@ -32,8 +32,9 @@ class LimbleConnection:
         __endpoints__ (dict): Dictionary of API endpoints and their paths.
     """
     # todo: __slots__
-    def __init__(self, convert_datetimes=False, auto_page_all=True, location:str=None, location_id:int=None,
-                 *args, **kwargs):
+    def __init__(self, convert_datetimes: bool = False, auto_page_all: bool = True, 
+                 location: str | None = None, location_id: int | None = None,
+                 verify: bool | str = True, *args, **kwargs):
         """Initializes a LimbleConnection instance.
 
         Args:
@@ -43,9 +44,19 @@ class LimbleConnection:
             location (str, optional): The default location for API requests. Defaults to None.
             location_id (int, optional): The locationID for the default location. Defaults to None.
             page_limit (int, optional): The maximum number of results to return per page. Defaults to 100.
+            verify (bool or str, optional): SSL verification. Can be a boolean to enable/disable, 
+                or a string path to a CA bundle. On Windows, if True, it attempts to use 
+                the system trust store via `certifi-win32`. Defaults to True.
         """
         self.authentication_header = {'Authorization': f'Basic {b64_credentials}'} if (b64_credentials:=kwargs.get('b64_credentials')) else None
         self.proxy = kwargs.get('proxy', None)
+        
+        # Handle SSL verification and Windows certificate store
+        if verify is True:
+            self.verify = self._local_certs()
+        else:
+            self.verify = verify
+            
         self.timezone = pytz.timezone(tz) if (tz := kwargs.get('tz')) else pytz.timezone(tzlocal.get_localzone_name())
 
         self.api_base_address = 'https://api.limblecmms.com:443'
@@ -62,8 +73,21 @@ class LimbleConnection:
         # Load spec-driven endpoints (FR-003)
         self._load_endpoints()
         
-        # Initialize curated operations (US2)
-        self.curated_assets = AssetsCurated(self)
+
+    def _local_certs(self) -> bool | str:
+        """Attempts to use the Windows trust store for SSL certificates.
+        
+        Returns the path to the certificate bundle if on Windows and certifi-win32 is available,
+        otherwise returns True.
+        """
+        if sys.platform == 'win32':
+            try:
+                import certifi_win32
+                certifi_win32.generate_pem()
+                return certifi_win32.wincerts.where()
+            except ImportError:
+                logger.debug("certifi_win32 not found; falling back to default certifi bundle.")
+        return True
 
     def _load_endpoints(self):
         """Dynamically attach endpoints from registry.yaml as a nested fluent API."""

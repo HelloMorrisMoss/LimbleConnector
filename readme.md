@@ -12,6 +12,7 @@ Currently targeting the API v2.
 - **Fluent API**: Access endpoints using a clean, dotted notation (e.g., `lc.assets.list()`).
 - **Auto-Pagination**: Large result sets are automatically fetched across multiple pages.
 - **Resilient**: Built-in exponential backoff and retries for transient errors (429, 502, 503).
+- **SSL Support**: Built-in support for custom SSL certificate bundles and automatic Windows trust store integration via `certifi-win32`.
 - **Type-Safe**: IDE support with generated `.pyi` stubs.
 - **Curated Operations**: High-level methods for common workflows (e.g., `lc.curated_assets.search_assets()`).
 - **Stability Shielding**: Internal field mapping to prevent upstream API changes from breaking user code.
@@ -29,10 +30,21 @@ assets = lc.assets.list()
 
 # Access nested endpoints
 fields = lc.assets.fields.asset_fields.list()
-
-# Search assets (curated operation)
-found = lc.curated_assets.search_assets("Forklift")
 ```
+
+### SSL Configuration
+
+By default, `LimbleConnection` enables SSL verification.
+
+- **Windows**: The library automatically attempts to use the Windows system trust store if `python-certifi-win32` is installed.
+- **Custom Bundle**: You can provide a path to a custom CA bundle:
+  ```python
+  lc = LimbleConnection(b64_credentials="...", verify="/path/to/cert.pem")
+  ```
+- **Disable Verification**: (Not recommended)
+  ```python
+  lc = LimbleConnection(b64_credentials="...", verify=False)
+  ```
 
 ## Developer Guide: Adding Endpoints
 
